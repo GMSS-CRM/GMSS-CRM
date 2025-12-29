@@ -1,40 +1,31 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../../modules/auth/pages/LoginPage";
-import ProtectedRoute from "./ProtectedRoute";
-import { useAuth } from "../providers/AuthProvider";
 import DashboardPage from "../../modules/auth/pages/DashboardPage";
+import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/MainLayout";
 
 export default function AppRoutes() {
-  const { user } = useAuth();
-
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Route */}
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-        />
+    <Routes>
+      {/* Public route */}
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected Route */}
-        <Route
-  path="/dashboard"
-  element={
-    <ProtectedRoute>
-      <MainLayout>
-        <DashboardPage />
-      </MainLayout>
-    </ProtectedRoute>
-  }
-/>
+      {/* Protected routes */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/users" element={<div>Users</div>} />
+        <Route path="/roles" element={<div>Roles</div>} />
+        <Route path="/permissions" element={<div>Permissions</div>} />
 
-        {/* Default Redirect */}
-        <Route
-          path="*"
-          element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-        />
-      </Routes>
-    </BrowserRouter>
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+      </Route>
+    </Routes>
   );
 }
