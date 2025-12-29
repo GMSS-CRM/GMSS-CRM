@@ -1,0 +1,124 @@
+:root {
+  /* Ocean Indigo palette (recommended) */
+  --bg-app: #f5f7ff;
+  --bg-panel: #ffffff;
+  --bg-muted: #f0f4ff;
+  --bg-sidebar: #071233; /* deep indigo/navy */
+  --bg-sidebar-accent: #081730;
+
+  --text-primary: #0b1220; /* near-black slate */
+  --text-secondary: #6b7280; /* subdued */
+  --text-invert: #ffffff;
+
+  --accent: #2563EB; /* Ocean Indigo */
+  --accent-600: #1E4ED8;
+  --accent-200: #DBEAFE;
+
+  --border-color: #E6EDF9;
+  --muted-border: #EAF2FF;
+
+  /* Layout & spacing */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 6px 18px rgba(16,24,40,0.06);
+  --shadow-subtle: 0 2px 6px rgba(16,24,40,0.04);
+  --transition-fast: 150ms ease;
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --text-size-base: 14px;
+  --text-size-lg: 16px;
+}
+
+/* Global base styles */
+html, body, #root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-size-base);
+  color: var(--text-primary);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility tokens & components */
+.panel, .card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
+  padding: 16px;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.btn:hover { transform: translateY(-1px); }
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent), var(--accent-600));
+  color: var(--text-invert);
+  box-shadow: 0 6px 18px rgba(44,106,111,0.12);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--muted-border);
+}
+
+.input {
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--muted-border);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  outline: none;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.input:focus {
+  box-shadow: 0 0 0 4px rgba(44,106,111,0.06);
+  border-color: var(--accent-600);
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.rounded { border-radius: var(--radius-lg); }
+
+.focus-ring:focus { box-shadow: 0 0 0 4px rgba(44,106,111,0.06); }
+
+/* Small helpers for spacing */
+.stack { display:flex; flex-direction:column; gap:12px; }
+.hstack { display:flex; gap:12px; align-items:center; }
+
+/* Panels used in dashboard pages */
+.panel-compact { padding: 12px; }
+
+/* Subtle table styling (minimalist) */
+.table { width:100%; border-collapse:collapse; background:transparent; }
+.table th, .table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); text-align:left; }
+
+/* Lightweight badge */
+.badge { display:inline-block; padding:4px 8px; border-radius:999px; background:var(--accent-200); color:var(--accent-600); font-weight:600; font-size:12px; }
