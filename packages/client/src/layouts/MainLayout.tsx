@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../app/providers/AuthProvider";
-import { logout } from "../modules/auth/services/auth.service";
+import { logout } from "../features/auth/services/auth.service";
 import "./MainLayout.css";
 
 const menuItems = [
