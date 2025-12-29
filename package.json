@@ -1,7 +1,4 @@
 {
   "private": true,
-  "name": "gmss-crm",
-  "workspaces": [
-    "packages/*"
-  ]
+  "workspaces": ["packages/*"]
 }
