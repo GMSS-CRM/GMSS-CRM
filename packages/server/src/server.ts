@@ -1,48 +1,48 @@
 import "reflect-metadata";
-import express, { Application } from "express";
+import express from "express";
 import http from "http";
 import dotenv from "dotenv";
-import { ApolloServer } from "apollo-server-express";
 
-//import { typeDefs, resolvers } from "./graphql";  -> Will use later
-// import { AppDataSource } from "./config/data-source"; // enable later when DB is ready
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@as-integrations/express4";
+
+
+import { typeDefs, resolvers } from "./graphql";
+import type { GraphQLContext } from "./types";
+import { AppDataSource } from "./config/data-source";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 4000;
+const PORT = Number(process.env.PORT) || 4000;
 
 export async function startApolloServer() {
-  const app: Application = express();
+  const app = express();
+  const httpServer = http.createServer(app);
+
   app.use(express.json());
 
-  // 👉 Enable DB later
-  // await AppDataSource.initialize();
-  // console.log("📦 Database connected");
+  // DB init
+  await AppDataSource.initialize();
+  console.log("✅ Database connected");
 
-  const server = new ApolloServer({
-   // typeDefs,
-    //resolvers,
-    context: ({ req }) => {
-      const token = req.headers.authorization || null;
-
-      return {
-        token,
-        req,
-      };
-    },
+  const server = new ApolloServer<GraphQLContext>({
+    typeDefs,
+    resolvers,
   });
 
   await server.start();
 
-  server.applyMiddleware({ app: app as any });
-
-  const httpServer = http.createServer(app);
-
-  await new Promise<void>((resolve) =>
-    httpServer.listen({ port: PORT }, resolve)
+  app.use(
+    "/graphql",
+    expressMiddleware(server, {
+      context: async ({ req }) => ({
+        req,
+        token: req.headers.authorization ?? null,
+      }),
+    })
   );
 
-  console.log(
-    `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-  );
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+  });
 }

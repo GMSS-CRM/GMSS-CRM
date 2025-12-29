@@ -1,2 +1,2 @@
-/*export * from './typedefs';
-export * from './resolver';*/
+export * from './typedefs';
+export * from './resolvers';

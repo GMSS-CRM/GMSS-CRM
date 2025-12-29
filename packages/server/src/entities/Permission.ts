@@ -19,15 +19,19 @@ export class Permission {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ nullable: true })
-  updatedBy?: string;
+  @Column()
+  createdBy!: string;
 
-  @UpdateDateColumn()
-  updatedDate!: Date;
+  @Column()
+  updatedBy!: string;
 
   @CreateDateColumn()
   createdDate!: Date;
 
-  @OneToMany(() => RolePermission, (rp) => rp.permission)
-  rolePermissions!: RolePermission[];
+  @UpdateDateColumn()
+  updatedDate!: Date;
+
+  // ✅ Optional mapping
+  @OneToMany(() => RolePermission, (rp) => rp.permission, { nullable: true })
+  rolePermissions?: RolePermission[];
 }

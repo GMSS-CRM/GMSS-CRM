@@ -3,8 +3,8 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   Column,
-  UpdateDateColumn,
   CreateDateColumn,
+  UpdateDateColumn,
   JoinColumn,
 } from "typeorm";
 import { Role } from "./Role";
@@ -15,7 +15,9 @@ export class RolePermission {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Role, (role) => role.rolePermissions, { onDelete: "CASCADE" })
+  @ManyToOne(() => Role, (role) => role.rolePermissions, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "roleId" })
   role!: Role;
 
@@ -25,12 +27,15 @@ export class RolePermission {
   @JoinColumn({ name: "permissionId" })
   permission!: Permission;
 
-  @Column({ nullable: true })
-  updatedBy?: string;
+  @Column()
+  createdBy!: string;
 
-  @UpdateDateColumn()
-  updatedDate!: Date;
+  @Column()
+  updatedBy!: string;
 
   @CreateDateColumn()
   createdDate!: Date;
+
+  @UpdateDateColumn()
+  updatedDate!: Date;
 }

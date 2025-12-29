@@ -4,8 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  UpdateDateColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { Role } from "./Role";
 
@@ -23,8 +23,9 @@ export class User {
   @Column({ nullable: true })
   middleName?: string;
 
-  @Column()
-  lastName!: string;
+  // ✅ Nullable as per review
+  @Column({ nullable: true })
+  lastName?: string;
 
   @ManyToOne(() => Role)
   @JoinColumn({ name: "roleId" })
@@ -36,12 +37,15 @@ export class User {
   @Column({ default: false })
   isDeleted!: boolean;
 
-  @Column({ nullable: true })
-  updatedBy?: string;
+  @Column()
+  createdBy!: string;
 
-  @UpdateDateColumn()
-  updatedDate!: Date;
+  @Column()
+  updatedBy!: string;
 
   @CreateDateColumn()
   createdDate!: Date;
+
+  @UpdateDateColumn()
+  updatedDate!: Date;
 }

@@ -25,15 +25,19 @@ export class Role {
   @Column({ default: false })
   isDeleted!: boolean;
 
-  @Column({ nullable: true })
-  updatedBy?: string;
+  @Column()
+  createdBy!: string;
 
-  @UpdateDateColumn()
-  updatedDate!: Date;
+  @Column()
+  updatedBy!: string;
 
   @CreateDateColumn()
   createdDate!: Date;
 
-  @OneToMany(() => RolePermission, (rp) => rp.role)
-  rolePermissions!: RolePermission[];
+  @UpdateDateColumn()
+  updatedDate!: Date;
+
+  // ✅ NOT mandatory – roles can exist without permissions
+  @OneToMany(() => RolePermission, (rp) => rp.role, { nullable: true })
+  rolePermissions?: RolePermission[];
 }
