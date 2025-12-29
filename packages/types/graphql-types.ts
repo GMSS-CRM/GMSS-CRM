@@ -1,5 +1,4 @@
 import { GraphQLResolveInfo } from 'graphql';
-import { GraphQLContext } from '../types';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -14,6 +13,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  _FieldSet: { input: any; output: any; }
 };
 
 export type Query = {
@@ -94,23 +94,23 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Boolean: Scalars['Boolean']['output'];
   Query: Record<PropertyKey, never>;
   String: Scalars['String']['output'];
+  Boolean: Scalars['Boolean']['output'];
 };
 
-export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   health?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type Resolvers<ContextType = GraphQLContext> = {
+export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
 };
 

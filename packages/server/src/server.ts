@@ -6,12 +6,15 @@ import dotenv from "dotenv";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
 
-
 import { typeDefs, resolvers } from "./graphql";
-import type { GraphQLContext } from "./types";
 import { AppDataSource } from "./config/data-source";
 
 dotenv.config();
+
+interface GraphQLContext {
+  req: express.Request;
+  token: string | null;
+}
 
 const PORT = Number(process.env.PORT) || 4000;
 

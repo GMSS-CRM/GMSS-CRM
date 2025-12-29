@@ -28,11 +28,11 @@ export class Role {
   @Column()
   createdBy!: string;
 
-  @Column()
-  updatedBy!: string;
-
   @CreateDateColumn()
   createdDate!: Date;
+  
+  @Column()
+  updatedBy!: string;
 
   @UpdateDateColumn()
   updatedDate!: Date;

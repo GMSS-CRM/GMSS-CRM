@@ -1,12 +1,17 @@
+overwrite: true
+
 schema:
-  - src/graphql/**/*.ts
+  - ./src/**/**/typedefs.ts
+
+documents: null
 
 generates:
-  src/generated/graphql.ts:
+  ../types/graphql-types.ts:
     plugins:
       - typescript
-      - typescript-operations
       - typescript-resolvers
 
 config:
-  contextType: ../types#GraphQLContext
+  federation: true
+  namingConvention:
+    enumValues: keep
