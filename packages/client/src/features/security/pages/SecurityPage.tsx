@@ -3,7 +3,7 @@ import { message } from 'antd';
 import SecurityMenu from '../components/SecurityMenu';
 import UsersList from '../components/UsersList';
 import UserDetailsForm from '../components/UserDetailsForm';
-import type { User, SecurityMenuItem, Role, Restriction } from '../types';
+import type { User, SecurityMenuItem, Role } from '../types';
 import styles from './SecurityPage.module.css';
 
 /**
