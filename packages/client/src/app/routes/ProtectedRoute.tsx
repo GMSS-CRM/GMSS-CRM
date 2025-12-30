@@ -11,7 +11,7 @@ export default function ProtectedRoute({
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <Loader tip="Checking authentication..." />;
+    return <Loader tip="Authorizing..." />;
   }
 
   if (!user) {
