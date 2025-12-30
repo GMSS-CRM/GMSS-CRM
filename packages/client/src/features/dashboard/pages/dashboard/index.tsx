@@ -17,7 +17,7 @@ export default function DashboardPage() {
       key: "id",
       width: 80,
       render: (text: number) => (
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#0066cc" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--accent)" }}>
           #{text}
         </span>
       ),
@@ -28,7 +28,7 @@ export default function DashboardPage() {
       key: "name",
       width: 150,
       render: (text: string) => (
-        <span style={{ fontWeight: 500, color: "#1f2937" }}>{text}</span>
+        <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>{text}</span>
       ),
     },
     {
@@ -36,7 +36,7 @@ export default function DashboardPage() {
       dataIndex: "email",
       key: "email",
       width: 200,
-      render: (text: string) => <span style={{ color: "#6b7280" }}>{text}</span>,
+      render: (text: string) => <span style={{ color: "var(--text-secondary)" }}>{text}</span>,
     },
     {
       title: "Status",
@@ -57,7 +57,7 @@ export default function DashboardPage() {
       dataIndex: "joined",
       key: "joined",
       width: 120,
-      render: (text: string) => <span style={{ color: "#6b7280" }}>{text}</span>,
+      render: (text: string) => <span style={{ color: "var(--text-secondary)" }}>{text}</span>,
     },
   ];
 
@@ -101,7 +101,7 @@ export default function DashboardPage() {
             style={{
               fontSize: 24,
               fontWeight: 700,
-              color: "#1f2937",
+              color: "var(--text-primary)",
               margin: 0,
               letterSpacing: "-0.5px",
             }}
@@ -111,7 +111,7 @@ export default function DashboardPage() {
           <p
             style={{
               fontSize: 14,
-              color: "#6b7280",
+              color: "var(--text-secondary)",
               margin: "4px 0 0 0",
               fontWeight: 400,
             }}
@@ -137,7 +137,7 @@ export default function DashboardPage() {
           <Card
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
               height: "100%",
             }}
             bodyStyle={{ padding: "20px" }}
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                 <span
                   style={{
                     fontSize: 13,
-                    color: "#6b7280",
+                    color: "var(--text-secondary)",
                     fontWeight: 500,
                   }}
                 >
@@ -158,14 +158,14 @@ export default function DashboardPage() {
               prefix={
                 <UserOutlined
                   style={{
-                    color: "#0066cc",
+                    color: "var(--accent)",
                     marginRight: 8,
                     fontSize: 18,
                   }}
                 />
               }
               valueStyle={{
-                color: "#1f2937",
+                color: "var(--text-primary)",
                 fontSize: 28,
                 fontWeight: 700,
               }}
@@ -174,7 +174,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 12,
                 fontSize: 12,
-                color: "#10b981",
+                color: "var(--accent)",
                 fontWeight: 500,
               }}
             >
@@ -188,7 +188,7 @@ export default function DashboardPage() {
           <Card
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
               height: "100%",
             }}
             bodyStyle={{ padding: "20px" }}
@@ -198,7 +198,7 @@ export default function DashboardPage() {
                 <span
                   style={{
                     fontSize: 13,
-                    color: "#6b7280",
+                    color: "var(--text-secondary)",
                     fontWeight: 500,
                   }}
                 >
@@ -209,14 +209,14 @@ export default function DashboardPage() {
               prefix={
                 <TeamOutlined
                   style={{
-                    color: "#8b5cf6",
+                    color: "var(--accent)",
                     marginRight: 8,
                     fontSize: 18,
                   }}
                 />
               }
               valueStyle={{
-                color: "#1f2937",
+                color: "var(--text-primary)",
                 fontSize: 28,
                 fontWeight: 700,
               }}
@@ -225,7 +225,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 12,
                 fontSize: 12,
-                color: "#6b7280",
+                color: "var(--text-secondary)",
               }}
             >
               Configured
@@ -238,7 +238,7 @@ export default function DashboardPage() {
           <Card
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
               height: "100%",
             }}
             bodyStyle={{ padding: "20px" }}
@@ -248,7 +248,7 @@ export default function DashboardPage() {
                 <span
                   style={{
                     fontSize: 13,
-                    color: "#6b7280",
+                    color: "var(--text-secondary)",
                     fontWeight: 500,
                   }}
                 >
@@ -259,14 +259,14 @@ export default function DashboardPage() {
               prefix={
                 <SafetyOutlined
                   style={{
-                    color: "#f59e0b",
+                    color: "var(--accent)",
                     marginRight: 8,
                     fontSize: 18,
                   }}
                 />
               }
               valueStyle={{
-                color: "#1f2937",
+                color: "var(--text-primary)",
                 fontSize: 28,
                 fontWeight: 700,
               }}
@@ -275,7 +275,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 12,
                 fontSize: 12,
-                color: "#6b7280",
+                color: "var(--text-secondary)",
               }}
             >
               All modules
@@ -288,7 +288,7 @@ export default function DashboardPage() {
           <Card
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
               height: "100%",
             }}
             bodyStyle={{ padding: "20px" }}
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                 <span
                   style={{
                     fontSize: 13,
-                    color: "#6b7280",
+                    color: "var(--text-secondary)",
                     fontWeight: 500,
                   }}
                 >
@@ -309,14 +309,14 @@ export default function DashboardPage() {
               prefix={
                 <LineChartOutlined
                   style={{
-                    color: "#10b981",
+                    color: "var(--accent)",
                     marginRight: 8,
                     fontSize: 18,
                   }}
                 />
               }
               valueStyle={{
-                color: "#1f2937",
+                color: "var(--text-primary)",
                 fontSize: 28,
                 fontWeight: 700,
               }}
@@ -325,7 +325,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 12,
                 fontSize: 12,
-                color: "#10b981",
+                color: "var(--accent)",
                 fontWeight: 500,
               }}
             >
@@ -343,7 +343,7 @@ export default function DashboardPage() {
               style={{
                 fontSize: 16,
                 fontWeight: 600,
-                color: "#1f2937",
+                color: "var(--text-primary)",
               }}
             >
               Recent Users
@@ -361,13 +361,13 @@ export default function DashboardPage() {
           </div>
         }
         extra={
-          <Button type="link" size="small" style={{ color: "#0066cc" }}>
+          <Button type="link" size="small" style={{ color: "var(--accent)" }}>
             View All →
           </Button>
         }
         style={{
           borderRadius: 12,
-          border: "1px solid #e5e7eb",
+          border: "1px solid var(--border-color)",
         }}
         bodyStyle={{ padding: "20px" }}
       >
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                 style={{
                   fontSize: 14,
                   fontWeight: 600,
-                  color: "#1f2937",
+                  color: "var(--text-primary)",
                 }}
               >
                 Database Status
@@ -401,7 +401,7 @@ export default function DashboardPage() {
             }
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
             }}
             bodyStyle={{ padding: "20px" }}
           >
@@ -411,10 +411,10 @@ export default function DashboardPage() {
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#10b981",
+                  backgroundColor: "var(--accent)",
                 }}
               />
-              <span style={{ color: "#1f2937", fontWeight: 500 }}>
+              <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>
                 All systems operational
               </span>
             </div>
@@ -427,7 +427,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 12,
                 fontSize: 12,
-                color: "#6b7280",
+                color: "var(--text-secondary)",
               }}
             >
               Latest update: 2 minutes ago
@@ -443,7 +443,7 @@ export default function DashboardPage() {
                 style={{
                   fontSize: 14,
                   fontWeight: 600,
-                  color: "#1f2937",
+                  color: "var(--text-primary)",
                 }}
               >
                 Last Backup
@@ -451,7 +451,7 @@ export default function DashboardPage() {
             }
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
             }}
             bodyStyle={{ padding: "20px" }}
           >
@@ -461,10 +461,10 @@ export default function DashboardPage() {
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#0066cc",
+                  backgroundColor: "var(--accent)",
                 }}
               />
-              <span style={{ color: "#1f2937", fontWeight: 500 }}>
+              <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>
                 Completed
               </span>
             </div>
@@ -473,7 +473,7 @@ export default function DashboardPage() {
                 marginTop: 16,
                 fontSize: 16,
                 fontWeight: 600,
-                color: "#1f2937",
+                color: "var(--text-primary)",
               }}
             >
               2 hours ago
@@ -482,7 +482,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 8,
                 fontSize: 12,
-                color: "#6b7280",
+                color: "var(--text-secondary)",
               }}
             >
               2.4 GB backed up
@@ -498,7 +498,7 @@ export default function DashboardPage() {
                 style={{
                   fontSize: 14,
                   fontWeight: 600,
-                  color: "#1f2937",
+                  color: "var(--text-primary)",
                 }}
               >
                 API Health
@@ -506,7 +506,7 @@ export default function DashboardPage() {
             }
             style={{
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-color)",
             }}
             bodyStyle={{ padding: "20px" }}
           >
@@ -516,10 +516,10 @@ export default function DashboardPage() {
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  backgroundColor: "#10b981",
+                  backgroundColor: "var(--accent)",
                 }}
               />
-              <span style={{ color: "#1f2937", fontWeight: 500 }}>
+              <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>
                 Healthy
               </span>
             </div>
@@ -528,7 +528,7 @@ export default function DashboardPage() {
                 marginTop: 16,
                 fontSize: 16,
                 fontWeight: 600,
-                color: "#1f2937",
+                color: "var(--text-primary)",
               }}
             >
               99.9% Uptime
@@ -537,7 +537,7 @@ export default function DashboardPage() {
               style={{
                 marginTop: 8,
                 fontSize: 12,
-                color: "#6b7280",
+                color: "var(--text-secondary)",
               }}
             >
               No errors detected

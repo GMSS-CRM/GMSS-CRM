@@ -1,2 +1,3 @@
-export { default as LoginPage } from "./pages/login-page";
-export { default as DashboardPage } from "./pages/dashboard-page";
+export { default as LoginPage } from "./pages/login";
+export { default as ResetPasswordPage } from "./pages/reset-password";
+export { default as AuthActionHandler } from "./pages/auth-action";

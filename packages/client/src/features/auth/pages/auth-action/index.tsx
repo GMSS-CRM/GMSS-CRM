@@ -46,7 +46,7 @@ export default function AuthActionHandler() {
           <span className={styles.logoText}>GMSS CRM</span>
         </div>
         <div className={styles.loadingContent}>
-          <LoadingOutlined style={{ fontSize: 48, color: "#1890ff" }} />
+          <LoadingOutlined style={{ fontSize: 48, color: "var(--accent)" }} />
           <p className={styles.loadingText}>Redirecting...</p>
         </div>
       </div>

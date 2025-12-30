@@ -1,0 +1,97 @@
+/* Theme Switcher Button - Minimalistic & Clean */
+.themeSwitcherButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-secondary);
+}
+
+.themeSwitcherButton:hover {
+  background: var(--bg-hover) !important;
+  transform: scale(1.05);
+}
+
+.currentThemeIcon {
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.themeSwitcherButton:hover .currentThemeIcon {
+  transform: rotate(15deg);
+}
+
+/* Theme Option in Dropdown - Compact & Modern */
+.themeOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  min-width: 160px;
+}
+
+.themeInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.themeIcon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.themeDetails {
+  flex: 1;
+}
+
+.themeName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.checkIcon {
+  color: var(--accent);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.activeTheme {
+  background: var(--bg-selected) !important;
+}
+
+/* Dropdown Styling - Clean & Minimal */
+:global(.ant-dropdown.themeDropdown) {
+  min-width: 180px;
+}
+
+:global(.ant-dropdown.themeDropdown .ant-dropdown-menu) {
+  padding: 6px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+:global(.ant-dropdown.themeDropdown .ant-dropdown-menu-item) {
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-height: auto;
+  transition: all 0.2s ease;
+}
+
+:global(.ant-dropdown.themeDropdown .ant-dropdown-menu-item:hover) {
+  background: var(--bg-hover);
+}
+
+:global(.ant-dropdown.themeDropdown .ant-dropdown-menu-item:active) {
+  transform: scale(0.98);
+}

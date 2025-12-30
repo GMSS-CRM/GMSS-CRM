@@ -4,17 +4,16 @@ import SecurityMenu from '../components/security-menu';
 import UsersList from '../components/users-list';
 import UserDetailsForm from '../components/user-details-form';
 import type { User, SecurityMenuItem, Role } from '../types';
-import styles from './SecurityPage.module.css';
+import styles from './index.module.css';
 
 /**
  * Mock data - In production, this would come from an API
  */
 const MOCK_ROLES: Role[] = [
-  { id: '1', name: 'Approver', description: 'Can approve requests' },
-  { id: '2', name: 'Construction', description: 'Construction team' },
-  { id: '3', name: 'Electrical', description: 'Electrical team' },
-  { id: '4', name: 'Satellite Power User', description: 'Satellite power access' },
-  { id: '5', name: 'System Administrator', description: 'Full system access' },
+  { id: '1', name: 'Member', description: 'Basic team member access' },
+  { id: '2', name: 'Manager', description: 'Team management access' },
+  { id: '3', name: 'Director', description: 'Department director access' },
+  { id: '4', name: 'System Administrator', description: 'Full system access' },
 ];
 
 const MOCK_USERS: User[] = [
@@ -149,7 +148,7 @@ export default function SecurityPage() {
             justifyContent: 'center',
             background: 'white',
             fontSize: 16,
-            color: '#8c8c8c',
+            color: 'var(--text-secondary)',
           }}
         >
           {selectedSecurityMenu.charAt(0).toUpperCase() + selectedSecurityMenu.slice(1)} section coming soon

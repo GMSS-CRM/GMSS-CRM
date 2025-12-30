@@ -13,7 +13,7 @@ import {
 } from "@ant-design/icons";
 import { loginWithEmailPassword, resetPassword } from "../../services/auth.service";
 import { useAuth } from "../../../../app/providers/AuthProvider";
-import Loader from "../../../../shared/components/loader";
+import Loader from "../../../../components/loader";
 import styles from "./styles.module.css";
 
 export default function LoginPage() {
@@ -154,7 +154,7 @@ export default function LoginPage() {
                 ]}
               >
                 <Input
-                  prefix={<MailOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                  prefix={<MailOutlined style={{ color: "var(--text-secondary)", fontSize: "14px" }} />}
                   placeholder="Email address"
                   size="large"
                   style={{
@@ -173,7 +173,7 @@ export default function LoginPage() {
                 ]}
               >
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                  prefix={<LockOutlined style={{ color: "var(--text-secondary)", fontSize: "14px" }} />}
                   placeholder="Password"
                   size="large"
                   style={{
@@ -261,7 +261,7 @@ export default function LoginPage() {
                   ]}
                 >
                   <Input
-                    prefix={<MailOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                    prefix={<MailOutlined style={{ color: "var(--text-secondary)", fontSize: "14px" }} />}
                     placeholder="Enter your email"
                     size="large"
                     style={{

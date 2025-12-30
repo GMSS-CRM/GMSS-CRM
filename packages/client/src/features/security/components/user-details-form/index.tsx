@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback, memo } from 'react';
 import { Form, Input, Button, Select, Switch, Row, Col } from 'antd';
-import { SaveOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SaveOutlined, CloseOutlined, DeleteFilled } from '@ant-design/icons';
 import type { User, Role } from '../../types';
-import { showConfirmModal } from '../../../../shared/components/confirm-modal';
-import Avatar from '../../../../shared/components/avatar';
+import { showConfirmModal } from '../../../../components/confirm-modal';
+import Avatar from '../../../../components/avatar';
 import styles from './styles.module.css';
 
 interface UserDetailsFormProps {
@@ -111,18 +111,18 @@ function UserDetailsForm({
 
   return (
     <div className={styles.container}>
-      {/* Header with Avatar and Active Toggle */}
+      {/* Header with Avatar and Status */}
       <div className={styles.header}>
-        <Row gutter={20} align="middle" justify="space-between" wrap={false}>
+        <Row gutter={16} align="middle" justify="space-between" wrap={false}>
           <Col flex="auto" style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {isNewUser ? (
                 <div className={styles.newUserAvatar}>+</div>
               ) : (
                 <Avatar 
                   firstName={user!.firstName} 
                   lastName={user!.lastName}
-                  size={48}
+                  size={44}
                 />
               )}
               <div style={{ minWidth: 0 }}>
@@ -133,31 +133,20 @@ function UserDetailsForm({
               </div>
             </div>
           </Col>
-          <Col flex="none">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {!isNewUser && onDelete && (
-                <DeleteOutlined 
-                  onClick={handleDelete}
-                  style={{ 
-                    fontSize: 18, 
-                    color: '#ff4d4f', 
-                    cursor: 'pointer',
-                    transition: 'opacity 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '0.7';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
+          {!isNewUser && (
+            <Col flex="none">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
+                  {form.getFieldValue('isActive') ? 'Active' : 'Inactive'}
+                </div>
+                <Switch 
+                  checked={form.getFieldValue('isActive')} 
+                  onChange={handleActiveToggle}
+                  size="small"
                 />
-              )}
-              <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
-                {form.getFieldValue('isActive') ? '● Active' : '● Inactive'}
               </div>
-              <Switch checked={form.getFieldValue('isActive')} onChange={handleActiveToggle} />
-            </div>
-          </Col>
+            </Col>
+          )}
         </Row>
       </div>
 
@@ -236,23 +225,38 @@ function UserDetailsForm({
 
       {/* Footer Actions - Always Visible */}
       <div className={styles.footer}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button
-            onClick={handleCancel}
-            icon={<CloseOutlined />}
-            size="large"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleSave}
-            icon={<SaveOutlined />}
-            disabled={!isDirty && !isNewUser}
-            size="large"
-          >
-            Save
-          </Button>
+        <div style={{ display: 'flex', gap: 8, width: '100%', justifyContent: 'space-between' }}>
+          <div>
+            {!isNewUser && onDelete && (
+              <Button
+                danger
+                onClick={handleDelete}
+                icon={<DeleteFilled />}
+                size="large"
+                style={{ boxShadow: 'none' }}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button
+              onClick={handleCancel}
+              icon={<CloseOutlined />}
+              size="large"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleSave}
+              icon={<SaveOutlined />}
+              disabled={!isDirty && !isNewUser}
+              size="large"
+            >
+              Save
+            </Button>
+          </div>
         </div>
       </div>
     </div>

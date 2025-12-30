@@ -1,4 +1,4 @@
-export { default as SecurityPage } from './pages/SecurityPage';
+export { default as SecurityPage } from './pages';
 export { default as SecurityMenu } from './components/security-menu';
 export { default as UsersList } from './components/users-list';
 export { default as UserDetailsForm } from './components/user-details-form';

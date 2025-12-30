@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../../features/auth/pages/login-page";
-import ResetPasswordPage from "../../features/auth/pages/reset-password-page";
-import AuthActionHandler from "../../features/auth/pages/auth-action-handler";
-import DashboardPage from "../../features/auth/pages/dashboard-page";
+import LoginPage from "../../features/auth/pages/login";
+import ResetPasswordPage from "../../features/auth/pages/reset-password";
+import AuthActionHandler from "../../features/auth/pages/auth-action";
+import DashboardPage from "../../features/dashboard/pages/dashboard";
 import { SecurityPage } from "../../features/security";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/main-layout";

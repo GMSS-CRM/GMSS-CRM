@@ -1,32 +1,50 @@
 import type { ThemeConfig } from 'antd';
 
-// Premium CRM Theme Configuration
+/**
+ * Get CSS variable value from :root
+ * This allows the Ant Design theme to dynamically sync with theme.css
+ * Note: CSS variables are read on page load. Refresh the page after changing theme.css
+ */
+const getCssVar = (varName: string): string => {
+  if (typeof window !== 'undefined') {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim();
+  }
+  return '';
+};
+
+/**
+ * Dynamic CRM Theme Configuration
+ * Automatically syncs with CSS variables from theme.css
+ * Change theme.css and everything updates automatically!
+ */
 const antdTheme: ThemeConfig = {
   token: {
-    // Primary Color - Modern Blue
-    colorPrimary: '#0066cc',
+    // Primary Color - Reads from CSS variable
+    colorPrimary: getCssVar('--accent') || '#0066cc',
     
     // Status Colors
-    colorSuccess: '#52c41a',
+    colorSuccess: getCssVar('--color-success') || '#52c41a',
     colorWarning: '#faad14',
-    colorError: '#ff4d4f',
-    colorInfo: '#0066cc',
+    colorError: getCssVar('--color-error') || '#ff4d4f',
+    colorInfo: getCssVar('--accent') || '#0066cc',
     
-    // Text Colors
-    colorTextBase: '#1f2937',
-    colorTextSecondary: '#6b7280',
-    colorTextTertiary: '#9ca3af',
-    colorTextQuaternary: '#d1d5db',
+    // Text Colors - From theme.css
+    colorTextBase: getCssVar('--text-primary') || '#262626',
+    colorTextSecondary: getCssVar('--text-secondary') || '#8c8c8c',
+    colorTextTertiary: getCssVar('--text-tertiary') || '#595959',
+    colorTextQuaternary: getCssVar('--border-color') || '#d1d5db',
     
-    // Background Colors
-    colorBgBase: '#ffffff',
-    colorBgContainer: '#f9fafb',
-    colorBgElevated: '#ffffff',
-    colorBgLayout: '#f3f4f6',
+    // Background Colors - From theme.css
+    colorBgBase: getCssVar('--bg-panel') || '#ffffff',
+    colorBgContainer: getCssVar('--bg-muted') || '#f5f7ff',
+    colorBgElevated: getCssVar('--bg-panel') || '#ffffff',
+    colorBgLayout: getCssVar('--bg-app') || '#f5f7ff',
     
-    // Border & Divider
-    colorBorder: '#e5e7eb',
-    colorBorderBg: '#f9fafb',
+    // Border & Divider - From theme.css
+    colorBorder: getCssVar('--border-color') || '#e8e8e8',
+    colorBorderBg: getCssVar('--border-light') || '#f0f0f0',
     
     // Spacing & Sizing
     margin: 16,
@@ -43,7 +61,7 @@ const antdTheme: ThemeConfig = {
     paddingLG: 24,
     paddingXL: 32,
     
-    // Border Radius - Modern look
+    // Border Radius - From theme.css
     borderRadius: 8,
     borderRadiusLG: 12,
     borderRadiusSM: 6,
@@ -61,33 +79,33 @@ const antdTheme: ThemeConfig = {
     lineHeightHeading2: 1.35,
     lineHeightHeading3: 1.4,
     
-    fontFamily: `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    fontFamily: getCssVar('--font-sans') || `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif`,
     
-    // Shadow - Premium depth
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
-    boxShadowSecondary: '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05)',
+    // Shadow - From theme.css
+    boxShadow: getCssVar('--shadow-subtle') || '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
+    boxShadowSecondary: getCssVar('--shadow-sm') || '0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05)',
   },
   
   components: {
     // Layout Components
     Layout: {
-      colorBgHeader: '#ffffff',
-      colorBgBody: '#f3f4f6',
-      colorBgTrigger: '#e5e7eb',
+      colorBgHeader: getCssVar('--bg-panel') || '#ffffff',
+      colorBgBody: getCssVar('--bg-app') || '#f5f7ff',
+      colorBgTrigger: getCssVar('--border-color') || '#e8e8e8',
       headerHeight: 64,
       headerPadding: '0 24px',
-      headerColor: '#1f2937',
-      siderBg: '#1f2937',
+      headerColor: getCssVar('--text-primary') || '#262626',
+      siderBg: getCssVar('--bg-sidebar') || '#071233',
     },
     
-    // Menu - Sidebar navigation
+    // Menu - Sidebar navigation (Dynamic with theme.css)
     Menu: {
-      colorItemBg: '#1f2937',
-      colorItemBgHover: '#374151',
-      colorItemBgSelected: '#0066cc',
-      colorItemBgSelectedHorizontal: '#0066cc',
+      colorItemBg: 'transparent',
+      colorItemBgHover: 'rgba(255, 255, 255, 0.1)',
+      colorItemBgSelected: getCssVar('--accent') || '#0066cc',
+      colorItemBgSelectedHorizontal: getCssVar('--accent') || '#0066cc',
       colorItemText: '#d1d5db',
       colorItemTextHover: '#ffffff',
       colorItemTextSelected: '#ffffff',

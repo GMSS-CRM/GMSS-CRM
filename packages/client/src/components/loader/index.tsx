@@ -19,7 +19,7 @@ export default function Loader({
         justifyContent: "center",
         alignItems: "center",
         height: fullScreen ? "100vh" : "100%",
-        background: "#f3f4f6",
+        background: "var(--bg-app)",
       }}
     >
       <Spin size={size} tip={tip} />
