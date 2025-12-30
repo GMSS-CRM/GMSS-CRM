@@ -28,7 +28,6 @@
 }
 
 .menu :global(.ant-menu-item) {
-  margin: 4px 12px !important;
   height: 40px;
   line-height: 40px;
   border-radius: 6px;

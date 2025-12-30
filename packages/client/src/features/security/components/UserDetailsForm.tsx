@@ -1,18 +1,21 @@
 import { useEffect, useState, useCallback, memo } from 'react';
 import { Form, Input, Button, Select, Switch, Row, Col, Avatar } from 'antd';
-import { SaveOutlined, CloseOutlined } from '@ant-design/icons';
-import type { User, Role, Restriction } from '../types';
+import { SaveOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons';
+import type { User, Role } from '../types';
+import { showConfirmModal } from '../../../shared/components/ConfirmModal';
 import styles from './UserDetailsForm.module.css';
 
 interface UserDetailsFormProps {
   user: User | null;
   onSave: (updatedUser: User) => void;
   onCancel: () => void;
+  onDelete?: (userId: string) => void;
   roles: Role[];
-  restrictions: Restriction[];
+  isAddMode?: boolean;
 }
 
-const getInitials = (firstName: string, lastName: string): string => {
+const getInitials = (firstName: string, lastName?: string): string => {
+  if (!lastName) return firstName.charAt(0).toUpperCase();
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 };
 
@@ -24,8 +27,9 @@ function UserDetailsForm({
   user,
   onSave,
   onCancel,
+  onDelete,
   roles = [],
-  restrictions = [],
+  isAddMode = false,
 }: UserDetailsFormProps) {
   const [form] = Form.useForm();
   const [isDirty, setIsDirty] = useState(false);
@@ -36,15 +40,21 @@ function UserDetailsForm({
       form.setFieldsValue({
         firstName: user.firstName,
         middleName: user.middleName || '',
-        lastName: user.lastName,
+        lastName: user.lastName || '',
         email: user.email,
-        roles: user.roles,
-        restrictions: user.restrictions,
+        role: user.role,
         isActive: user.isActive,
       });
       setIsDirty(false);
+    } else if (isAddMode) {
+      // Clear form for add mode
+      form.resetFields();
+      form.setFieldsValue({
+        isActive: true,
+      });
+      setIsDirty(false);
     }
-  }, [user, form]);
+  }, [user, isAddMode, form]);
 
   const handleFieldChange = useCallback(() => {
     setIsDirty(true);
@@ -54,19 +64,17 @@ function UserDetailsForm({
     try {
       const values = await form.validateFields();
       
-      if (user) {
-        const updatedUser: User = {
-          ...user,
-          firstName: values.firstName,
-          middleName: values.middleName,
-          lastName: values.lastName,
-          roles: values.roles || [],
-          restrictions: values.restrictions || [],
-          isActive: values.isActive,
-        };
-        onSave(updatedUser);
-        setIsDirty(false);
-      }
+      const updatedUser: User = {
+        id: user?.id || `new-${Date.now()}`,
+        firstName: values.firstName,
+        middleName: values.middleName,
+        lastName: values.lastName,
+        email: values.email,
+        role: values.role,
+        isActive: values.isActive ?? true,
+      };
+      onSave(updatedUser);
+      setIsDirty(false);
     } catch (error) {
       console.error('Form validation failed:', error);
     }
@@ -83,13 +91,27 @@ function UserDetailsForm({
     handleFieldChange();
   }, [form, handleFieldChange]);
 
-  if (!user) {
+  const handleDelete = useCallback(() => {
+    if (!user || !onDelete) return;
+    
+    showConfirmModal({
+      title: 'Delete User',
+      content: `Are you sure you want to delete ${user.firstName}${user.lastName ? ' ' + user.lastName : ''}?`,
+      okText: 'Delete',
+      okType: 'danger',
+      onOk: () => onDelete(user.id),
+    });
+  }, [user, onDelete]);
+
+  if (!user && !isAddMode) {
     return (
       <div className={styles.container}>
         <div className={styles.empty}>Select a user to view details</div>
       </div>
     );
   }
+
+  const isNewUser = isAddMode || !user;
 
   return (
     <div className={styles.container}>
@@ -99,22 +121,22 @@ function UserDetailsForm({
           <Col flex="auto" style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <Avatar size={56} className={styles.avatar}>
-                {getInitials(user.firstName, user.lastName)}
+                {isNewUser ? '+' : getInitials(user!.firstName, user!.lastName)}
               </Avatar>
               <div style={{ minWidth: 0 }}>
                 <div className={styles.headerName}>
-                  {user.firstName} {user.lastName}
+                  {isNewUser ? 'New User' : `${user!.firstName}${user!.lastName ? ' ' + user!.lastName : ''}`}
                 </div>
-                <div className={styles.headerEmail}>{user.email}</div>
+                <div className={styles.headerEmail}>{isNewUser ? 'Enter user details' : user!.email}</div>
               </div>
             </div>
           </Col>
           <Col flex="none">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div className={`${styles.statusText} ${user.isActive ? styles.active : ''}`}>
-                {user.isActive ? '● Active' : '● Inactive'}
+              <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
+                {form.getFieldValue('isActive') ? '● Active' : '● Inactive'}
               </div>
-              <Switch checked={user.isActive} onChange={handleActiveToggle} />
+              <Switch checked={form.getFieldValue('isActive')} onChange={handleActiveToggle} />
             </div>
           </Col>
         </Row>
@@ -145,9 +167,8 @@ function UserDetailsForm({
               <Form.Item
                 label="Last Name"
                 name="lastName"
-                rules={[{ required: true, message: 'Last name is required' }]}
               >
-                <Input placeholder="Enter last name" />
+                <Input placeholder="Enter last name (optional)" />
               </Form.Item>
             </Col>
           </Row>
@@ -160,46 +181,27 @@ function UserDetailsForm({
           </Form.Item>
 
           <Form.Item
-            label="User Name (UPN)"
+            label="Email Address"
             name="email"
             rules={[{ required: true, type: 'email', message: 'Valid email is required' }]}
           >
-            <Input placeholder="user@example.com" disabled />
+            <Input placeholder="user@example.com" disabled={!isNewUser} />
           </Form.Item>
         </div>
 
-        {/* User Roles Section */}
+        {/* User Role Section */}
         <div className={styles.section}>
-          <div className={styles.sectionTitle}>User Roles</div>
+          <div className={styles.sectionTitle}>User Role</div>
           <Form.Item
-            label="Roles"
-            name="roles"
+            label="Role"
+            name="role"
           >
             <Select
-              mode="multiple"
-              placeholder="Select roles"
+              placeholder="Select role (optional)"
+              allowClear
               options={roles.map((role) => ({
                 label: role.name,
                 value: role.id,
-              }))}
-              optionLabelProp="label"
-            />
-          </Form.Item>
-        </div>
-
-        {/* User Restrictions Section */}
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>User Restrictions</div>
-          <Form.Item
-            label="Equipment Tag"
-            name="restrictions"
-          >
-            <Select
-              mode="multiple"
-              placeholder="Select restrictions"
-              options={restrictions.map((restriction) => ({
-                label: restriction.name,
-                value: restriction.id,
               }))}
               optionLabelProp="label"
             />
@@ -214,22 +216,36 @@ function UserDetailsForm({
 
       {/* Footer Actions - Always Visible */}
       <div className={styles.footer}>
-        <Button
-          onClick={handleCancel}
-          icon={<CloseOutlined />}
-          size="large"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="primary"
-          onClick={handleSave}
-          icon={<SaveOutlined />}
-          disabled={!isDirty}
-          size="large"
-        >
-          Save
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {!isNewUser && onDelete && (
+            <Button
+              danger
+              onClick={handleDelete}
+              icon={<DeleteOutlined />}
+              size="large"
+            >
+              Delete
+            </Button>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button
+            onClick={handleCancel}
+            icon={<CloseOutlined />}
+            size="large"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleSave}
+            icon={<SaveOutlined />}
+            disabled={!isDirty && !isNewUser}
+            size="large"
+          >
+            Save
+          </Button>
+        </div>
       </div>
     </div>
   );

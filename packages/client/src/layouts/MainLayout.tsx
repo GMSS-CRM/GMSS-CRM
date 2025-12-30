@@ -4,7 +4,6 @@ import {
   Layout,
   Menu,
   Button,
-  Input,
   Space,
   Avatar,
   Dropdown,
@@ -15,7 +14,6 @@ import {
 import {
   BellOutlined,
   LogoutOutlined,
-  SearchOutlined,
   DashboardOutlined,
   SafetyOutlined,
   MenuFoldOutlined,
@@ -23,6 +21,7 @@ import {
 } from "@ant-design/icons";
 import { useAuth } from "../app/providers/AuthProvider";
 import { logout } from "../features/auth/services/auth.service";
+import { showConfirmModal } from "../shared/components/ConfirmModal";
 import type { MenuProps } from "antd";
 
 const { Header, Sider, Content } = Layout;
@@ -49,6 +48,16 @@ export default function MainLayout() {
   // Get the current route to highlight the correct menu item
   const selectedKey = location.pathname.split("/")[1] || "dashboard";
 
+  const handleLogout = () => {
+    showConfirmModal({
+      title: 'Logout',
+      content: 'Are you sure you want to logout?',
+      okText: 'Logout',
+      okType: 'danger',
+      onOk: logout,
+    });
+  };
+
   const userMenuItems: MenuProps["items"] = [
     {
       key: "profile",
@@ -62,7 +71,7 @@ export default function MainLayout() {
       key: "logout",
       label: "Logout",
       icon: <LogoutOutlined />,
-      onClick: logout,
+      onClick: handleLogout,
       danger: true,
     },
   ];
@@ -189,18 +198,6 @@ export default function MainLayout() {
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: 16, color: "#6b7280" }}
-          />
-
-          {/* Search Bar */}
-          <Input
-            placeholder="Search users, roles, permissions..."
-            prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
-            style={{
-              maxWidth: 300,
-              borderRadius: 8,
-              background: "#f9fafb",
-              border: "1px solid #e5e7eb",
-            }}
           />
 
           <div style={{ flex: 1 }} />

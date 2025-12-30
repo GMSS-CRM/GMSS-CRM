@@ -1,5 +1,5 @@
 import { Menu, Divider } from 'antd';
-import { UserOutlined, TeamOutlined, LockOutlined, BlockOutlined } from '@ant-design/icons';
+import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import type { SecurityMenuItem } from '../types';
 import styles from './SecurityMenu.module.css';
@@ -25,11 +25,6 @@ export default function SecurityMenu({ selectedMenu, onMenuChange }: SecurityMen
       key: 'permissions',
       icon: <LockOutlined />,
       label: 'Permissions',
-    },
-    {
-      key: 'restrictions',
-      icon: <BlockOutlined />,
-      label: 'Restrictions',
     },
   ];
 

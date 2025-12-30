@@ -17,23 +17,17 @@ const MOCK_ROLES: Role[] = [
   { id: '5', name: 'System Administrator', description: 'Full system access' },
 ];
 
-const MOCK_RESTRICTIONS: Restriction[] = [
-  { id: '1', name: 'Equipment Tag', type: 'EquipmentTag' },
-  { id: '2', name: 'Location A', type: 'Location' },
-  { id: '3', name: 'Department X', type: 'Department' },
-];
-
 const MOCK_USERS: User[] = [
-  { id: '1', firstName: 'Rajesh', lastName: 'Kumar', email: 'rkumar@gmss.com', roles: ['1', '2', '3'], restrictions: ['1'], isActive: true, roleCount: 3 },
-  { id: '2', firstName: 'Priya', lastName: 'Singh', email: 'psingh@gmss.com', roles: ['2', '3', '4'], restrictions: ['2'], isActive: true, roleCount: 3 },
-  { id: '3', firstName: 'Amit', lastName: 'Verma', email: 'averma@gmss.com', roles: ['1', '5'], restrictions: [], isActive: true, roleCount: 2 },
-  { id: '4', firstName: 'Neha', lastName: 'Patel', email: 'npatel@gmss.com', roles: ['2', '3', '4', '5'], restrictions: ['1', '2'], isActive: true, roleCount: 4 },
-  { id: '5', firstName: 'Vikram', lastName: 'Shrivastav', email: 'vshrivastav@gmss.com', roles: ['1', '2', '3', '4', '5'], restrictions: [], isActive: true, roleCount: 5 },
-  { id: '6', firstName: 'Anjali', lastName: 'Sharma', email: 'asharma@gmss.com', roles: ['3', '4'], restrictions: ['2'], isActive: true, roleCount: 2 },
-  { id: '7', firstName: 'Arjun', lastName: 'Nair', email: 'anair@gmss.com', roles: ['1', '2'], restrictions: [], isActive: true, roleCount: 2 },
-  { id: '8', firstName: 'Sneha', lastName: 'Gupta', email: 'sgupta@gmss.com', roles: ['2', '3', '5'], restrictions: ['1'], isActive: false, roleCount: 3 },
-  { id: '9', firstName: 'Rohit', lastName: 'Desai', email: 'rdesai@gmss.com', roles: ['1', '2', '3', '4'], restrictions: ['2', '3'], isActive: true, roleCount: 4 },
-  { id: '10', firstName: 'Divya', lastName: 'Rao', email: 'drao@gmss.com', roles: ['1', '5'], restrictions: [], isActive: true, roleCount: 2 },
+  { id: '1', firstName: 'Rajesh', lastName: 'Kumar', email: 'rkumar@gmss.com', role: '1', isActive: true },
+  { id: '2', firstName: 'Priya', lastName: 'Singh', email: 'psingh@gmss.com', role: '2', isActive: true },
+  { id: '3', firstName: 'Amit', lastName: 'Verma', email: 'averma@gmss.com', role: '5', isActive: true },
+  { id: '4', firstName: 'Neha', lastName: 'Patel', email: 'npatel@gmss.com', role: '4', isActive: true },
+  { id: '5', firstName: 'Vikram', lastName: 'Shrivastav', email: 'vshrivastav@gmss.com', role: '5', isActive: true },
+  { id: '6', firstName: 'Anjali', lastName: 'Sharma', email: 'asharma@gmss.com', role: '3', isActive: true },
+  { id: '7', firstName: 'Arjun', lastName: 'Nair', email: 'anair@gmss.com', role: '1', isActive: true },
+  { id: '8', firstName: 'Sneha', lastName: 'Gupta', email: 'sgupta@gmss.com', role: '2', isActive: false },
+  { id: '9', firstName: 'Rohit', lastName: 'Desai', email: 'rdesai@gmss.com', role: '1', isActive: true },
+  { id: '10', firstName: 'Divya', lastName: 'Rao', email: 'drao@gmss.com', role: '5', isActive: true },
 ];
 
 /**
@@ -44,6 +38,7 @@ export default function SecurityPage() {
   const [selectedSecurityMenu, setSelectedSecurityMenu] = useState<SecurityMenuItem>('users');
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isAddMode, setIsAddMode] = useState(false);
 
   // Auto-select first user on mount
   useEffect(() => {
@@ -54,25 +49,59 @@ export default function SecurityPage() {
 
   const handleUserSelect = useCallback((userId: string) => {
     setSelectedUserId(userId);
+    setIsAddMode(false);
   }, []);
 
   const handleSaveUser = useCallback((updatedUser: User) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((u) => (u.id === updatedUser.id ? updatedUser : u))
-    );
-    message.success('User updated successfully');
-  }, []);
+    setUsers((prevUsers) => {
+      const existingIndex = prevUsers.findIndex((u) => u.id === updatedUser.id);
+      if (existingIndex >= 0) {
+        // Update existing user
+        const newUsers = [...prevUsers];
+        newUsers[existingIndex] = updatedUser;
+        return newUsers;
+      } else {
+        // Add new user
+        return [...prevUsers, updatedUser];
+      }
+    });
+    message.success(isAddMode ? 'User added successfully' : 'User updated successfully');
+    setSelectedUserId(updatedUser.id);
+    setIsAddMode(false);
+  }, [isAddMode]);
 
   const handleCancelEdit = useCallback(() => {
-    // Reset by re-selecting (triggers form refresh)
-    if (selectedUserId) setSelectedUserId(selectedUserId);
-  }, [selectedUserId]);
+    if (isAddMode) {
+      setIsAddMode(false);
+      // Auto-select first user if available
+      if (users.length > 0) {
+        setSelectedUserId(users[0].id);
+      }
+    } else {
+      // Reset by re-selecting (triggers form refresh)
+      if (selectedUserId) setSelectedUserId(selectedUserId);
+    }
+  }, [isAddMode, selectedUserId, users]);
 
   const handleAddUser = useCallback(() => {
-    message.info('Add user feature coming soon');
+    setIsAddMode(true);
+    setSelectedUserId(null);
   }, []);
 
-  const selectedUser = users.find((u) => u.id === selectedUserId) || null;
+  const handleDeleteUser = useCallback((userId: string) => {
+    setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
+    message.success('User deleted successfully');
+    setSelectedUserId(null);
+    setIsAddMode(false);
+    // Auto-select first user if available
+    setTimeout(() => {
+      if (users.length > 1) {
+        setSelectedUserId(users.find((u) => u.id !== userId)?.id || null);
+      }
+    }, 0);
+  }, [users]);
+
+  const selectedUser = isAddMode ? null : users.find((u) => u.id === selectedUserId) || null;
 
   return (
     <div className={styles.container}>
@@ -103,8 +132,9 @@ export default function SecurityPage() {
             user={selectedUser}
             onSave={handleSaveUser}
             onCancel={handleCancelEdit}
+            onDelete={handleDeleteUser}
             roles={MOCK_ROLES}
-            restrictions={MOCK_RESTRICTIONS}
+            isAddMode={isAddMode}
           />
         </div>
       )}

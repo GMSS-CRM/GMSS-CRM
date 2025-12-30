@@ -11,7 +11,8 @@ interface UsersListProps {
   onAddUser: () => void;
 }
 
-const getInitials = (firstName: string, lastName: string): string => {
+const getInitials = (firstName: string, lastName?: string): string => {
+  if (!lastName) return firstName.charAt(0).toUpperCase();
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 };
 
@@ -33,7 +34,7 @@ function UsersList({
     return users.filter(
       (user) =>
         user.firstName.toLowerCase().includes(query) ||
-        user.lastName.toLowerCase().includes(query) ||
+        (user.lastName && user.lastName.toLowerCase().includes(query)) ||
         user.email.toLowerCase().includes(query)
     );
   }, [users, searchText]);
@@ -106,14 +107,14 @@ function UsersList({
                     {getInitials(user.firstName, user.lastName)}
                   </Avatar>
                 }
-                title={<div className={styles.userName}>{user.firstName} {user.lastName}</div>}
+                title={<div className={styles.userName}>{user.firstName}{user.lastName ? ' ' + user.lastName : ''}</div>}
                 description={
                   <div className={styles.userMeta}>
                     <div className={styles.email}>{user.email}</div>
-                    <div className={styles.roleCount}>{user.roleCount} Roles</div>
                   </div>
                 }
               />
+              {user.role && <div className={styles.roleCount}>1 Role</div>}
             </List.Item>
           </div>
         )}

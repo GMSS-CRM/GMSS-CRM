@@ -6,12 +6,11 @@ export interface User {
   id: string;
   firstName: string;
   middleName?: string;
-  lastName: string;
+  lastName?: string;
   email: string;
-  roles: string[];
-  restrictions: string[];
+  role?: string;
+  restrictions?: string[];
   isActive: boolean;
-  roleCount: number;
 }
 
 export interface Role {
@@ -26,4 +25,4 @@ export interface Restriction {
   type: 'EquipmentTag' | 'Location' | 'Department';
 }
 
-export type SecurityMenuItem = 'users' | 'roles' | 'permissions' | 'restrictions';
+export type SecurityMenuItem = 'users' | 'roles' | 'permissions';
