@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../../features/auth/pages/LoginPage";
-import DashboardPage from "../../features/auth/pages/DashboardPage";
+import LoginPage from "../../features/auth/pages/login-page";
+import DashboardPage from "../../features/auth/pages/dashboard-page";
 import { SecurityPage } from "../../features/security";
 import ProtectedRoute from "./ProtectedRoute";
-import MainLayout from "../../layouts/MainLayout";
+import MainLayout from "../../layouts/main-layout";
 
 export default function AppRoutes() {
   return (

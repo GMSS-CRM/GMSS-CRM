@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback, memo } from 'react';
 import { Input, List, Button, Row, Col, Divider } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import type { User } from '../types';
-import Avatar from '../../../shared/components/Avatar';
-import styles from './UsersList.module.css';
+import type { User } from '../../types';
+import Avatar from '../../../../shared/components/avatar';
+import styles from './styles.module.css';
 
 interface UsersListProps {
   users: User[];
