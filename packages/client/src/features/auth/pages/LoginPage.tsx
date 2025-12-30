@@ -219,7 +219,9 @@ export default function LoginPage() {
 
             <div className={styles.demoInfo}>
               <p className={styles.demoText}>
-                <span className={styles.demoStrong}>ID:</span> demo@demo.com  
+                <span className={styles.demoStrong}>Email:</span> demo@demo.com
+              </p>
+              <p className={styles.demoText}>
                 <span className={styles.demoStrong}>Pass:</span> demo1234
               </p>
             </div>
