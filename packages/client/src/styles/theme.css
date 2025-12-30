@@ -5,17 +5,32 @@
   --bg-muted: #f0f4ff;
   --bg-sidebar: #071233; /* deep indigo/navy */
   --bg-sidebar-accent: #081730;
+  --bg-hover: #fafafa;
+  --bg-selected: #f5f5f5;
 
-  --text-primary: #0b1220; /* near-black slate */
-  --text-secondary: #6b7280; /* subdued */
+  --text-primary: #262626; /* Dark text */
+  --text-secondary: #8c8c8c; /* Muted text */
+  --text-tertiary: #595959; /* Medium gray */
   --text-invert: #ffffff;
 
-  --accent: #2563EB; /* Ocean Indigo */
-  --accent-600: #1E4ED8;
-  --accent-200: #DBEAFE;
+  --accent: #0066cc; /* Primary blue */
+  --accent-hover: #0052a3; /* Darker blue for hover */
+  --accent-light: rgba(0, 102, 204, 0.1); /* Light blue background */
+  --accent-lighter: rgba(0, 102, 204, 0.05); /* Very light blue background */
 
-  --border-color: #E6EDF9;
-  --muted-border: #EAF2FF;
+  --border-color: #e8e8e8;
+  --border-light: #f0f0f0;
+  --border-lighter: #f5f5f5;
+  --border-input: #d9d9d9;
+  
+  /* Scrollbar colors */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #bfbfbf;
+  --scrollbar-thumb-hover: #8c8c8c;
+  
+  /* Status colors */
+  --color-success: #52c41a;
+  --color-error: #ff4d4f;
 
   /* Layout & spacing */
   --radius-sm: 6px;
