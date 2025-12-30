@@ -13,3 +13,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+
+// Action Code Settings for password reset
+export const getActionCodeSettings = () => {
+  // This makes Firebase send the reset link to our app instead of their hosted page
+  const url = `${window.location.origin}/__/auth/action`;
+  
+  return {
+    url,
+    handleCodeInApp: true,
+  };
+};

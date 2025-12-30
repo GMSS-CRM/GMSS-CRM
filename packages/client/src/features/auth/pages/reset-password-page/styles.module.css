@@ -1,0 +1,283 @@
+/* Reset Password Container */
+.resetContainer {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Center Content for loading/success states */
+.centerContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Left Panel - Branding */
+.leftPanel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  overflow: hidden;
+}
+
+.decorativePattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  animation: pulse 15s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.brandContent {
+  position: relative;
+  z-index: 1;
+  max-width: 500px;
+  color: white;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+}
+
+.logoIcon {
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #667eea;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logoText {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.tagline {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  letter-spacing: -1px;
+}
+
+.description {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.securityTips {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.tipsTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.tipsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tipsList li {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.tipsList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #4ade80;
+  font-weight: bold;
+}
+
+/* Right Panel - Form */
+.rightPanel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: white;
+}
+
+.formWrapper {
+  width: 100%;
+  max-width: 440px;
+}
+
+.formCard {
+  background: white;
+  padding: 2.5rem;
+}
+
+.formHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.formTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.formSubtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.submitButton {
+  margin-bottom: 0 !important;
+  margin-top: 1.5rem;
+}
+
+.backToLogin {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.backLink {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.backLink:hover {
+  background: #f3f4f6;
+  color: #5568d3;
+}
+
+/* Verifying State */
+.verifyingContent {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.verifyingText {
+  margin-top: 1.5rem;
+  font-size: 1.125rem;
+  color: white;
+  opacity: 0.9;
+}
+
+/* Success State */
+.successCard {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.successIcon {
+  font-size: 64px;
+  color: #10b981;
+  margin-bottom: 1.5rem;
+}
+
+.successTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.successDescription {
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.redirectText {
+  font-size: 0.95rem;
+  color: #667eea;
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .resetContainer {
+    flex-direction: column;
+  }
+
+  .leftPanel {
+    padding: 3rem 2rem;
+  }
+
+  .tagline {
+    font-size: 2rem;
+  }
+
+  .securityTips {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .leftPanel {
+    padding: 2rem 1.5rem;
+  }
+
+  .rightPanel {
+    padding: 1.5rem;
+  }
+
+  .formCard {
+    padding: 1.5rem;
+  }
+
+  .tagline {
+    font-size: 1.5rem;
+  }
+
+  .formTitle {
+    font-size: 1.5rem;
+  }
+}
