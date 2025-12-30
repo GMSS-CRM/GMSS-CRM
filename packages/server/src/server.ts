@@ -34,7 +34,9 @@ export async function startApolloServer() {
   });
 
   await server.start();
-
+  app.get("/", (_req, res) => {
+    res.send("OK");
+  });
   app.use(
     "/graphql",
     expressMiddleware(server, {
