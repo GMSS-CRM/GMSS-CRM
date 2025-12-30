@@ -1,31 +1,29 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import {
-  Form,
-  Input,
-  Button,
-  Card,
-  message,
-  Spin,
-  Space,
-  Divider,
-  Row,
-  Col,
-} from "antd";
-import {
-  LockOutlined,
-  MailOutlined,
-  SmileOutlined,
-  SecurityScanOutlined,
+import { Form, Input, Button, message, Spin, Modal } from "antd";
+import { 
+  LockOutlined, 
+  MailOutlined, 
+  AppstoreOutlined, 
+  KeyOutlined, 
+  CheckCircleOutlined,
+  ThunderboltOutlined,
+  SafetyOutlined,
+  RocketOutlined
 } from "@ant-design/icons";
-import { loginWithEmailPassword } from "../services/auth.service";
+import { loginWithEmailPassword, resetPassword } from "../services/auth.service";
 import { useAuth } from "../../../app/providers/AuthProvider";
+import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [resetModalVisible, setResetModalVisible] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [form] = Form.useForm();
+  const [resetForm] = Form.useForm();
 
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
@@ -40,18 +38,34 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPassword = () => {
+    setResetModalVisible(true);
+    setResetSuccess(false);
+    resetForm.resetFields();
+  };
+
+  const handleResetPassword = async (values: { email: string }) => {
+    try {
+      setResetLoading(true);
+      await resetPassword(values.email);
+      setResetSuccess(true);
+    } catch (err: any) {
+      message.error(err.message || "Failed to send reset email");
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleCloseResetModal = () => {
+    setResetModalVisible(false);
+    setResetSuccess(false);
+    resetForm.resetFields();
+  };
+
   if (authLoading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        }}
-      >
-        <Spin size="large" tip="Checking authentication..." />
+      <div className={styles.loadingContainer}>
+        <Spin size="large" />
       </div>
     );
   }
@@ -59,117 +73,75 @@ export default function LoginPage() {
   if (user) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        padding: "20px",
-      }}
-    >
-      <Row gutter={[32, 32]} style={{ width: "100%", maxWidth: "900px" }}>
-        {/* Left Side - Features/Info */}
-        <Col xs={24} sm={24} md={12} style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div
-            style={{
-              color: "#ffffff",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 48,
-                fontWeight: 700,
-                marginBottom: 16,
-                letterSpacing: "-1px",
-              }}
-            >
-              GMSS CRM
+    <div className={styles.loginContainer}>
+      {/* Left Panel - Branding */}
+      <div className={styles.leftPanel}>
+        <div className={styles.decorativePattern}></div>
+        <div className={styles.brandContent}>
+          <div className={styles.logo}>
+            <div className={styles.logoIcon}>
+              <AppstoreOutlined />
             </div>
-            <p
-              style={{
-                fontSize: 18,
-                marginBottom: 32,
-                opacity: 0.9,
-                lineHeight: 1.6,
-              }}
-            >
-              Manage your business relationships effectively with our modern CRM platform
-            </p>
-
-            {/* Features */}
-            <Space
-              direction="vertical"
-              size={16}
-              style={{
-                textAlign: "left",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <SmileOutlined style={{ fontSize: 24, color: "#fbbf24" }} />
-                <div>
-                  <strong style={{ fontSize: 16 }}>User Friendly</strong>
-                  <p style={{ margin: 0, opacity: 0.8, fontSize: 14 }}>
-                    Intuitive interface designed for ease of use
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <SecurityScanOutlined style={{ fontSize: 24, color: "#fbbf24" }} />
-                <div>
-                  <strong style={{ fontSize: 16 }}>Secure</strong>
-                  <p style={{ margin: 0, opacity: 0.8, fontSize: 14 }}>
-                    Enterprise-grade security for your data
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <SecurityScanOutlined style={{ fontSize: 24, color: "#fbbf24" }} />
-                <div>
-                  <strong style={{ fontSize: 16 }}>Powerful</strong>
-                  <p style={{ margin: 0, opacity: 0.8, fontSize: 14 }}>
-                    Advanced features for growing businesses
-                  </p>
-                </div>
-              </div>
-            </Space>
+            <span className={styles.logoText}>GMSS CRM</span>
           </div>
-        </Col>
+          
+          <h1 className={styles.tagline}>
+            Transform how you manage customer relationships
+          </h1>
+          
+          <p className={styles.description}>
+            Powerful CRM built for modern teams. Boost productivity and grow with confidence.
+          </p>
 
-        {/* Right Side - Login Form */}
-        <Col xs={24} sm={24} md={12}>
-          <Card
-            style={{
-              borderRadius: 16,
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
-              padding: 32,
-            }}
-          >
-            {/* Header */}
-            <div style={{ marginBottom: 32, textAlign: "center" }}>
-              <h2
-                style={{
-                  fontSize: 24,
-                  fontWeight: 700,
-                  color: "#1f2937",
-                  margin: 0,
-                  marginBottom: 8,
-                }}
-              >
-                Welcome Back
-              </h2>
-              <p style={{ color: "#6b7280", margin: 0, fontSize: 14 }}>
-                Sign in to your account to continue
-              </p>
+          <div className={styles.features}>
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>
+                <ThunderboltOutlined />
+              </div>
+              <div className={styles.featureContent}>
+                <h3 className={styles.featureTitle}>Lightning Fast</h3>
+                <p className={styles.featureDescription}>
+                  Optimized performance for seamless user experience
+                </p>
+              </div>
             </div>
 
-            {/* Form */}
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>
+                <SafetyOutlined />
+              </div>
+              <div className={styles.featureContent}>
+                <h3 className={styles.featureTitle}>Enterprise Security</h3>
+                <p className={styles.featureDescription}>
+                  Bank-level encryption to keep your data protected
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIcon}>
+                <RocketOutlined />
+              </div>
+              <div className={styles.featureContent}>
+                <h3 className={styles.featureTitle}>Scale with Ease</h3>
+                <p className={styles.featureDescription}>
+                  Built to grow alongside your business needs
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Panel - Login Form */}
+      <div className={styles.rightPanel}>
+        <div className={styles.formWrapper}>
+          <div className={styles.formCard}>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>Welcome Back</h2>
+              <p className={styles.formSubtitle}>Enter your credentials to access your account</p>
+            </div>
+
             <Form
               form={form}
               layout="vertical"
@@ -178,46 +150,55 @@ export default function LoginPage() {
               requiredMark={false}
             >
               <Form.Item
-                label={<span style={{ fontWeight: 500, color: "#374151" }}>Email Address</span>}
                 name="email"
                 rules={[
-                  { required: true, message: "Please enter your email address" },
-                  { type: "email", message: "Please enter a valid email" },
+                  { required: true, message: "Email is required" },
+                  { type: "email", message: "Enter a valid email" },
                 ]}
               >
                 <Input
-                  prefix={<MailOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="name@example.com"
+                  prefix={<MailOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                  placeholder="Email address"
                   size="large"
                   style={{
                     borderRadius: 8,
-                    background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    height: 44,
+                    fontSize: 14,
                   }}
                 />
               </Form.Item>
 
               <Form.Item
-                label={<span style={{ fontWeight: 500, color: "#374151" }}>Password</span>}
                 name="password"
                 rules={[
-                  { required: true, message: "Please enter your password" },
+                  { required: true, message: "Password is required" },
                   { min: 6, message: "Password must be at least 6 characters" },
                 ]}
               >
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: "#9ca3af" }} />}
-                  placeholder="Enter your password"
+                  prefix={<LockOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                  placeholder="Password"
                   size="large"
                   style={{
                     borderRadius: 8,
-                    background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    height: 44,
+                    fontSize: 14,
                   }}
                 />
               </Form.Item>
 
-              <Form.Item style={{ marginBottom: 24 }}>
+              <div className={styles.formActions}>
+                <div></div>
+                <button
+                  type="button"
+                  className={styles.forgotPassword}
+                  onClick={handleForgotPassword}
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              <Form.Item className={styles.submitButton}>
                 <Button
                   type="primary"
                   htmlType="submit"
@@ -226,35 +207,126 @@ export default function LoginPage() {
                   size="large"
                   style={{
                     borderRadius: 8,
-                    fontSize: 16,
-                    fontWeight: 600,
                     height: 44,
+                    fontSize: 14,
+                    fontWeight: 600,
                   }}
                 >
-                  Sign In
+                  Sign in
                 </Button>
               </Form.Item>
             </Form>
 
-            <Divider style={{ margin: "24px 0" }} />
-
-            {/* Demo Info */}
-            <div
-              style={{
-                background: "#f0fdf4",
-                border: "1px solid #86efac",
-                borderRadius: 8,
-                padding: 12,
-                textAlign: "center",
-                fontSize: 12,
-                color: "#16a34a",
-              }}
-            >
-              <strong>Demo Mode:</strong> Use any email and password to login
+            <div className={styles.demoInfo}>
+              <p className={styles.demoText}>
+                <span className={styles.demoStrong}>Email:</span> demo@demo.com
+              </p>
+              <p className={styles.demoText}>
+                <span className={styles.demoStrong}>Pass:</span> demo1234
+              </p>
             </div>
-          </Card>
-        </Col>
-      </Row>
+          </div>
+        </div>
+      </div>
+
+      {/* Reset Password Modal */}
+      <Modal
+        open={resetModalVisible}
+        onCancel={handleCloseResetModal}
+        footer={null}
+        width={480}
+        centered
+        destroyOnClose
+      >
+        <div className={styles.resetModal}>
+          <div className={styles.resetIcon}>
+            <KeyOutlined />
+          </div>
+
+          {!resetSuccess ? (
+            <>
+              <h2 className={styles.resetTitle}>Reset your password</h2>
+              <p className={styles.resetDescription}>
+                Enter your email address and we'll send you a link to reset your password
+              </p>
+
+              <Form
+                form={resetForm}
+                layout="vertical"
+                onFinish={handleResetPassword}
+                requiredMark={false}
+              >
+                <Form.Item
+                  name="email"
+                  rules={[
+                    { required: true, message: "Email is required" },
+                    { type: "email", message: "Enter a valid email" },
+                  ]}
+                >
+                  <Input
+                    prefix={<MailOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                    placeholder="Enter your email"
+                    size="large"
+                    style={{
+                      borderRadius: 8,
+                      height: 44,
+                      fontSize: 14,
+                    }}
+                  />
+                </Form.Item>
+
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={resetLoading}
+                    block
+                    size="large"
+                    style={{
+                      borderRadius: 8,
+                      height: 44,
+                      fontSize: 14,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Send reset link
+                  </Button>
+                </Form.Item>
+              </Form>
+            </>
+          ) : (
+            <>
+              <h2 className={styles.resetTitle}>Check your email</h2>
+              <p className={styles.resetDescription}>
+                We've sent a password reset link to your email address
+              </p>
+
+              <div className={styles.resetSuccess}>
+                <p className={styles.resetSuccessText}>
+                  <CheckCircleOutlined style={{ fontSize: "18px" }} />
+                  Reset link sent successfully!
+                </p>
+              </div>
+
+              <Button
+                type="primary"
+                block
+                size="large"
+                onClick={handleCloseResetModal}
+                style={{
+                  marginTop: "1.5rem",
+                  borderRadius: 8,
+                  height: 44,
+                  fontSize: 14,
+                  fontWeight: 600,
+                }}
+              >
+                Done
+              </Button>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }
