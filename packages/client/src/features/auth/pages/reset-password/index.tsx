@@ -74,7 +74,7 @@ export default function ResetPasswordPage() {
             <span className={styles.logoText}>GMSS CRM</span>
           </div>
           <div className={styles.verifyingContent}>
-            <LoadingOutlined style={{ fontSize: 48, color: "#1890ff" }} />
+            <LoadingOutlined style={{ fontSize: 48, color: "var(--accent)" }} />
             <p className={styles.verifyingText}>Verifying reset link...</p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function ResetPasswordPage() {
                 ]}
               >
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                  prefix={<LockOutlined style={{ color: "var(--text-secondary)", fontSize: "14px" }} />}
                   placeholder="New password"
                   size="large"
                   style={{
@@ -191,7 +191,7 @@ export default function ResetPasswordPage() {
                 ]}
               >
                 <Input.Password
-                  prefix={<LockOutlined style={{ color: "#8c8c8c", fontSize: "14px" }} />}
+                  prefix={<LockOutlined style={{ color: "var(--text-secondary)", fontSize: "14px" }} />}
                   placeholder="Confirm new password"
                   size="large"
                   style={{

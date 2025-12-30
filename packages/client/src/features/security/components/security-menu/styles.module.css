@@ -31,15 +31,20 @@
   height: 40px;
   line-height: 40px;
   border-radius: 6px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .menu :global(.ant-menu-item:hover) {
-  color: var(--accent);
+  color: var(--accent) !important;
   background-color: var(--accent-lighter);
   padding-left: 12px;
+}
+
+.menu :global(.ant-menu-item:hover span) {
+  color: var(--accent) !important;
+  opacity: 1 !important;
 }
 
 .menu :global(.ant-menu-item-selected) {
@@ -50,14 +55,10 @@
   padding-left: 9px !important;
 }
 
-.menu :global(.ant-menu-item-selected::after) {
-  display: none;
-}
-
 .menu :global(.ant-menu-item-icon) {
   font-size: 16px;
   margin-right: 12px;
-  transition: all 0.3s ease;
+  transition: color 0.2s;
 }
 
 .menu :global(.ant-menu-item:hover .ant-menu-item-icon) {

@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, memo } from 'react';
 import { Input, List, Button, Row, Col, Divider } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import type { User } from '../../types';
-import Avatar from '../../../../shared/components/avatar';
+import Avatar from '../../../../components/avatar';
 import styles from './styles.module.css';
 
 interface UsersListProps {
@@ -57,18 +57,18 @@ function UsersList({
               type="primary"
               icon={<PlusOutlined />}
               onClick={onAddUser}
-              style={{ background: '#1890ff' }}
+              style={{ background: 'var(--accent)', boxShadow: 'none' }}
             />
           </Col>
         </Row>
       </div>
 
-      <Divider style={{ margin: '8px 0' }} />
+      <Divider style={{ margin: '8px 0', borderColor: 'var(--border-color)' }} />
 
       {/* Search */}
       <Input
-        placeholder="Search users..."
-        prefix={<SearchOutlined style={{ color: '#0066cc', fontSize: 13 }} />}
+        placeholder="Search by name or email address"
+        prefix={<SearchOutlined style={{ color: 'var(--accent)', fontSize: 13 }} />}
         value={searchText}
         onChange={handleSearchChange}
         allowClear
@@ -102,7 +102,7 @@ function UsersList({
                   <Avatar 
                     firstName={user.firstName} 
                     lastName={user.lastName}
-                    size={48}
+                    size={36}
                   />
                 }
                 title={<div className={styles.userName}>{user.firstName}{user.lastName ? ' ' + user.lastName : ''}</div>}
