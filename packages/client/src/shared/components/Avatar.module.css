@@ -1,0 +1,5 @@
+.avatar {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: var(--text-invert);
+  font-weight: 600;
+}

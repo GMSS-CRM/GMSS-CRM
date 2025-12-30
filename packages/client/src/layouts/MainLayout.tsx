@@ -5,11 +5,11 @@ import {
   Menu,
   Button,
   Space,
-  Avatar,
   Dropdown,
   Badge,
   Tooltip,
   Divider,
+  Avatar,
 } from "antd";
 import {
   BellOutlined,
@@ -235,9 +235,9 @@ export default function MainLayout() {
               >
                 <Avatar
                   style={{
-                    backgroundColor: "#0066cc",
+                    background: "linear-gradient(135deg, #0066cc 0%, #0052a3 100%)",
                     fontSize: 14,
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
                   {user?.email ? user.email.charAt(0).toUpperCase() : "U"}

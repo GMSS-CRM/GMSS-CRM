@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Form, Input, Button, Select, Switch, Row, Col, Avatar } from 'antd';
+import { Form, Input, Button, Select, Switch, Row, Col } from 'antd';
 import { SaveOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { User, Role } from '../types';
 import { showConfirmModal } from '../../../shared/components/ConfirmModal';
+import Avatar from '../../../shared/components/Avatar';
 import styles from './UserDetailsForm.module.css';
 
 interface UserDetailsFormProps {
@@ -13,11 +14,6 @@ interface UserDetailsFormProps {
   roles: Role[];
   isAddMode?: boolean;
 }
-
-const getInitials = (firstName: string, lastName?: string): string => {
-  if (!lastName) return firstName.charAt(0).toUpperCase();
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-};
 
 /**
  * User details form component
@@ -120,9 +116,15 @@ function UserDetailsForm({
         <Row gutter={20} align="middle" justify="space-between" wrap={false}>
           <Col flex="auto" style={{ minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Avatar size={56} className={styles.avatar}>
-                {isNewUser ? '+' : getInitials(user!.firstName, user!.lastName)}
-              </Avatar>
+              {isNewUser ? (
+                <div className={styles.newUserAvatar}>+</div>
+              ) : (
+                <Avatar 
+                  firstName={user!.firstName} 
+                  lastName={user!.lastName}
+                  size={48}
+                />
+              )}
               <div style={{ minWidth: 0 }}>
                 <div className={styles.headerName}>
                   {isNewUser ? 'New User' : `${user!.firstName}${user!.lastName ? ' ' + user!.lastName : ''}`}
@@ -133,6 +135,23 @@ function UserDetailsForm({
           </Col>
           <Col flex="none">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {!isNewUser && onDelete && (
+                <DeleteOutlined 
+                  onClick={handleDelete}
+                  style={{ 
+                    fontSize: 18, 
+                    color: '#ff4d4f', 
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.7';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                />
+              )}
               <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
                 {form.getFieldValue('isActive') ? '● Active' : '● Inactive'}
               </div>
@@ -148,6 +167,7 @@ function UserDetailsForm({
           form={form}
           layout="vertical"
           style={{ width: '100%' }}
+          requiredMark={false}
           onValuesChange={handleFieldChange}
         >
         {/* User Details Section */}
@@ -156,7 +176,7 @@ function UserDetailsForm({
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="First Name"
+                label={<>First Name<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
                 name="firstName"
                 rules={[{ required: true, message: 'First name is required' }]}
               >
@@ -165,23 +185,23 @@ function UserDetailsForm({
             </Col>
             <Col span={12}>
               <Form.Item
-                label="Last Name"
-                name="lastName"
+                label="Middle Name"
+                name="middleName"
               >
-                <Input placeholder="Enter last name (optional)" />
+                <Input placeholder="Enter middle name (optional)" />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item
-            label="Middle Name"
-            name="middleName"
+            label="Last Name"
+            name="lastName"
           >
-            <Input placeholder="Enter middle name (optional)" />
+            <Input placeholder="Enter last name (optional)" />
           </Form.Item>
 
           <Form.Item
-            label="Email Address"
+            label={<>Email Address<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
             name="email"
             rules={[{ required: true, type: 'email', message: 'Valid email is required' }]}
           >
@@ -216,18 +236,6 @@ function UserDetailsForm({
 
       {/* Footer Actions - Always Visible */}
       <div className={styles.footer}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {!isNewUser && onDelete && (
-            <Button
-              danger
-              onClick={handleDelete}
-              icon={<DeleteOutlined />}
-              size="large"
-            >
-              Delete
-            </Button>
-          )}
-        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button
             onClick={handleCancel}
