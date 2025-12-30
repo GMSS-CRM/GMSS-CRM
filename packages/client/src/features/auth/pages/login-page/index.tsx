@@ -11,10 +11,10 @@ import {
   SafetyOutlined,
   RocketOutlined
 } from "@ant-design/icons";
-import { loginWithEmailPassword, resetPassword } from "../services/auth.service";
-import { useAuth } from "../../../app/providers/AuthProvider";
-import styles from "./LoginPage.module.css";
-import Loader from "@shared/components/loader";
+import { loginWithEmailPassword, resetPassword } from "../../services/auth.service";
+import { useAuth } from "../../../../app/providers/AuthProvider";
+import Loader from "../../../../shared/components/loader";
+import styles from "./styles.module.css";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);

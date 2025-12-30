@@ -99,34 +99,38 @@ export default function DashboardPage() {
         <div>
           <h1
             style={{
-              fontSize: 32,
+              fontSize: 24,
               fontWeight: 700,
               color: "#1f2937",
               margin: 0,
-              marginBottom: 4,
+              letterSpacing: "-0.5px",
             }}
           >
             Dashboard
           </h1>
-          <p style={{ color: "#6b7280", margin: 0, fontSize: 14 }}>
-            Welcome back! Here's what's happening in your CRM today.
+          <p
+            style={{
+              fontSize: 14,
+              color: "#6b7280",
+              margin: "4px 0 0 0",
+              fontWeight: 400,
+            }}
+          >
+            Welcome back! Here's what's happening today.
           </p>
         </div>
-        <Space size={12}>
-          <Button icon={<DownloadOutlined />} style={{ borderRadius: 8 }}>
+
+        <Space>
+          <Button type="default" icon={<DownloadOutlined />}>
             Export
           </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            style={{ borderRadius: 8 }}
-          >
-            New User
+          <Button type="primary" icon={<PlusOutlined />}>
+            Add User
           </Button>
         </Space>
       </div>
 
-      {/* Key Metrics Section */}
+      {/* Stats Row */}
       <Row gutter={[16, 16]}>
         {/* Total Users Card */}
         <Col xs={24} sm={12} lg={6}>
@@ -174,12 +178,12 @@ export default function DashboardPage() {
                 fontWeight: 500,
               }}
             >
-              ↑ 12% increase
+              +12% from last month
             </div>
           </Card>
         </Col>
 
-        {/* Total Roles Card */}
+        {/* Active Roles Card */}
         <Col xs={24} sm={12} lg={6}>
           <Card
             style={{

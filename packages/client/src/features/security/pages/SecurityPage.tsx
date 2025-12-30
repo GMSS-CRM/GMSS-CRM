@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
-import SecurityMenu from '../components/SecurityMenu';
-import UsersList from '../components/UsersList';
-import UserDetailsForm from '../components/UserDetailsForm';
+import SecurityMenu from '../components/security-menu';
+import UsersList from '../components/users-list';
+import UserDetailsForm from '../components/user-details-form';
 import type { User, SecurityMenuItem, Role } from '../types';
 import styles from './SecurityPage.module.css';
 

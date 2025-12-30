@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../providers/AuthProvider";
-import Loader from "../../shared/components/Loader";
+import Loader from "../../shared/components/loader";
 import type { JSX } from "react";
 
 export default function ProtectedRoute({
@@ -11,7 +11,7 @@ export default function ProtectedRoute({
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <Loader tip="Checking authentication..." />;
+    return <Loader tip="Authorizing..." />;
   }
 
   if (!user) {

@@ -9,7 +9,7 @@ import {
   Badge,
   Tooltip,
   Divider,
-  Avatar,
+  Avatar,   
 } from "antd";
 import {
   BellOutlined,
@@ -19,10 +19,11 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
-import { useAuth } from "../app/providers/AuthProvider";
-import { logout } from "../features/auth/services/auth.service";
-import { showConfirmModal } from "../shared/components/ConfirmModal";
+import { useAuth } from "../../app/providers/AuthProvider";
+import { logout } from "../../features/auth/services/auth.service";
+import { showConfirmModal } from "../../shared/components/confirm-modal";
 import type { MenuProps } from "antd";
+import "./styles.css";
 
 const { Header, Sider, Content } = Layout;
 

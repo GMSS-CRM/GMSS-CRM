@@ -1,6 +1,6 @@
 import { Avatar as AntAvatar } from 'antd';
 import type { AvatarProps as AntAvatarProps } from 'antd';
-import styles from './Avatar.module.css';
+import styles from './styles.module.css';
 
 interface AvatarProps extends Omit<AntAvatarProps, 'children'> {
   firstName: string;
