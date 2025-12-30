@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../../features/auth/pages/LoginPage";
 import DashboardPage from "../../features/auth/pages/DashboardPage";
+import { SecurityPage } from "../../features/security";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/MainLayout";
 
@@ -19,9 +20,7 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/users" element={<div>Users</div>} />
-        <Route path="/roles" element={<div>Roles</div>} />
-        <Route path="/permissions" element={<div>Permissions</div>} />
+        <Route path="/security" element={<SecurityPage />} />
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/dashboard" />} />

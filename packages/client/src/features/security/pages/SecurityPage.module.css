@@ -1,0 +1,34 @@
+.container {
+  height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.menuSection {
+  flex: 0 0 auto;
+  width: 200px;
+  overflow: hidden;
+  border-right: 1px solid #e8e8e8;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.listSection {
+  flex: 0 0 320px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e8e8e8;
+}
+
+.formSection {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
