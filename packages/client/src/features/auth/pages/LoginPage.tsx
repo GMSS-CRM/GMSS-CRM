@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Form, Input, Button, message, Spin, Modal } from "antd";
+import { Form, Input, Button, message, Modal } from "antd";
 import { 
   LockOutlined, 
   MailOutlined, 
@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { loginWithEmailPassword, resetPassword } from "../services/auth.service";
 import { useAuth } from "../../../app/providers/AuthProvider";
+import Loader from "../../../shared/components/Loader";
 import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
@@ -63,11 +64,7 @@ export default function LoginPage() {
   };
 
   if (authLoading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <Spin size="large" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (user) return <Navigate to="/dashboard" replace />;
