@@ -34,9 +34,9 @@
 }
 
 .logoText {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: white;
   letter-spacing: -0.5px;
 }
 
