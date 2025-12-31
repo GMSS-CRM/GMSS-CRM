@@ -22,6 +22,7 @@ export interface Theme {
     textInvert: string;
     accent: string;
     accentHover: string;
+    accentMedium: string;
     accentLight: string;
     accentLighter: string;
     borderColor: string;
@@ -57,6 +58,7 @@ export const themes: Theme[] = [
       textInvert: '#ffffff',
       accent: '#0066cc',
       accentHover: '#0052a3',
+      accentMedium: 'rgba(0, 102, 204, 0.35)',
       accentLight: 'rgba(0, 102, 204, 0.1)',
       accentLighter: 'rgba(0, 102, 204, 0.05)',
       borderColor: '#e8e8e8',
@@ -91,6 +93,7 @@ export const themes: Theme[] = [
       textInvert: '#ffffff',
       accent: '#10b981',
       accentHover: '#059669',
+      accentMedium: 'rgba(16, 185, 129, 0.35)',
       accentLight: 'rgba(16, 185, 129, 0.1)',
       accentLighter: 'rgba(16, 185, 129, 0.05)',
       borderColor: '#d1d5db',
@@ -125,6 +128,7 @@ export const themes: Theme[] = [
       textInvert: '#ffffff',
       accent: '#8b5cf6',
       accentHover: '#7c3aed',
+      accentMedium: 'rgba(139, 92, 246, 0.35)',
       accentLight: 'rgba(139, 92, 246, 0.1)',
       accentLighter: 'rgba(139, 92, 246, 0.05)',
       borderColor: '#e5e7eb',
@@ -159,6 +163,7 @@ export const themes: Theme[] = [
       textInvert: '#0f172a',
       accent: '#3b82f6',
       accentHover: '#2563eb',
+      accentMedium: 'rgba(59, 130, 246, 0.4)',
       accentLight: 'rgba(59, 130, 246, 0.2)',
       accentLighter: 'rgba(59, 130, 246, 0.1)',
       borderColor: '#334155',

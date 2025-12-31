@@ -49,6 +49,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     root.style.setProperty('--accent', theme.colors.accent);
     root.style.setProperty('--accent-hover', theme.colors.accentHover);
+    root.style.setProperty('--accent-medium', theme.colors.accentMedium);
     root.style.setProperty('--accent-light', theme.colors.accentLight);
     root.style.setProperty('--accent-lighter', theme.colors.accentLighter);
     

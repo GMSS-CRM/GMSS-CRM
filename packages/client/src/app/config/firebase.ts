@@ -14,13 +14,33 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 
-// Action Code Settings for password reset
+/**
+ * Dynamic Action Code Settings for Firebase Email Actions
+ * 
+ * Generates appropriate URLs for both development (localhost) and production (Render)
+ * This ensures email links work correctly in both environments
+ */
 export const getActionCodeSettings = () => {
-  // This makes Firebase send the reset link to our app instead of their hosted page
-  const url = `${window.location.origin}/__/auth/action`;
+  // Detect environment based on hostname
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1';
+  
+  // Set base URL based on environment
+  const baseUrl = isLocalhost 
+    ? 'http://localhost:5173' 
+    : 'https://gmss-crm.onrender.com';
+  
+  // The action handler path (must match your route in AppRoutes)
+  const actionUrl = `${baseUrl}/auth/action`;
+  
+  // Where to redirect after successful action (optional)
+  const continueUrl = `${baseUrl}/dashboard`;
+  
+  console.log('Action URL being used:', actionUrl); // Debug log
+  console.log('Environment:', isLocalhost ? 'localhost' : 'production');
   
   return {
-    url,
-    handleCodeInApp: true,
+    url: actionUrl,
+    handleCodeInApp: false, // Web app, not mobile
   };
 };
