@@ -4,11 +4,16 @@ import { LoadingOutlined, AppstoreOutlined } from "@ant-design/icons";
 import styles from "./styles.module.css";
 
 /**
- * This component handles Firebase auth action URLs like:
- * /__/auth/action?mode=resetPassword&oobCode=xxx
- * and redirects to the appropriate page in our app
+ * Email Action Handler
+ * 
+ * Processes Firebase authentication email action links:
+ * - Password reset links from email
+ * - Email verification links
+ * - Account recovery links
+ * 
+ * Example URL: /__/auth/action?mode=resetPassword&oobCode=ABC123
  */
-export default function AuthActionHandler() {
+export default function EmailHandler() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 

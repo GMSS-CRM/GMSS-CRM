@@ -1,7 +1,7 @@
 import { Menu, Divider } from 'antd';
 import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import type { SecurityMenuItem } from '../../types';
+import type { SecurityMenuItem } from '../../features/security/types';
 import styles from './styles.module.css';
 
 interface SecurityMenuProps {

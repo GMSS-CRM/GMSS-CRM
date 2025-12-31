@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../../features/auth/pages/login";
 import ResetPasswordPage from "../../features/auth/pages/reset-password";
-import AuthActionHandler from "../../features/auth/pages/auth-action";
-import DashboardPage from "../../features/dashboard/pages/dashboard";
+import EmailHandler from "../../features/auth/pages/email-handler";
+import DashboardPage from "../../features/dashboard";
 import { SecurityPage } from "../../features/security";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/main-layout";
@@ -13,7 +13,7 @@ export default function AppRoutes() {
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/__/auth/action" element={<AuthActionHandler />} />
+      <Route path="/__/auth/action" element={<EmailHandler />} />
 
       {/* Protected routes */}
       <Route

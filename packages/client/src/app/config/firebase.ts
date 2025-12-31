@@ -16,8 +16,11 @@ export const auth = getAuth(app);
 
 // Action Code Settings for password reset
 export const getActionCodeSettings = () => {
-  // This makes Firebase send the reset link to our app instead of their hosted page
-  const url = `${window.location.origin}/__/auth/action`;
+  // Get the current origin or use environment variable for production
+  const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+  const url = `${baseUrl}/__/auth/action`;
+  
+  console.log('Action URL being used:', url); // Debug log
   
   return {
     url,
