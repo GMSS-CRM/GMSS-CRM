@@ -133,20 +133,6 @@
   margin-bottom: 0;
 }
 
-/* Notification Button */
-.notificationButton {
-  color: var(--text-secondary);
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.notificationButton:hover {
-  background: var(--bg-hover);
-}
-
 /* User Dropdown */
 .userDropdown {
   cursor: pointer;

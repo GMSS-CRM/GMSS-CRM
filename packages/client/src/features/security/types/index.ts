@@ -17,6 +17,14 @@ export interface Role {
   id: string;
   name: string;
   description?: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdBy?: string;
+  createdDate: string;
+  updatedBy?: string;
+  updatedDate?: string;
+  userCount?: number; // For UI purposes - number of users with this role
+  isSystemRole?: boolean; // For UI purposes - prevent deletion of system roles
 }
 
 export interface Restriction {
