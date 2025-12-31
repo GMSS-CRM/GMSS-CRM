@@ -1,8 +1,11 @@
 import {
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset,
 } from "firebase/auth";
-import { auth } from "../../../app/config/firebase";
+import { auth, getActionCodeSettings } from "../../../app/config/firebase";
 
 export const loginWithEmailPassword = (
   email: string,
@@ -13,4 +16,17 @@ export const loginWithEmailPassword = (
 
 export const logout = () => {
   return signOut(auth);
+};
+
+export const resetPassword = (email: string) => {
+  const actionCodeSettings = getActionCodeSettings();
+  return sendPasswordResetEmail(auth, email, actionCodeSettings);
+};
+
+export const verifyResetCode = (code: string) => {
+  return verifyPasswordResetCode(auth, code);
+};
+
+export const confirmNewPassword = (code: string, newPassword: string) => {
+  return confirmPasswordReset(auth, code, newPassword);
 };

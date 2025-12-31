@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Form, Input, Button, Select, Switch, Row, Col, Avatar } from 'antd';
-import { SaveOutlined, CloseOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { User, Role } from '../types';
-import { showConfirmModal } from '../../../shared/components/ConfirmModal';
-import styles from './UserDetailsForm.module.css';
+import { Form, Input, Button, Select, Switch, Row, Col } from 'antd';
+import { SaveOutlined, CloseOutlined, DeleteFilled } from '@ant-design/icons';
+import type { User, Role } from '../../../types';
+import { showConfirmModal } from '../../../../../components/confirm-modal';
+import Avatar from '../../../../../components/avatar';
+import styles from './styles.module.css';
 
 interface UserDetailsFormProps {
   user: User | null;
@@ -13,11 +14,6 @@ interface UserDetailsFormProps {
   roles: Role[];
   isAddMode?: boolean;
 }
-
-const getInitials = (firstName: string, lastName?: string): string => {
-  if (!lastName) return firstName.charAt(0).toUpperCase();
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-};
 
 /**
  * User details form component
@@ -115,14 +111,20 @@ function UserDetailsForm({
 
   return (
     <div className={styles.container}>
-      {/* Header with Avatar and Active Toggle */}
+      {/* Header with Avatar and Status */}
       <div className={styles.header}>
-        <Row gutter={20} align="middle" justify="space-between" wrap={false}>
+        <Row gutter={16} align="middle" justify="space-between" wrap={false}>
           <Col flex="auto" style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Avatar size={56} className={styles.avatar}>
-                {isNewUser ? '+' : getInitials(user!.firstName, user!.lastName)}
-              </Avatar>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {isNewUser ? (
+                <div className={styles.newUserAvatar}>+</div>
+              ) : (
+                <Avatar 
+                  firstName={user!.firstName} 
+                  lastName={user!.lastName}
+                  size={44}
+                />
+              )}
               <div style={{ minWidth: 0 }}>
                 <div className={styles.headerName}>
                   {isNewUser ? 'New User' : `${user!.firstName}${user!.lastName ? ' ' + user!.lastName : ''}`}
@@ -131,14 +133,20 @@ function UserDetailsForm({
               </div>
             </div>
           </Col>
-          <Col flex="none">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
-                {form.getFieldValue('isActive') ? '● Active' : '● Inactive'}
+          {!isNewUser && (
+            <Col flex="none">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
+                  {form.getFieldValue('isActive') ? 'Active' : 'Inactive'}
+                </div>
+                <Switch 
+                  checked={form.getFieldValue('isActive')} 
+                  onChange={handleActiveToggle}
+                  size="small"
+                />
               </div>
-              <Switch checked={form.getFieldValue('isActive')} onChange={handleActiveToggle} />
-            </div>
-          </Col>
+            </Col>
+          )}
         </Row>
       </div>
 
@@ -148,6 +156,7 @@ function UserDetailsForm({
           form={form}
           layout="vertical"
           style={{ width: '100%' }}
+          requiredMark={false}
           onValuesChange={handleFieldChange}
         >
         {/* User Details Section */}
@@ -156,7 +165,7 @@ function UserDetailsForm({
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="First Name"
+                label={<>First Name<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
                 name="firstName"
                 rules={[{ required: true, message: 'First name is required' }]}
               >
@@ -165,23 +174,23 @@ function UserDetailsForm({
             </Col>
             <Col span={12}>
               <Form.Item
-                label="Last Name"
-                name="lastName"
+                label="Middle Name"
+                name="middleName"
               >
-                <Input placeholder="Enter last name (optional)" />
+                <Input placeholder="Enter middle name (optional)" />
               </Form.Item>
             </Col>
           </Row>
 
           <Form.Item
-            label="Middle Name"
-            name="middleName"
+            label="Last Name"
+            name="lastName"
           >
-            <Input placeholder="Enter middle name (optional)" />
+            <Input placeholder="Enter last name (optional)" />
           </Form.Item>
 
           <Form.Item
-            label="Email Address"
+            label={<>Email Address<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
             name="email"
             rules={[{ required: true, type: 'email', message: 'Valid email is required' }]}
           >
@@ -216,35 +225,39 @@ function UserDetailsForm({
 
       {/* Footer Actions - Always Visible */}
       <div className={styles.footer}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {!isNewUser && onDelete && (
+        <div style={{ display: 'flex', gap: 8, width: '100%', justifyContent: 'space-between' }}>
+          <div>
+            {!isNewUser && onDelete && (
+              <Button
+                danger
+                onClick={handleDelete}
+                icon={<DeleteFilled />}
+                size="large"
+                style={{ boxShadow: 'none' }}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
             <Button
-              danger
-              onClick={handleDelete}
-              icon={<DeleteOutlined />}
+              onClick={handleCancel}
+              icon={<CloseOutlined />}
               size="large"
             >
-              Delete
+              Cancel
             </Button>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button
-            onClick={handleCancel}
-            icon={<CloseOutlined />}
-            size="large"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="primary"
-            onClick={handleSave}
-            icon={<SaveOutlined />}
-            disabled={!isDirty && !isNewUser}
-            size="large"
-          >
-            Save
-          </Button>
+            <Button
+              type="primary"
+              onClick={handleSave}
+              icon={<SaveOutlined />}
+              disabled={!isDirty && !isNewUser}
+              size="large"
+              style={{ color: 'white'}}
+            >
+              Save
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -66,21 +66,23 @@
   padding: 0;
 }
 
-.list ::-webkit-scrollbar {
+/* Scrollbar styling for the list container */
+.container ::-webkit-scrollbar {
   width: 6px;
 }
 
-.list ::-webkit-scrollbar-track {
-  background: transparent;
+.container ::-webkit-scrollbar-track {
+  background: var(--bg-hover);
 }
 
-.list ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+.container ::-webkit-scrollbar-thumb {
+  background: var(--accent-medium);
   border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
-.list ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+.container ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 .listItem {
@@ -88,14 +90,11 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-bottom: 1px solid var(--border-lighter);
   border-left: 3px solid transparent;
-  padding-left: 8px !important;
-  margin: 0;
-  display: block;
+  padding-left: 8px;
 }
 
 .listItemContent {
-  padding: 10px 12px 10px 16px;
-  margin-bottom: 0;
+  padding: 8px 12px;
   display: flex;
   justify-content: space-between;
 }
@@ -103,8 +102,8 @@
 .avatar {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
   color: var(--text-invert);
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .listItem:hover {
@@ -127,23 +126,21 @@
 }
 
 .userName {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 0px;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
   line-height: 1.4;
 }
 
 .userMeta {
   display: flex;
   align-items: center;
-  gap: 0px;
   flex-wrap: wrap;
 }
 
 .email {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
   flex: 0 1 auto;
   word-break: break-word;
@@ -165,10 +162,6 @@
   align-items: center !important;
 }
 
-.listItemContent :global(.ant-list-item-meta-title) {
-  margin-bottom: 0px !important;
-}
-
 .listItemContent :global(.ant-list-item-meta-description) {
-  margin-top: 2px;
+  margin-top: 1px;
 }

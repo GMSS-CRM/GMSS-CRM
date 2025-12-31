@@ -1,0 +1,215 @@
+/* MainLayout Styles - CSS Modules */
+
+/* ==================== Layout Structure ==================== */
+.layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: row;
+  background: var(--bg-app);
+}
+
+.mainContent {
+  background: var(--bg-app);
+  margin-left: 90px;
+}
+
+/* ==================== Sidebar ==================== */
+.sider {
+  background: var(--bg-sidebar);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Logo Section */
+.logo {
+  padding: 16px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--bg-sidebar-accent);
+  flex-shrink: 0;
+}
+
+.logoTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.logoSubtitle {
+  font-size: 9px;
+  color: white;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation Menu */
+.menu {
+  background: var(--bg-sidebar);
+  border: none;
+  margin-top: 12px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+/* Vertical icon-above-text menu styling */
+.menu :global(.ant-menu-item) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  text-align: center !important;
+  margin: 8px 6px !important;
+  padding: 12px 4px !important;
+  height: auto !important;
+  min-height: 70px !important;
+  line-height: 1.2 !important;
+}
+
+.menu :global(.ant-menu-item-icon) {
+  margin-inline-end: 0 !important;
+  font-size: 22px !important;
+}
+
+.menu :global(.ant-menu-title-content) {
+  margin-inline-start: 0 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.3 !important;
+}
+
+.menu :global(.ant-menu-item-selected) {
+  border-radius: 8px !important;
+}
+
+/* Sidebar Footer */
+.sidebarFooter {
+  padding: 12px 8px;
+  border-top: 1px solid var(--bg-sidebar-accent);
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-secondary);
+  background: var(--bg-sidebar-accent);
+  font-weight: 500;
+  margin-top: auto;
+}
+
+/* ==================== Header ==================== */
+.header {
+  background: var(--bg-panel);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-subtle);
+  border-bottom: 1px solid var(--border-color);
+  gap: 24px;
+}
+
+.headerSpacer {
+  flex: 1;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+/* Notification Button */
+.notificationButton {
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.notificationButton:hover {
+  background: var(--bg-hover);
+}
+
+/* User Dropdown */
+.userDropdown {
+  cursor: pointer;
+  padding: 0 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  gap: 6px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.userDropdown:hover {
+  background: var(--bg-hover);
+}
+
+.userAvatar {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userName {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ==================== Content ==================== */
+.content {
+  margin: 12px;
+  padding: 12px;
+  background: var(--bg-panel);
+  border-radius: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+}
+
+/* ==================== Scrollbar ==================== */
+.menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.menu::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}

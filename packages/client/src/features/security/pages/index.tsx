@@ -1,20 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
-import SecurityMenu from '../components/SecurityMenu';
-import UsersList from '../components/UsersList';
-import UserDetailsForm from '../components/UserDetailsForm';
-import type { User, SecurityMenuItem, Role, Restriction } from '../types';
-import styles from './SecurityPage.module.css';
+import SubMenu from '../../../components/sub-menu';
+import type { SubMenuItem } from '../../../components/sub-menu';
+import UsersList from './users/list';
+import UserDetailsForm from './users/details-form';
+import type { User, Role } from '../types';
+import styles from './index.module.css';
 
 /**
  * Mock data - In production, this would come from an API
  */
 const MOCK_ROLES: Role[] = [
-  { id: '1', name: 'Approver', description: 'Can approve requests' },
-  { id: '2', name: 'Construction', description: 'Construction team' },
-  { id: '3', name: 'Electrical', description: 'Electrical team' },
-  { id: '4', name: 'Satellite Power User', description: 'Satellite power access' },
-  { id: '5', name: 'System Administrator', description: 'Full system access' },
+  { id: '1', name: 'Member', description: 'Basic team member access' },
+  { id: '2', name: 'Manager', description: 'Team management access' },
+  { id: '3', name: 'Director', description: 'Department director access' },
+  { id: '4', name: 'System Administrator', description: 'Full system access' },
 ];
 
 const MOCK_USERS: User[] = [
@@ -35,7 +35,7 @@ const MOCK_USERS: User[] = [
  * Three-section layout: Menu | Users List | User Details
  */
 export default function SecurityPage() {
-  const [selectedSecurityMenu, setSelectedSecurityMenu] = useState<SecurityMenuItem>('users');
+  const [selectedSubMenu, setSelectedSubMenu] = useState<SubMenuItem>('users');
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
@@ -107,14 +107,14 @@ export default function SecurityPage() {
     <div className={styles.container}>
       {/* Left: Security Sub-Navigation Menu */}
       <div className={styles.menuSection}>
-        <SecurityMenu
-          selectedMenu={selectedSecurityMenu}
-          onMenuChange={setSelectedSecurityMenu}
+        <SubMenu
+          selectedMenu={selectedSubMenu}
+          onMenuChange={setSelectedSubMenu}
         />
       </div>
 
       {/* Center: Users List */}
-      {selectedSecurityMenu === 'users' && (
+      {selectedSubMenu === 'users' && (
         <div className={styles.listSection}>
           <UsersList
             users={users}
@@ -126,7 +126,7 @@ export default function SecurityPage() {
       )}
 
       {/* Right: User Details Form */}
-      {selectedSecurityMenu === 'users' && (
+      {selectedSubMenu === 'users' && (
         <div className={styles.formSection}>
           <UserDetailsForm
             user={selectedUser}
@@ -140,7 +140,7 @@ export default function SecurityPage() {
       )}
 
       {/* Placeholder for other menu items */}
-      {selectedSecurityMenu !== 'users' && (
+      {selectedSubMenu !== 'users' && (
         <div
           style={{
             flex: 1,
@@ -149,10 +149,10 @@ export default function SecurityPage() {
             justifyContent: 'center',
             background: 'white',
             fontSize: 16,
-            color: '#8c8c8c',
+            color: 'var(--text-secondary)',
           }}
         >
-          {selectedSecurityMenu.charAt(0).toUpperCase() + selectedSecurityMenu.slice(1)} section coming soon
+          {selectedSubMenu.charAt(0).toUpperCase() + selectedSubMenu.slice(1)} section coming soon
         </div>
       )}
     </div>

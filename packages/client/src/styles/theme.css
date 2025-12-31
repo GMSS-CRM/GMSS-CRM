@@ -1,5 +1,5 @@
 :root {
-  /* Ocean Indigo palette (recommended) */
+  /* Ocean Indigo - Professional Blue Theme */
   --bg-app: #f5f7ff;
   --bg-panel: #ffffff;
   --bg-muted: #f0f4ff;
@@ -15,6 +15,7 @@
 
   --accent: #0066cc; /* Primary blue */
   --accent-hover: #0052a3; /* Darker blue for hover */
+  --accent-medium: rgba(0, 102, 204, 0.35); /* Medium blue for scrollbars/subtle elements */
   --accent-light: rgba(0, 102, 204, 0.1); /* Light blue background */
   --accent-lighter: rgba(0, 102, 204, 0.05); /* Very light blue background */
 
@@ -50,6 +51,12 @@
 html, body, #root {
   height: 100%;
 }
+
+:root {
+  /* Smooth theme transitions */
+  --transition-theme: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -58,6 +65,20 @@ body {
   background: var(--bg-app);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-theme), color var(--transition-theme);
+}
+
+/* Smooth transitions for theme changes on all elements */
+* {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-duration: var(--transition-theme);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent transition on interactive elements for better UX */
+button, a, input, select, textarea {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: 0.2s;
 }
 
 /* Utility tokens & components */
@@ -137,3 +158,150 @@ a:hover { text-decoration: underline; }
 
 /* Lightweight badge */
 .badge { display:inline-block; padding:4px 8px; border-radius:999px; background:var(--accent-200); color:var(--accent-600); font-weight:600; font-size:12px; }
+/* ===================================
+   Ant Design Global Overrides
+   Forces all Ant Design components to use theme colors
+   =================================== */
+
+/* Primary Button - uses accent color */
+.ant-btn-primary {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.ant-btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+/* Default Button - neutral styling */
+.ant-btn-default:hover:not(:disabled) {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Links */
+.ant-btn-link {
+  color: var(--accent) !important;
+}
+
+.ant-btn-link:hover:not(:disabled) {
+  color: var(--accent-hover) !important;
+}
+
+/* Modal buttons */
+.ant-modal .ant-btn-default:hover {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Input focus states */
+.ant-input:focus,
+.ant-input-focused,
+.ant-input:hover {
+  border-color: var(--accent) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  box-shadow: 0 0 0 2px var(--accent-lighter) !important;
+}
+
+/* Select dropdown */
+.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+  border-color: var(--accent) !important;
+}
+
+.ant-select-focused:not(.ant-select-disabled) .ant-select-selector {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-lighter) !important;
+}
+
+/* Checkbox */
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.ant-checkbox-wrapper:hover .ant-checkbox-inner,
+.ant-checkbox:hover .ant-checkbox-inner {
+  border-color: var(--accent) !important;
+}
+
+/* Radio */
+.ant-radio-checked .ant-radio-inner {
+  border-color: var(--accent) !important;
+}
+
+.ant-radio-checked .ant-radio-inner:after {
+  background-color: var(--accent) !important;
+}
+
+.ant-radio:hover .ant-radio-inner {
+  border-color: var(--accent) !important;
+}
+
+/* Switch */
+.ant-switch-checked {
+  background: var(--accent) !important;
+}
+
+/* Tabs */
+.ant-tabs-tab:hover {
+  color: var(--accent) !important;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--accent) !important;
+}
+
+.ant-tabs-ink-bar {
+  background: var(--accent) !important;
+}
+
+/* Links in text */
+a {
+  color: var(--accent) !important;
+}
+
+a:hover {
+  color: var(--accent-hover) !important;
+}
+
+/* Pagination */
+.ant-pagination-item-active {
+  border-color: var(--accent) !important;
+}
+
+.ant-pagination-item-active a {
+  color: var(--accent) !important;
+}
+
+.ant-pagination-item:hover {
+  border-color: var(--accent) !important;
+}
+
+.ant-pagination-item:hover a {
+  color: var(--accent) !important;
+}
+
+/* Dropdown menu items */
+.ant-dropdown-menu-item:hover,
+.ant-dropdown-menu-submenu-title:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+.ant-dropdown-menu-item-selected {
+  background-color: var(--bg-selected) !important;
+  color: var(--accent) !important;
+}
+
+/* Badge */
+.ant-badge-count {
+  background-color: var(--color-error) !important;
+}
+
+/* Spin loader */
+.ant-spin-dot-item {
+  background-color: var(--accent) !important;
+}
