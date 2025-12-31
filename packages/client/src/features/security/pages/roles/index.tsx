@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState } from 'react';
-import { Table, Button, Tag, Tooltip, Space, Modal, Form, Input, Switch } from 'antd';
+import { Table, Button, Tooltip, Space, Modal, Form, Input } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { Role } from '../../types';
@@ -73,7 +73,7 @@ export default function RolesPage({
       const roleData: Partial<Role> = {
         name: values.name.trim(),
         description: values.description?.trim() || undefined,
-        isActive: values.isActive ?? true,
+        isActive: true,
       };
 
       if (isEditMode && selectedRole) {
@@ -101,13 +101,9 @@ export default function RolesPage({
         form.setFieldsValue({
           name: selectedRole.name,
           description: selectedRole.description || '',
-          isActive: selectedRole.isActive,
         });
       } else {
         form.resetFields();
-        form.setFieldsValue({
-          isActive: true,
-        });
       }
     }
   }, [visible, selectedRole, isEditMode, form]);
@@ -127,7 +123,7 @@ export default function RolesPage({
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      width: '35%',
+      width: '40%',
       ellipsis: {
         showTitle: false,
       },
@@ -140,21 +136,6 @@ export default function RolesPage({
           <span className={styles.emptyText}>—</span>
         )
       ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'isActive',
-      key: 'isActive',
-      width: '12%',
-      render: (isActive: boolean) => (
-        <Tag
-          color={isActive ? 'success' : 'default'}
-          className={styles.statusTag}
-        >
-          {isActive ? 'Active' : 'Inactive'}
-        </Tag>
-      ),
-      sorter: (a, b) => Number(b.isActive) - Number(a.isActive),
     },
     {
       title: 'Created By',
@@ -311,21 +292,6 @@ export default function RolesPage({
               maxLength={200}
               showCount
             />
-          </Form.Item>
-
-          {/* Status */}
-          <Form.Item
-            label="Status"
-            name="isActive"
-            valuePropName="checked"
-            className={styles.formItem}
-          >
-            <div className={styles.switchContainer}>
-              <Switch className={styles.switch} />
-              <span className={styles.switchLabel}>
-                Active
-              </span>
-            </div>
           </Form.Item>
 
           {/* Info Text */}
