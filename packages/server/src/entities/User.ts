@@ -11,8 +11,8 @@ import { Role } from "./Role";
 
 @Entity("users")
 export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Column({ unique: true })
   email!: string;
@@ -40,12 +40,12 @@ export class User {
   @Column()
   createdBy!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamptz" })
   createdDate!: Date;
 
   @Column()
   updatedBy!: string;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamptz" })
   updatedDate!: Date;
 }

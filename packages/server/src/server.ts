@@ -2,11 +2,9 @@ import "reflect-metadata";
 import express from "express";
 import http from "http";
 import dotenv from "dotenv";
-
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
-
-import { typeDefs, resolvers } from "./graphql";
+import { mergedTypeDefs, resolvers } from "./graphql";
 import { AppDataSource } from "./config/data-source";
 
 dotenv.config();
@@ -29,7 +27,7 @@ export async function startApolloServer() {
   console.log("✅ Database connected");
 
   const server = new ApolloServer<GraphQLContext>({
-    typeDefs,
+    typeDefs: mergedTypeDefs,
     resolvers,
   });
 

@@ -6,38 +6,27 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
-import { RolePermission } from "./RolePermission";
 
-@Entity("roles")
+import { Permission } from "../components/permission/permissions";
+@Entity()
 export class Role {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
   @Column({ unique: true })
   name!: string;
 
-  @Column({ nullable: true })
-  description?: string;
-
-  @Column({ default: true })
-  isActive!: boolean;
-
-  @Column({ default: false })
-  isDeleted!: boolean;
-
-  @Column()
-  createdBy!: string;
+  @Column({
+    type: "enum",
+    enum: Permission,
+    array: true,
+    default: [],
+  })
+  permissions!: Permission[];
 
   @CreateDateColumn()
-  createdDate!: Date;
-  
-  @Column()
-  updatedBy!: string;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedDate!: Date;
-
-  // ✅ NOT mandatory – roles can exist without permissions
-  @OneToMany(() => RolePermission, (rp) => rp.role, { nullable: true })
-  rolePermissions?: RolePermission[];
+  updatedAt!: Date;
 }
