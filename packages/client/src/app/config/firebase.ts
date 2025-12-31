@@ -34,7 +34,7 @@ export const getActionCodeSettings = () => {
   const actionUrl = `${baseUrl}/auth/action`;
   
   // Where to redirect after successful action (optional)
-  const continueUrl = `${baseUrl}/dashboard`;
+  //const continueUrl = `${baseUrl}/dashboard`;
   
   console.log('Action URL being used:', actionUrl); // Debug log
   console.log('Environment:', isLocalhost ? 'localhost' : 'production');
