@@ -15,6 +15,7 @@
 
   --accent: #0066cc; /* Primary blue */
   --accent-hover: #0052a3; /* Darker blue for hover */
+  --accent-medium: rgba(0, 102, 204, 0.35); /* Medium blue for scrollbars/subtle elements */
   --accent-light: rgba(0, 102, 204, 0.1); /* Light blue background */
   --accent-lighter: rgba(0, 102, 204, 0.05); /* Very light blue background */
 

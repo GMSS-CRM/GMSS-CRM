@@ -66,21 +66,23 @@
   padding: 0;
 }
 
-.list ::-webkit-scrollbar {
+/* Scrollbar styling for the list container */
+.container ::-webkit-scrollbar {
   width: 6px;
 }
 
-.list ::-webkit-scrollbar-track {
-  background: transparent;
+.container ::-webkit-scrollbar-track {
+  background: var(--bg-hover);
 }
 
-.list ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+.container ::-webkit-scrollbar-thumb {
+  background: var(--accent-medium);
   border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
-.list ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+.container ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
 }
 
 .listItem {

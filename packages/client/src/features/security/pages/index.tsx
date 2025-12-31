@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
-import SecurityMenu from '../../../components/sub-menu';
+import SubMenu from '../../../components/sub-menu';
 import UsersList from './users/list';
 import UserDetailsForm from './users/details-form';
 import type { User, SecurityMenuItem, Role } from '../types';
@@ -106,7 +106,7 @@ export default function SecurityPage() {
     <div className={styles.container}>
       {/* Left: Security Sub-Navigation Menu */}
       <div className={styles.menuSection}>
-        <SecurityMenu
+        <SubMenu
           selectedMenu={selectedSecurityMenu}
           onMenuChange={setSelectedSecurityMenu}
         />

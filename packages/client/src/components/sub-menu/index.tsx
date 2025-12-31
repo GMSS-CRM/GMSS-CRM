@@ -4,12 +4,12 @@ import type { MenuProps } from 'antd';
 import type { SecurityMenuItem } from '../../features/security/types';
 import styles from './styles.module.css';
 
-interface SecurityMenuProps {
+interface SubMenuProps {
   selectedMenu: SecurityMenuItem;
   onMenuChange: (key: SecurityMenuItem) => void;
 }
 
-export default function SecurityMenu({ selectedMenu, onMenuChange }: SecurityMenuProps) {
+export default function SubMenu({ selectedMenu, onMenuChange }: SubMenuProps) {
   const menuItems: MenuProps['items'] = [
     {
       key: 'users',
