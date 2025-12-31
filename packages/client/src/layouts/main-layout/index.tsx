@@ -85,7 +85,7 @@ export default function MainLayout() {
         <div className={styles.sidebarContent}>
           {/* Logo Section */}
           <div className={styles.logo}>
-            <div className={styles.logoTitle}>GSM</div>
+            <div className={styles.logoTitle}>GMSS</div>
             <div className={styles.logoSubtitle}>CRM SYSTEM</div>
           </div>
 
