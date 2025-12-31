@@ -1,47 +1,36 @@
+// src/components/user/repository.ts
 import { AppDataSource } from "../../config/data-source";
 import { User } from "../../entities/User";
 
+const repo = AppDataSource.getRepository(User);
+
 export const userRepository = {
-  repo: AppDataSource.getRepository(User),
-
-  create(data: any) {
-    const entity = this.repo.create(data);
-    return this.repo.save(entity);
-  },
-
-  update(id: string, data: any) {
-    return this.repo
-      .update(id, data)
-      .then(() => this.repo.findOneBy({ id }));
-  },
-
-  delete(id: string) {
-    return this.repo.delete(id).then(() => true);
-  },
-
-  deleteMany(ids: string[]) {
-    return this.repo.delete(ids).then(() => true);
-  },
-
-  findById(id: string) {
-    return this.repo.findOne({
-      where: { id },
-      relations: ["role"],
+  async create(data: any) {
+    const user = repo.create({
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      roleId: data.roleId,      // ✅ THIS WAS MISSING
+      createdBy: "SYSTEM",
     });
+
+    return repo.save(user);
   },
 
-  search({ search }: { search?: string }) {
-    const qb = this.repo
-      .createQueryBuilder("user")
-      .leftJoinAndSelect("user.role", "role");
+  findById: (id: string) =>
+    repo.findOne({ where: { id } }),
 
-    if (search) {
-      qb.where(
-        "user.email ILIKE :s OR user.firstName ILIKE :s",
-        { s: `%${search}%` }
-      );
-    }
+  search: (params: any) =>
+    repo.find({ where: params }),
 
-    return qb.getMany();
-  },
-};
+  delete: (id: string) =>
+    repo.delete(id),
+
+  deleteMany: (ids: string[]) =>
+    repo.delete(ids),
+
+  update: async (id: string, data: any) => {
+    const user = await repo.findOne({ where: { id } }); 
+  }
+}
+

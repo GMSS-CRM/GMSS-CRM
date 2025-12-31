@@ -6,7 +6,8 @@ export const userTypeDefs = gql`
     firstName: String!
     lastName: String
     email: String!
-    roleId: ID!
+    roleId: ID!      
+    role: Role!
     createdAt: String!
     updatedAt: String!
   }
