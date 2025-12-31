@@ -253,6 +253,7 @@ function UserDetailsForm({
               icon={<SaveOutlined />}
               disabled={!isDirty && !isNewUser}
               size="large"
+              style={{ color: 'white'}}
             >
               Save
             </Button>
