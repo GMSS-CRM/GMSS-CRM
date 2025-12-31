@@ -26,7 +26,7 @@ export async function startApolloServer() {
 
   // DB init
   await AppDataSource.initialize();
-  console.log("✅ Database connected");
+  console.log("✅ Database connected!");
 
   const server = new ApolloServer<GraphQLContext>({
     typeDefs,
@@ -34,7 +34,9 @@ export async function startApolloServer() {
   });
 
   await server.start();
-
+  app.get("/", (_req, res) => {
+    res.send("OK");
+  });
   app.use(
     "/graphql",
     expressMiddleware(server, {
