@@ -11,7 +11,7 @@ import styles from "./styles.module.css";
  * - Email verification links
  * - Account recovery links
  * 
- * Example URL: /__/auth/action?mode=resetPassword&oobCode=ABC123
+ * Example URL: /auth/action?mode=resetPassword&oobCode=ABC123
  */
 export default function EmailHandler() {
   const [searchParams] = useSearchParams();

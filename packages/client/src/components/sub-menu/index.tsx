@@ -1,12 +1,13 @@
 import { Menu, Divider } from 'antd';
 import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import type { SecurityMenuItem } from '../../features/security/types';
 import styles from './styles.module.css';
 
+export type SubMenuItem = 'users' | 'roles' | 'permissions';
+
 interface SubMenuProps {
-  selectedMenu: SecurityMenuItem;
-  onMenuChange: (key: SecurityMenuItem) => void;
+  selectedMenu: SubMenuItem;
+  onMenuChange: (key: SubMenuItem) => void;
 }
 
 export default function SubMenu({ selectedMenu, onMenuChange }: SubMenuProps) {
@@ -36,7 +37,7 @@ export default function SubMenu({ selectedMenu, onMenuChange }: SubMenuProps) {
         mode="vertical"
         selectedKeys={[selectedMenu]}
         items={menuItems}
-        onClick={(e) => onMenuChange(e.key as SecurityMenuItem)}
+        onClick={(e) => onMenuChange(e.key as SubMenuItem)}
         style={{
           border: 'none',
           backgroundColor: 'transparent',

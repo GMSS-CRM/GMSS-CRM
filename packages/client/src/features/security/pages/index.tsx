@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
 import SubMenu from '../../../components/sub-menu';
+import type { SubMenuItem } from '../../../components/sub-menu';
 import UsersList from './users/list';
 import UserDetailsForm from './users/details-form';
-import type { User, SecurityMenuItem, Role } from '../types';
+import type { User, Role } from '../types';
 import styles from './index.module.css';
 
 /**
@@ -34,7 +35,7 @@ const MOCK_USERS: User[] = [
  * Three-section layout: Menu | Users List | User Details
  */
 export default function SecurityPage() {
-  const [selectedSecurityMenu, setSelectedSecurityMenu] = useState<SecurityMenuItem>('users');
+  const [selectedSubMenu, setSelectedSubMenu] = useState<SubMenuItem>('users');
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
@@ -107,13 +108,13 @@ export default function SecurityPage() {
       {/* Left: Security Sub-Navigation Menu */}
       <div className={styles.menuSection}>
         <SubMenu
-          selectedMenu={selectedSecurityMenu}
-          onMenuChange={setSelectedSecurityMenu}
+          selectedMenu={selectedSubMenu}
+          onMenuChange={setSelectedSubMenu}
         />
       </div>
 
       {/* Center: Users List */}
-      {selectedSecurityMenu === 'users' && (
+      {selectedSubMenu === 'users' && (
         <div className={styles.listSection}>
           <UsersList
             users={users}
@@ -125,7 +126,7 @@ export default function SecurityPage() {
       )}
 
       {/* Right: User Details Form */}
-      {selectedSecurityMenu === 'users' && (
+      {selectedSubMenu === 'users' && (
         <div className={styles.formSection}>
           <UserDetailsForm
             user={selectedUser}
@@ -139,7 +140,7 @@ export default function SecurityPage() {
       )}
 
       {/* Placeholder for other menu items */}
-      {selectedSecurityMenu !== 'users' && (
+      {selectedSubMenu !== 'users' && (
         <div
           style={{
             flex: 1,
@@ -151,7 +152,7 @@ export default function SecurityPage() {
             color: 'var(--text-secondary)',
           }}
         >
-          {selectedSecurityMenu.charAt(0).toUpperCase() + selectedSecurityMenu.slice(1)} section coming soon
+          {selectedSubMenu.charAt(0).toUpperCase() + selectedSubMenu.slice(1)} section coming soon
         </div>
       )}
     </div>

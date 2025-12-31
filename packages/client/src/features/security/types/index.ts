@@ -24,5 +24,3 @@ export interface Restriction {
   name: string;
   type: 'EquipmentTag' | 'Location' | 'Department';
 }
-
-export type SecurityMenuItem = 'users' | 'roles' | 'permissions';
