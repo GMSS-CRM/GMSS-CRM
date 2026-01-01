@@ -1,7 +1,8 @@
-import { Dropdown, Button } from 'antd';
+import { Dropdown } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import type { MenuProps } from 'antd';
+import Button from '../button';
 import styles from './styles.module.css';
 
 /**

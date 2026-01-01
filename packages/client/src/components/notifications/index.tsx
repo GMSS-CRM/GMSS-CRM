@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Dropdown, Badge, Button, Tabs, Empty, Avatar } from 'antd';
+import { Dropdown, Badge, Tabs, Empty, Avatar } from 'antd';
 import { 
   BellOutlined, 
   CheckCircleOutlined, 
@@ -10,6 +10,7 @@ import {
   CloseOutlined,
   CheckOutlined,
 } from '@ant-design/icons';
+import Button from '../button';
 import styles from './styles.module.css';
 
 export interface Notification {

@@ -1,12 +1,12 @@
 .menu {
   width: 200px;
   background: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-selected) 100%);
-  border-right: 1px solid var(--border-color);
   padding: 20px 0 0;
   height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border-radius: 10px;
 }
 
 .title {

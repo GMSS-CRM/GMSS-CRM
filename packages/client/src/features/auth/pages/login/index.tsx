@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Form, Input, Button, message, Modal } from "antd";
+import { Form, Input, message, Modal } from "antd";
 import { 
   LockOutlined, 
   MailOutlined, 
@@ -14,6 +14,7 @@ import {
 import { loginWithEmailPassword, resetPassword } from "../../services/auth.service";
 import { useAuth } from "../../../../app/providers/AuthProvider";
 import Loader from "../../../../components/loader";
+import Button from "../../../../components/button";
 import styles from "./styles.module.css";
 
 export default function LoginPage() {

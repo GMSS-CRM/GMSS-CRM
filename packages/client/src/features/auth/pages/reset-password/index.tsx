@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, message } from "antd";
 import { 
   LockOutlined, 
   AppstoreOutlined, 
@@ -8,6 +8,7 @@ import {
   LoadingOutlined
 } from "@ant-design/icons";
 import { verifyResetCode, confirmNewPassword } from "../../services/auth.service";
+import Button from "../../../../components/button";
 import styles from "./styles.module.css";
 
 export default function ResetPasswordPage() {

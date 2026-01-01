@@ -1,9 +1,10 @@
 import { useMemo, useCallback, useState } from 'react';
-import { Table, Button, Tooltip, Space, Modal, Form, Input } from 'antd';
+import { Table, Tooltip, Space, Modal, Form, Input } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { Role } from '../../types';
 import { showConfirmModal } from '../../../../components/confirm-modal';
+import Button from '../../../../components/button';
 import styles from './styles.module.css';
 
 interface RolesPageProps {
@@ -117,7 +118,6 @@ export default function RolesPage({
       render: (name: string) => (
         <span className={styles.roleName}>{name}</span>
       ),
-      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: 'Description',
@@ -154,12 +154,10 @@ export default function RolesPage({
       key: 'createdDate',
       width: '12%',
       render: (createdDate: string) => (
-        <span className={styles.secondaryText}>
+        <span className={styles.dateText}>
           {formatDate(createdDate)}
         </span>
       ),
-      sorter: (a, b) => new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime(),
-      defaultSortOrder: 'descend',
     },
     {
       title: 'Actions',
@@ -202,7 +200,7 @@ export default function RolesPage({
         <div>
           <h2 className={styles.title}>Roles</h2>
           <p className={styles.subtitle}>
-            {activeRoles.length} role{activeRoles.length !== 1 ? 's' : ''} total
+            {activeRoles.length} role{activeRoles.length !== 1 ? 's' : ''}
           </p>
         </div>
         <Button
@@ -294,10 +292,12 @@ export default function RolesPage({
             />
           </Form.Item>
 
-          {/* Info Text */}
-          <div className={styles.infoText}>
-            Permissions can be assigned to this role after creation.
-          </div>
+          {/* Info Text - Only show when creating new role */}
+          {!isEditMode && (
+            <div className={styles.infoText}>
+              Permissions can be assigned to this role after creation.
+            </div>
+          )}
 
           {/* Footer Actions */}
           <div className={styles.footer}>

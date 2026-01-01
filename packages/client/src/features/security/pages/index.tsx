@@ -5,6 +5,7 @@ import type { SubMenuItem } from '../../../components/sub-menu';
 import UsersList from './users/list';
 import UserDetailsForm from './users/details-form';
 import RolesPage from './roles';
+import PermissionsPage from './permissions';
 import type { User, Role } from '../types';
 import { createRole, updateRole, deleteRole } from '../services/roles.service';
 import styles from './index.module.css';
@@ -323,20 +324,10 @@ export default function SecurityPage() {
         </div>
       )}
 
-      {/* Placeholder for Permissions */}
+      {/* Permissions Section */}
       {selectedSubMenu === 'permissions' && (
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'white',
-            fontSize: 16,
-            color: 'var(--text-secondary)',
-          }}
-        >
-          Permissions section coming soon
+        <div className={styles.rolesSection}>
+          <PermissionsPage roles={roles} />
         </div>
       )}
     </div>
