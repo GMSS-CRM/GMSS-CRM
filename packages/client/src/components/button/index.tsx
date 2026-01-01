@@ -1,22 +1,16 @@
-import { Button as AntButton } from "antd";
-import React from "react";
+import { Button as AntButton, type ButtonProps as AntButtonProps } from "antd";
 
+interface CustomButtonProps extends Omit<AntButtonProps, 'type'> {
+  type?: 'primary' | 'default' | 'dashed' | 'text' | 'link';
+}
+
+/**
+ * Custom Button Component
+ * Wraps Ant Design Button with consistent styling and props
+ */
 export default function Button({
-  children,
-  onClick,
-  className = "",
-  disabled = false,
+  type = 'default',
   ...props
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  className?: string;
-  disabled?: boolean;
-  [key: string]: any;
-}) {
-  return (
-    <AntButton onClick={onClick} disabled={disabled} {...props}>
-      {children}
-    </AntButton>
-  );
+}: CustomButtonProps) {
+  return <AntButton type={type} {...props} />;
 }

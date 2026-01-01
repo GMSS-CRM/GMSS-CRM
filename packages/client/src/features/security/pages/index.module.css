@@ -10,7 +10,6 @@
   flex: 0 0 auto;
   width: 200px;
   overflow: hidden;
-  border-right: 1px solid var(--border-color);
   height: 100%;
   display: flex;
   flex-direction: column;

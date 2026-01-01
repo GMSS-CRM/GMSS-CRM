@@ -32,3 +32,19 @@ export interface Restriction {
   name: string;
   type: 'EquipmentTag' | 'Location' | 'Department';
 }
+
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string;
+  module?: string;
+  isActive: boolean;
+  createdDate: string;
+}
+
+export interface RolePermission {
+  roleId: string;
+  permissionId: string;
+  assignedDate: string;
+  assignedBy?: string;
+}

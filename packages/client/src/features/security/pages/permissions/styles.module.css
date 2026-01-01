@@ -1,0 +1,350 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  background: var(--bg-panel);
+  padding: 16px 24px;
+  overflow: hidden;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+  letter-spacing: -0.2px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Role Selector Section */
+.roleSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.roleSelect {
+  font-size: 14px;
+  min-width: 280px;
+}
+
+/* Dual Panels Container */
+.panelsContainer {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+/* Individual Panel */
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-hover);
+  flex-shrink: 0;
+}
+
+.panelTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panelIcon {
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.panelTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.panelCounts {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.selectedCount {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(22, 119, 255, 0.1);
+}
+
+.count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.searchContainer {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-lighter);
+  flex-shrink: 0;
+}
+
+.tableWrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Scrollbar styling for table wrapper */
+.tableWrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: var(--bg-hover);
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: var(--accent-medium);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Table Styles */
+.table :global(.ant-table) {
+  font-size: 13px;
+}
+
+.table :global(.ant-table-thead > tr > th) {
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+  padding: 10px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-lighter);
+}
+
+.table :global(.ant-table-tbody > tr:hover > td) {
+  background: var(--bg-hover);
+  cursor: pointer;
+}
+
+.table :global(.ant-table-tbody > tr.ant-table-row-selected > td) {
+  background: rgba(22, 119, 255, 0.05);
+}
+
+.table :global(.ant-table-tbody > tr.ant-table-row-selected:hover > td) {
+  background: rgba(22, 119, 255, 0.08);
+}
+
+.table :global(.ant-table-selection-column) {
+  width: 40px;
+}
+
+.permissionName {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.description {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Empty State */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  gap: 12px;
+  padding: 48px 24px;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0;
+  max-width: 300px;
+  text-align: center;
+  line-height: 1.5;
+}
+.controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.controlButton {
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.controlButtonActive {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: white;
+}
+
+.controlButtonActive :global(.anticon) {
+  color: var(--accent);
+}
+
+.controlButton:disabled {
+  background: var(--bg-hover);
+  border-color: var(--border-lighter);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.controlButton :global(.anticon) {
+  font-size: 16px;
+}
+
+/* Footer Actions */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.footerLeft {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.footerRight {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.changesMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d46b08;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.changesMessage :global(.anticon) {
+  font-size: 16px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1200px) {
+  .panelsContainer {
+    flex-direction: column;
+  }
+
+  .controls {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .controlButton {
+    transform: rotate(90deg);
+  }
+
+  .controlButton:hover:not(:disabled) {
+    transform: rotate(90deg) translateY(-1px);
+  }
+}

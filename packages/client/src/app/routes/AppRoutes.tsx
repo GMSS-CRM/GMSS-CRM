@@ -7,6 +7,7 @@ import DashboardPage from "../../features/dashboard";
 import { SecurityPage } from "../../features/security";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/main-layout";
+import NotFoundPage from "../../pages/NotFound";
 
 export default function AppRoutes() {
   return (
@@ -31,6 +32,9 @@ export default function AppRoutes() {
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Route>
+
+      {/* 404 Not Found - Must be last */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

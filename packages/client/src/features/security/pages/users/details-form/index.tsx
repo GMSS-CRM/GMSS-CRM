@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Form, Input, Button, Select, Switch, Row, Col } from 'antd';
+import { Form, Input, Select, Switch, Row, Col } from 'antd';
 import { SaveOutlined, CloseOutlined, DeleteFilled } from '@ant-design/icons';
 import type { User, Role } from '../../../types';
 import { showConfirmModal } from '../../../../../components/confirm-modal';
 import Avatar from '../../../../../components/avatar';
+import Button from '../../../../../components/button';
 import styles from './styles.module.css';
 
 interface UserDetailsFormProps {
