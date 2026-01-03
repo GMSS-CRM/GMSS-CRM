@@ -50,7 +50,7 @@
 .tableContainer {
   flex: 1;
   overflow: auto;
-  background: white;
+  background: var(--bg-panel);
   border-radius: 8px;
   border: 1px solid var(--border-color);
 }

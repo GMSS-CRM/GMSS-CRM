@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
+import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 import SubMenu from '../../../components/sub-menu';
-import type { SubMenuItem } from '../../../components/sub-menu';
+import type { SubMenuItemConfig } from '../../../components/sub-menu';
 import UsersList from './users/list';
 import UserDetailsForm from './users/details-form';
 import RolesPage from './roles';
@@ -9,6 +10,26 @@ import PermissionsPage from './permissions';
 import type { User, Role } from '../types';
 import { createRole, updateRole, deleteRole } from '../services/roles.service';
 import styles from './index.module.css';
+
+type SecuritySubMenuItem = 'users' | 'roles' | 'permissions';
+
+const SECURITY_MENU_ITEMS: SubMenuItemConfig[] = [
+  {
+    key: 'users',
+    icon: <UserOutlined />,
+    label: 'Users',
+  },
+  {
+    key: 'roles',
+    icon: <TeamOutlined />,
+    label: 'Roles',
+  },
+  {
+    key: 'permissions',
+    icon: <LockOutlined />,
+    label: 'Permissions',
+  },
+];
 
 /**
  * Initial roles data - This is the master list of all roles
@@ -80,7 +101,7 @@ const MOCK_USERS: User[] = [
  * Roles are the single source of truth used across the application
  */
 export default function SecurityPage() {
-  const [selectedSubMenu, setSelectedSubMenu] = useState<SubMenuItem>('users');
+  const [selectedSubMenu, setSelectedSubMenu] = useState<SecuritySubMenuItem>('users');
   
   // Shared roles state - single source of truth
   const [roles, setRoles] = useState<Role[]>(INITIAL_ROLES);
@@ -276,8 +297,10 @@ export default function SecurityPage() {
       {/* Left: Security Sub-Navigation Menu */}
       <div className={styles.menuSection}>
         <SubMenu
+          title="Security"
           selectedMenu={selectedSubMenu}
-          onMenuChange={setSelectedSubMenu}
+          onMenuChange={(key) => setSelectedSubMenu(key as SecuritySubMenuItem)}
+          items={SECURITY_MENU_ITEMS}
         />
       </div>
 
