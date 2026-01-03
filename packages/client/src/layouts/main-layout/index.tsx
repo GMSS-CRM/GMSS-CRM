@@ -10,6 +10,7 @@ import {
   LogoutOutlined,
   DashboardOutlined,
   SafetyOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
@@ -26,6 +27,11 @@ const menuItems: MenuProps["items"] = [
     key: "dashboard",
     icon: <DashboardOutlined style={{ fontSize: 22 }} />,
     label: "Dashboard",
+  },
+  {
+    key: "vendors",
+    icon: <ShopOutlined style={{ fontSize: 22 }} />,
+    label: "Vendors",
   },
   {
     key: "security",

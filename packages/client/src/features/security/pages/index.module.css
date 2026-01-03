@@ -1,6 +1,6 @@
 .container {
   height: 100%;
-  background: white;
+  background: var(--bg-panel);
   display: flex;
   flex-direction: row;
   overflow: hidden;

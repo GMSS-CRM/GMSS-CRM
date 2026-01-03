@@ -5,6 +5,8 @@ import EmailHandler from "../../features/auth/pages/email-handler";
 import VerifyEmail from "../../features/auth/pages/verify-email";
 import DashboardPage from "../../features/dashboard";
 import { SecurityPage } from "../../features/security";
+import { VendorsPage } from "../../features/vendors";
+import VendorDetailsForm from "../../features/vendors/pages/details-form";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/main-layout";
 import NotFoundPage from "../../pages/NotFound";
@@ -28,6 +30,9 @@ export default function AppRoutes() {
       >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/security" element={<SecurityPage />} />
+        <Route path="/vendors" element={<VendorsPage />} />
+        <Route path="/vendors/create" element={<VendorDetailsForm />} />
+        <Route path="/vendors/:id" element={<VendorDetailsForm />} />
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/dashboard" />} />

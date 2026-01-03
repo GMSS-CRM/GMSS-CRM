@@ -1,37 +1,50 @@
-import { Menu, Divider } from 'antd';
-import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
+import { Menu, Divider, Tag } from 'antd';
 import type { MenuProps } from 'antd';
+import type { ReactNode } from 'react';
 import styles from './styles.module.css';
 
-export type SubMenuItem = 'users' | 'roles' | 'permissions';
+export type SubMenuItem = string;
 
-interface SubMenuProps {
-  selectedMenu: SubMenuItem;
-  onMenuChange: (key: SubMenuItem) => void;
+export interface SubMenuItemConfig {
+  key: string;
+  icon: ReactNode;
+  label: string;
 }
 
-export default function SubMenu({ selectedMenu, onMenuChange }: SubMenuProps) {
-  const menuItems: MenuProps['items'] = [
-    {
-      key: 'users',
-      icon: <UserOutlined />,
-      label: 'Users',
-    },
-    {
-      key: 'roles',
-      icon: <TeamOutlined />,
-      label: 'Roles',
-    },
-    {
-      key: 'permissions',
-      icon: <LockOutlined />,
-      label: 'Permissions',
-    },
-  ];
+interface SubMenuProps {
+  title: string;
+  selectedMenu: SubMenuItem;
+  onMenuChange: (key: SubMenuItem) => void;
+  items: SubMenuItemConfig[];
+  badge?: {
+    text: string;
+    color?: string;
+  };
+}
+
+export default function SubMenu({ 
+  title, 
+  selectedMenu, 
+  onMenuChange, 
+  items,
+  badge 
+}: SubMenuProps) {
+  const menuItems: MenuProps['items'] = items.map((item) => ({
+    key: item.key,
+    icon: item.icon,
+    label: item.label,
+  }));
 
   return (
     <div className={styles.menu}>
-      <div className={styles.title}>Security</div>
+      <div className={styles.header}>
+        <div className={styles.title}>{title}</div>
+        {badge && (
+          <Tag color={badge.color || 'default'} className={styles.badge}>
+            {badge.text}
+          </Tag>
+        )}
+      </div>
       <Divider style={{ margin: '8px 0' }} />
       <Menu
         mode="vertical"

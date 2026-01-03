@@ -69,7 +69,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--bg-panel);
   border-radius: 8px;
   border: 1px solid var(--border-color);
   overflow: hidden;
@@ -115,7 +115,7 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 12px;
-  background: rgba(22, 119, 255, 0.1);
+  background: var(--accent-lighter);
 }
 
 .count {
@@ -165,7 +165,7 @@
   border-bottom: 1px solid var(--border-color);
   font-weight: 600;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   padding: 10px 12px;
   position: sticky;
   top: 0;
@@ -184,15 +184,20 @@
 }
 
 .table :global(.ant-table-tbody > tr.ant-table-row-selected > td) {
-  background: rgba(22, 119, 255, 0.05);
+  background: var(--bg-hover);
 }
 
 .table :global(.ant-table-tbody > tr.ant-table-row-selected:hover > td) {
-  background: rgba(22, 119, 255, 0.08);
+  background: var(--bg-hover);
 }
 
 .table :global(.ant-table-selection-column) {
   width: 40px;
+}
+
+.table :global(.ant-checkbox-inner) {
+  background-color: var(--bg-panel);
+  border-color: var(--border-color);
 }
 
 .permissionName {
@@ -206,41 +211,6 @@
   font-size: 13px;
 }
 
-/* Empty State */
-.emptyState {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  gap: 12px;
-  padding: 48px 24px;
-}
-
-.emptyIcon {
-  font-size: 48px;
-  color: var(--text-tertiary);
-  opacity: 0.5;
-}
-
-.emptyTitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.emptyText {
-  font-size: 13px;
-  color: var(--text-tertiary);
-  margin: 0;
-  max-width: 300px;
-  text-align: center;
-  line-height: 1.5;
-}
 .controls {
   display: flex;
   flex-direction: column;
@@ -257,7 +227,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--bg-panel);
   border: 1px solid var(--border-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
@@ -273,7 +243,7 @@
 .controlButtonActive {
   border-color: var(--accent) !important;
   color: var(--accent) !important;
-  background: white;
+  background: var(--bg-panel);
 }
 
 .controlButtonActive :global(.anticon) {
@@ -298,7 +268,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  background: white;
+  background: var(--bg-panel);
   border-radius: 8px;
   border: 1px solid var(--border-color);
   flex-shrink: 0;

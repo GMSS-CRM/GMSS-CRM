@@ -6,8 +6,6 @@ import {
   ArrowLeftOutlined, 
   UnorderedListOutlined, 
   CheckCircleOutlined, 
-  ExclamationCircleOutlined, 
-  LockOutlined,
   SaveOutlined,
   CloseOutlined
 } from '@ant-design/icons';
@@ -56,8 +54,15 @@ const MOCK_ROLE_PERMISSIONS: Record<string, string[]> = {
  * Allows assigning and removing permissions for roles using dual-list transfer UI
  */
 export default function PermissionsPage({ roles }: PermissionsPageProps) {
-  // State
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
+  // Active roles for dropdown
+  const activeRoles = useMemo(() => {
+    return roles.filter(role => role.isActive && !role.isDeleted);
+  }, [roles]);
+
+  // State - Initialize with first role
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(
+    activeRoles.length > 0 ? activeRoles[0].id : null
+  );
   const [availablePermissions, setAvailablePermissions] = useState<Permission[]>([]);
   const [rolePermissions, setRolePermissions] = useState<Permission[]>([]);
   const [selectedAvailableKeys, setSelectedAvailableKeys] = useState<React.Key[]>([]);
@@ -68,11 +73,6 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
   
   // Store original state for cancel functionality
   const [originalRolePermissions, setOriginalRolePermissions] = useState<Permission[]>([]);
-
-  // Active roles for dropdown
-  const activeRoles = useMemo(() => {
-    return roles.filter(role => role.isActive && !role.isDeleted);
-  }, [roles]);
 
   // Load permissions when role is selected
   useEffect(() => {
@@ -429,15 +429,6 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
             </div>
           </div>
         </>
-      )}
-
-      {/* Empty State */}
-      {!selectedRoleId && (
-        <div className={styles.emptyState}>
-          <LockOutlined className={styles.emptyIcon} />
-          <p className={styles.emptyTitle}>No Role Selected</p>
-          <p className={styles.emptyText}>Select a role from the dropdown above to manage its permissions</p>
-        </div>
       )}
     </div>
   );

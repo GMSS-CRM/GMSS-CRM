@@ -99,13 +99,6 @@
   justify-content: space-between;
 }
 
-.avatar {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  color: var(--text-invert);
-  font-weight: 600;
-  font-size: 13px;
-}
-
 .listItem:hover {
   background-color: var(--bg-hover);
   border-bottom-color: var(--border-light);
@@ -144,18 +137,6 @@
   color: var(--text-secondary);
   flex: 0 1 auto;
   word-break: break-word;
-}
-
-.roleCount {
-  font-size: 12px;
-  color: var(--accent);
-  font-weight: 600;
-  background-color: var(--accent-light);
-  padding: 2px 8px;
-  border-radius: 3px;
-  white-space: nowrap;
-  position: absolute;
-  right: 16px;
 }
 
 .listItemContent :global(.ant-list-item-meta) {
