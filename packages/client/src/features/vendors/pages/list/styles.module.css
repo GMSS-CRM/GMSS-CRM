@@ -142,12 +142,12 @@
 }
 
 .table :global(.ant-pagination-item-active) {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
 }
 
 .table :global(.ant-pagination-item-active a) {
-  color: white;
+  color: white !important;
 }
 
 .table :global(.ant-pagination-prev),
