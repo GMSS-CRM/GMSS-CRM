@@ -139,7 +139,7 @@ export default function     NotificationDropdown() {
         <div className={styles.headerActions}>
           {unreadCount > 0 && (
             <Button
-              type="text"
+              variant="text"
               size="small"
               onClick={markAllAsRead}
               className={styles.actionButton}
@@ -149,7 +149,7 @@ export default function     NotificationDropdown() {
           )}
           {notifications.length > 0 && (
             <Button
-              type="text"
+              variant="text"
               size="small"
               onClick={clearAll}
               className={styles.actionButton}
@@ -224,7 +224,7 @@ export default function     NotificationDropdown() {
               <div className={styles.notificationActions}>
                 {!notification.isRead && (
                   <Button
-                    type="text"
+                    variant="text"
                     size="small"
                     icon={<CheckOutlined />}
                     onClick={(e) => markAsRead(notification.id, e)}
@@ -233,7 +233,7 @@ export default function     NotificationDropdown() {
                   />
                 )}
                 <Button
-                  type="text"
+                  variant="text"
                   size="small"
                   icon={<CloseOutlined />}
                   onClick={(e) => removeNotification(notification.id, e)}
@@ -249,7 +249,7 @@ export default function     NotificationDropdown() {
       {/* Footer */}
       {notifications.length > 0 && (
         <div className={styles.footer}>
-          <Button type="link" size="small" className={styles.viewAllButton}>
+          <Button variant="text" size="small" className={styles.viewAllButton}>
             View all notifications
           </Button>
         </div>
@@ -273,7 +273,7 @@ export default function     NotificationDropdown() {
         className={styles.badge}
       >
         <Button
-          type="text"
+          variant="text"
           icon={
             <BellOutlined
               className={`${styles.bellIcon} ${unreadCount > 0 ? styles.hasNotifications : ''}`}

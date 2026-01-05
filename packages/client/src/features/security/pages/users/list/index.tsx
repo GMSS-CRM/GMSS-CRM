@@ -55,10 +55,9 @@ function UsersList({
           </Col>
           <Col>
             <Button
-              type="primary"
+              variant="primary"
               icon={<PlusOutlined />}
               onClick={onAddUser}
-              style={{ background: 'var(--accent)', boxShadow: 'none' }}
             />
           </Col>
         </Row>

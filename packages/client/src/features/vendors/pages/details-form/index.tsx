@@ -298,10 +298,9 @@ export default function VendorDetailsForm() {
       <div className={styles.header}>
         <Space>
           <Button
-            type="text"
+            variant="ghost"
             icon={<ArrowLeftOutlined />}
             onClick={handleBack}
-            className={styles.backButton}
           />
           <div>
             <Space size="middle" align="center">

@@ -11,6 +11,7 @@ import {
   DashboardOutlined,
   SafetyOutlined,
   ShopOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
@@ -27,6 +28,11 @@ const menuItems: MenuProps["items"] = [
     key: "dashboard",
     icon: <DashboardOutlined style={{ fontSize: 22 }} />,
     label: "Dashboard",
+  },
+  {
+    key: "tenders",
+    icon: <FileTextOutlined style={{ fontSize: 22 }} />,
+    label: "Tenders",
   },
   {
     key: "vendors",

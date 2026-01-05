@@ -118,13 +118,12 @@ export default function VendorList({
           <Space size="small">
             <Tooltip title="View/Edit">
               <Button
-                type="text"
+                variant="ghost"
                 icon={<EyeOutlined />}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleView(record);
                 }}
-                className={styles.actionButton}
               />
             </Tooltip>
           </Space>
@@ -142,10 +141,10 @@ export default function VendorList({
           <p className={styles.subtitle}>Manage registered vendors</p>
         </div>
         <Button
-          type="primary"
+          variant="primary"
+          size="large"
           icon={<EditOutlined />}
           onClick={onCreate}
-          className={styles.createButton}
         >
           Create Vendor
         </Button>

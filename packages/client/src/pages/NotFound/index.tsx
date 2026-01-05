@@ -24,7 +24,7 @@ export default function NotFoundPage() {
 
         <div className={styles.actions}>
           <Button 
-            type="primary"
+            variant="primary"
             size="large"
             onClick={() => navigate(-1)}
           >

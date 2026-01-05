@@ -196,9 +196,9 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <Form.Item className={styles.submitButton}>
+              <Form.Item>
                 <Button
-                  type="primary"
+                  variant="primary"
                   htmlType="submit"
                   loading={loading}
                   block
@@ -275,7 +275,7 @@ export default function LoginPage() {
 
                 <Form.Item style={{ marginBottom: 0 }}>
                   <Button
-                    type="primary"
+                    variant="primary"
                     htmlType="submit"
                     loading={resetLoading}
                     block
@@ -307,7 +307,7 @@ export default function LoginPage() {
               </div>
 
               <Button
-                type="primary"
+                variant="primary"
                 block
                 size="large"
                 onClick={handleCloseResetModal}

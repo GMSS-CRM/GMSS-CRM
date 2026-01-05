@@ -1,0 +1,200 @@
+/* ===================================
+   Custom Button Component Styles
+   Centralized button styling for consistent UI
+   =================================== */
+
+.custom-button {
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
+  box-shadow: none !important;
+}
+
+/* Remove box shadows from all Ant Design buttons globally */
+.ant-btn {
+  box-shadow: none !important;
+}
+
+.ant-btn:hover,
+.ant-btn:focus,
+.ant-btn:active {
+  box-shadow: none !important;
+}
+
+/* ===================================
+   SIZE VARIANTS
+   =================================== */
+
+.btn-size-small {
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+}
+
+.btn-size-medium {
+  height: 36px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+}
+
+.btn-size-large {
+  height: 40px !important;
+  padding: 0 20px !important;
+  font-size: 14px !important;
+}
+
+/* ===================================
+   VARIANT STYLES
+   =================================== */
+
+/* PRIMARY VARIANT - Main action buttons */
+.btn-variant-primary {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.btn-variant-primary:hover:not(:disabled) {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+  transform: translateY(-1px);
+}
+
+.btn-variant-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-variant-primary:disabled {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* SECONDARY VARIANT - Default outlined buttons */
+.btn-variant-secondary {
+  background: transparent !important;
+  border: 1.2px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-variant-secondary:hover:not(:disabled) {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+  background: transparent !important;
+}
+
+.btn-variant-secondary:active:not(:disabled) {
+  background: var(--accent-lighter) !important;
+}
+
+/* GHOST VARIANT - Transparent minimal buttons */
+.btn-variant-ghost {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-secondary) !important;
+}
+
+.btn-variant-ghost:hover:not(:disabled) {
+  color: var(--accent) !important;
+  background: var(--bg-hover) !important;
+}
+
+/* DANGER VARIANT - Destructive actions */
+.btn-variant-danger {
+  background: var(--color-error) !important;
+  border-color: var(--color-error) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.btn-variant-danger:hover:not(:disabled) {
+  background: #ff7875 !important;
+  border-color: #ff7875 !important;
+  transform: translateY(-1px);
+}
+
+.btn-variant-danger:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* TEXT VARIANT - Link-style buttons */
+.btn-variant-text {
+  background: transparent !important;
+  border: none !important;
+  color: var(--accent) !important;
+  padding: 0 8px !important;
+}
+
+.btn-variant-text:hover:not(:disabled) {
+  color: var(--accent-hover) !important;
+  background: transparent !important;
+}
+
+/* ===================================
+   ICON BUTTONS
+   =================================== */
+
+.custom-button.ant-btn-icon-only {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-size-small.ant-btn-icon-only {
+  width: 32px !important;
+}
+
+.btn-size-medium.ant-btn-icon-only {
+  width: 36px !important;
+}
+
+.btn-size-large.ant-btn-icon-only {
+  width: 40px !important;
+}
+
+/* ===================================
+   FOCUS STATES (Accessibility)
+   =================================== */
+
+.custom-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+
+/* ===================================
+   LOADING STATE
+   =================================== */
+
+.custom-button.ant-btn-loading {
+  opacity: 0.65;
+  cursor: wait;
+  box-shadow: none !important;
+}
+
+/* ===================================
+   BUTTON GROUPS
+   =================================== */
+
+.ant-btn-group .custom-button:not(:first-child) {
+  margin-left: -1px;
+}
+
+.ant-btn-group .custom-button:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ant-btn-group .custom-button:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.ant-btn-group .custom-button:not(:first-child):not(:last-child) {
+  border-radius: 0;
+}

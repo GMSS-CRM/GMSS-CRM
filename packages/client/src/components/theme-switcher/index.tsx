@@ -43,7 +43,7 @@ export default function ThemeSwitcher() {
       overlayClassName={styles.themeDropdown}
     >
       <Button
-        type="text"
+        variant="text"
         className={styles.themeSwitcherButton}
       >
         <span className={styles.currentThemeIcon}>{currentTheme.icon}</span>

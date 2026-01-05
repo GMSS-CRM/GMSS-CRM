@@ -287,39 +287,3 @@
   border-top: 1px solid var(--border-lighter);
   margin-top: 8px;
 }
-
-.cancelButton {
-  height: 36px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  border: 1.2px solid var(--border-color);
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
-}
-
-.cancelButton:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.saveButton {
-  height: 36px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  background: var(--accent);
-  border: none;
-  box-shadow: none;
-  transition: all 0.2s ease;
-}
-
-.saveButton:hover {
-  background: var(--accent-dark) !important;
-  transform: translateY(-1px);
-}
-
-.saveButton:disabled {
-  background: var(--bg-hover);
-  opacity: 0.6;
-}

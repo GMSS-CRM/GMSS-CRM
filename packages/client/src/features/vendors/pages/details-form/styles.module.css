@@ -10,19 +10,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
+  padding: 20px 1px;
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
-}
-
-.backButton {
-  color: var(--text-secondary);
-  padding: 4px 8px;
-}
-
-.backButton:hover {
-  color: var(--accent) !important;
-  background: var(--bg-hover) !important;
 }
 
 .title {

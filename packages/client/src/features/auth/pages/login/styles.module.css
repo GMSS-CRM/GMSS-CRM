@@ -321,25 +321,6 @@
   margin-bottom: 0.5rem;
 }
 
-.submitButton {
-  margin-top: 0.75rem;
-}
-
-.submitButton button {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-  border: none;
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
-  transition: all 0.3s ease;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-}
-
-.submitButton button:hover {
-  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--bg-sidebar-accent) 100%);
-  box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
-  transform: translateY(-2px);
-}
-
 .divider {
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, var(--border-color) 50%, transparent 100%);

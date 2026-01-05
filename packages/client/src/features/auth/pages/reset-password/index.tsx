@@ -203,9 +203,9 @@ export default function ResetPasswordPage() {
                 />
               </Form.Item>
 
-              <Form.Item className={styles.submitButton}>
+              <Form.Item>
                 <Button
-                  type="primary"
+                  variant="primary"
                   htmlType="submit"
                   loading={loading}
                   block

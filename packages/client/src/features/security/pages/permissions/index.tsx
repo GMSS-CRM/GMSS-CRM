@@ -339,18 +339,18 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
             <div className={styles.controls}>
               <Tooltip title="Assign selected permissions" placement="left">
                 <Button
+                  variant="ghost"
                   icon={<ArrowRightOutlined />}
                   onClick={handleAssignPermissions}
                   disabled={selectedAvailableKeys.length === 0}
-                  className={`${styles.controlButton} ${selectedAvailableKeys.length > 0 ? styles.controlButtonActive : ''}`}
                 />
               </Tooltip>
               <Tooltip title="Remove selected permissions" placement="left">
                 <Button
+                  variant="ghost"
                   icon={<ArrowLeftOutlined />}
                   onClick={handleRemovePermissions}
                   disabled={selectedRoleKeys.length === 0}
-                  className={`${styles.controlButton} ${selectedRoleKeys.length > 0 ? styles.controlButtonActive : ''}`}
                 />
               </Tooltip>
             </div>
@@ -409,7 +409,8 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
               )}
             </div>
             <div className={styles.footerRight}>
-              <Button 
+              <Button
+                variant="secondary"
                 onClick={handleCancel} 
                 disabled={!hasChanges}
                 icon={<CloseOutlined />}
@@ -418,12 +419,11 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
                 Cancel
               </Button>
               <Button
-                type="primary"
+                variant="primary"
                 onClick={handleSave}
                 disabled={!hasChanges}
                 icon={<SaveOutlined />}
                 size="large"
-                style={{ color: 'white' }}
               >
                 Save
               </Button>

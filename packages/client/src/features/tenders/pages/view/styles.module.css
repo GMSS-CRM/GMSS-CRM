@@ -1,0 +1,136 @@
+.container {
+  padding: 24px;
+  min-height: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.header {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}\n\n.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.statusTag {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+
+.content {
+  max-width: 1200px;
+}
+
+.card {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color);
+}
+
+.statusBanner {
+  background: #e6f7ff;
+  border-color: #91d5ff;
+  margin-bottom: 20px;
+}
+
+.bannerContent {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.bannerIcon {
+  font-size: 24px;
+  color: #1890ff;
+  margin-top: 4px;
+}
+
+.bannerContent strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.bannerContent p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.tagSection {
+  padding: 8px 0;
+}
+
+.tagGroup {
+  margin-bottom: 16px;
+}
+
+.tagGroup:last-child {
+  margin-bottom: 0;
+}
+
+.tagGroup strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.emptyText {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.placeholderCard {
+  background: var(--surface-secondary);
+  border-style: dashed;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.placeholderIcon {
+  font-size: 48px;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  margin-bottom: 16px;
+}
+
+.placeholderText {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+  max-width: 400px;
+}

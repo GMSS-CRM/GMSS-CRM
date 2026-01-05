@@ -230,11 +230,10 @@ function UserDetailsForm({
           <div>
             {!isNewUser && onDelete && (
               <Button
-                danger
+                variant="danger"
                 onClick={handleDelete}
                 icon={<DeleteFilled />}
                 size="large"
-                style={{ boxShadow: 'none' }}
               >
                 Delete
               </Button>
@@ -242,6 +241,7 @@ function UserDetailsForm({
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
+              variant="secondary"
               onClick={handleCancel}
               icon={<CloseOutlined />}
               size="large"
@@ -249,12 +249,11 @@ function UserDetailsForm({
               Cancel
             </Button>
             <Button
-              type="primary"
+              variant="primary"
               onClick={handleSave}
               icon={<SaveOutlined />}
               disabled={!isDirty && !isNewUser}
               size="large"
-              style={{ color: 'white'}}
             >
               Save
             </Button>

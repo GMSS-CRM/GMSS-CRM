@@ -169,22 +169,19 @@ export default function RolesPage({
           <Space size="small">
             <Tooltip title="Edit">
               <Button
-                type="text"
+                variant="ghost"
                 icon={<EditOutlined />}
                 onClick={() => handleEdit(role)}
                 size="small"
-                className={styles.actionButton}
               />
             </Tooltip>
             
             <Tooltip title="Delete">
               <Button
-                type="text"
-                danger
+                variant="danger"
                 icon={<DeleteOutlined />}
                 onClick={() => handleDelete(role)}
                 size="small"
-                className={styles.actionButton}
               />
             </Tooltip>
           </Space>
@@ -204,10 +201,10 @@ export default function RolesPage({
           </p>
         </div>
         <Button
-          type="primary"
+          variant="primary"
+          size="large"
           icon={<PlusOutlined />}
           onClick={onCreate}
-          className={styles.createButton}
         >
           Create Role
         </Button>
@@ -303,16 +300,15 @@ export default function RolesPage({
           <div className={styles.footer}>
             <Space size="middle">
               <Button
+                variant="secondary"
                 onClick={handleCancel}
-                className={styles.cancelButton}
               >
                 Cancel
               </Button>
               <Button
-                type="primary"
+                variant="primary"
                 htmlType="submit"
                 loading={isSubmitting}
-                className={styles.saveButton}
               >
                 {isEditMode ? 'Save Changes' : 'Create Role'}
               </Button>
