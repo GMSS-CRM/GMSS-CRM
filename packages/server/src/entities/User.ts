@@ -1,36 +1,50 @@
-// src/entities/User.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   JoinColumn,
-} from "typeorm";
-import { Role } from "./Role";
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
+import { Role } from './Role';
 
-@Entity("users")
+@Entity({ name: 'user' })
 export class User {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @Column({ unique: true })
+  email!: string;
 
   @Column()
   firstName!: string;
 
   @Column({ nullable: true })
-  lastName?: string;
+  middleName?: string;
 
-  @Column({ unique: true })
-  email!: string;
+  @Column()
+  lastName!: string;
 
-  // ✅ REAL COLUMN (IMPORTANT)
-  @Column({ type: "uuid" })
-  roleId!: string;
-
-  // ✅ VIRTUAL RELATION (no insert/update)
-  @ManyToOne(() => Role, { eager: false })
-  @JoinColumn({ name: "roleId" })
+  @ManyToOne(() => Role, { nullable: false })
+  @JoinColumn({ name: 'roleId' })
   role!: Role;
 
-  @Column({ default: "SYSTEM" })
+  @Column({ default: true })
+  isActive!: boolean;
+
+  @Column({ default: false })
+  isDeleted!: boolean;
+
+   @Column({default: "SYSTEM"})
   createdBy!: string;
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdDate!: Date;
+
+  @Column({default:"SYSTEM"})
+  updatedBy?: string;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedDate?: Date;
 }

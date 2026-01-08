@@ -1,30 +1,39 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const roleTypeDefs = gql`
   type Role {
     id: ID!
-    name: String!
-    permissions: [Permission!]!
+    roleName: String!
+    description: String
+    createdDate: String!
+    updatedDate: String!
   }
 
   input CreateRoleInput {
-    name: String!
-    permissions: [Permission!]!
+    roleName: String!
+    description: String
   }
 
   input UpdateRoleInput {
-    name: String
-    permissions: [Permission!]
+    id: ID!
+    roleName: String
+    description: String
+  }
+
+  input SearchRoleInput {
+    search: String
+    limit: Int
+    offset: Int
   }
 
   extend type Query {
-    getRoleById(id: ID!): Role
-    searchRoles: [Role!]!
+    roleById(id: ID!): Role
+    searchRoles(searchInput: SearchRoleInput): [Role!]!
   }
 
   extend type Mutation {
     createRole(input: CreateRoleInput!): Role!
-    updateRole(id: ID!, input: UpdateRoleInput!): Role!
+    updateRole(input: UpdateRoleInput!): Role!
     deleteRole(id: ID!): Boolean!
   }
 `;

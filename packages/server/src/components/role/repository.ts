@@ -1,35 +1,62 @@
-import { AppDataSource } from "../../config/data-source";
-import { Role } from "../../entities/Role";
+import { inject, injectable } from 'inversify';
+import { DataSource, Repository, Like } from 'typeorm';
+import { TYPES } from '../../inversify/types';
+import { Role } from '../../entities/Role';
+import {
+  IRoleRepository,
+  CreateRoleInput,
+  UpdateRoleInput,
+  SearchRoleInput,
+} from './types';
 
-export const roleRepository = {
-  repo: AppDataSource.getRepository(Role),
-
-  create(data: any) {
-    const entity = this.repo.create(data);
-    return this.repo.save(entity);
-  },
-
-  update(id: string, data: any) {
-    return this.repo
-      .update(id, data)
-      .then(() => this.repo.findOneBy({ id }));
-  },
-
-  delete(id: string) {
-    return this.repo.delete(id).then(() => true);
-  },
+@injectable()
+export class RoleRepository
+  extends Repository<Role>
+  implements IRoleRepository
+{
+  constructor(
+    @inject(TYPES.DbContext) private readonly dbContext: DataSource
+  ) {
+    super(Role, dbContext.manager);
+  }
 
   findById(id: string) {
-    return this.repo.findOneBy({ id });
-  },
+    return this.findOne({ where: { id } });
+  }
 
-  search(search?: string) {
-    const qb = this.repo.createQueryBuilder("role");
-
-    if (search) {
-      qb.where("role.name ILIKE :s", { s: `%${search}%` });
+  async search(input?: SearchRoleInput) {
+    if (!input?.search) {
+      return this.find({
+        take: input?.limit,
+        skip: input?.offset,
+      });
     }
 
-    return qb.getMany();
-  },
-};
+    return this.find({
+      where: { roleName: Like(`%${input.search}%`) },
+      take: input.limit,
+      skip: input.offset,
+    });
+  }
+
+  async createRole(input: CreateRoleInput) {
+    const role = this.create({
+      ...input,
+      updatedBy: 'SYSTEM',
+    });
+    return this.save(role);
+  }
+
+  async updateRole(id: string, input: UpdateRoleInput) {
+    await this.update(id, {
+      ...input,
+      updatedBy: 'SYSTEM',
+    });
+    return this.findById(id);
+  }
+
+  async deleteRole(id: string) {
+    await this.delete(id);
+    return true;
+  }
+}

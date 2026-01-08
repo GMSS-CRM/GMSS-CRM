@@ -1,9 +1,9 @@
 import { gql } from "graphql-tag";
 
+import { baseTypeDefs } from "./base.schema";
 import { userTypeDefs } from "../components/user/schema";
 import { roleTypeDefs } from "../components/role/schema";
-import { permissionTypeDefs } from "../components/permission/schema";
-import { appSettingTypeDefs } from "../components/app-setting/schema";
+import { rolePermissionTypeDefs } from "../components/role-permission/schema";
 
 export const typeDefs = gql`
   scalar DateTime
@@ -14,8 +14,8 @@ export const typeDefs = gql`
 
 export const mergedTypeDefs = [
   typeDefs,
+  baseTypeDefs,
   userTypeDefs,
   roleTypeDefs,
-  permissionTypeDefs,
-  appSettingTypeDefs,
+  rolePermissionTypeDefs,
 ];

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["packages/server/src/*"],
+      "@gmss/types": ["packages/types/src"],
+      "@gmss/types/*": ["packages/types/src/*"]
+    }
+  }
+}

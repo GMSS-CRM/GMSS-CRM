@@ -2,31 +2,32 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   UpdateDateColumn,
+  CreateDateColumn,
   OneToMany,
-} from "typeorm";
+} from 'typeorm';
+import { RolePermission } from './RolePermission';
 
-import { Permission } from "../components/permission/permissions";
-@Entity()
+@Entity({ name: 'role' })
 export class Role {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ unique: true })
-  name!: string;
+  @Column()
+  roleName!: string;
 
-  @Column({
-    type: "enum",
-    enum: Permission,
-    array: true,
-    default: [],
-  })
-  permissions!: Permission[];
+  @Column({ nullable: true })
+  description?: string;
+
+  @Column({ default: 'SYSTEM' })
+  updatedBy!: string;
 
   @CreateDateColumn()
-  createdAt!: Date;
+  createdDate!: Date;
 
   @UpdateDateColumn()
-  updatedAt!: Date;
+  updatedDate!: Date;
+
+  @OneToMany(() => RolePermission, (rp) => rp.role)
+  rolePermissions!: RolePermission[];
 }

@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const userTypeDefs = gql`
   type User {
@@ -6,10 +6,10 @@ export const userTypeDefs = gql`
     firstName: String!
     lastName: String
     email: String!
-    roleId: ID!      
+    roleId: ID!
     role: Role!
-    createdAt: String!
-    updatedAt: String!
+    createdDate: String!
+    updatedDate: String!
   }
 
   input CreateUserInput {
@@ -25,9 +25,15 @@ export const userTypeDefs = gql`
     roleId: ID
   }
 
+  input SearchUserInput {
+    search: String
+    limit: Int
+    offset: Int
+  }
+
   extend type Query {
     getUserById(id: ID!): User
-    searchUsers(search: String, limit: Int, offset: Int): [User!]!
+    searchUsers(searchInput: SearchUserInput): [User!]!
   }
 
   extend type Mutation {

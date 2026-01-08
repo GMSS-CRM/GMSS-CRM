@@ -1,22 +1,29 @@
-import { roleService } from "./service";
+import { container } from '../../inversify/container';
+import { TYPES } from '../../inversify/types';
+import { IRoleService } from './types';
 
 export const roleResolvers = {
   Query: {
-    getRoleById: (_: any, { id }: any) =>
-      roleService.getById(id),
+    roleById: (_: any, { id }: any) =>
+      container.get<IRoleService>(TYPES.IRoleService).getRoleById(id),
 
-    searchRoles: (_: any, { search }: any) =>
-      roleService.search(search),
+    searchRoles: (_: any, { searchInput }: any) =>
+      container
+        .get<IRoleService>(TYPES.IRoleService)
+        .searchRoles(searchInput),
   },
 
   Mutation: {
     createRole: (_: any, { input }: any) =>
-      roleService.create(input),
+      container.get<IRoleService>(TYPES.IRoleService).createRole(input),
 
-    updateRole: (_: any, { id, input }: any) =>
-      roleService.update(id, input),
+    updateRole: (_: any, { input }: any) =>
+      container.get<IRoleService>(TYPES.IRoleService).updateRole(
+        input.id,
+        input
+      ),
 
     deleteRole: (_: any, { id }: any) =>
-      roleService.delete(id),
+      container.get<IRoleService>(TYPES.IRoleService).deleteRole(id),
   },
 };

@@ -1,10 +1,41 @@
-import { userRepository } from "./repository";
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../../inversify/types';
+import {
+  IUserService,
+  IUserRepository,
+  CreateUserInput,
+  UpdateUserInput,
+  SearchUserInput,
+} from './types';
 
-export const userService = {
-  create: (data: any) => userRepository.create(data),
-  update: (id: string, data: any) => userRepository.update(id, data),
-  delete: (id: string) => userRepository.delete(id),
-  deleteMany: (ids: string[]) => userRepository.deleteMany(ids),
-  getById: (id: string) => userRepository.findById(id),
-  search: (params: any) => userRepository.search(params),
-};
+@injectable()
+export class UserService implements IUserService {
+  constructor(
+    @inject(TYPES.IUserRepository)
+    private readonly userRepository: IUserRepository
+  ) {}
+
+  create(input: CreateUserInput) {
+    return this.userRepository.createUser(input);
+  }
+
+  update(id: string, input: UpdateUserInput) {
+    return this.userRepository.updateUser(id, input);
+  }
+
+  delete(id: string) {
+    return this.userRepository.deleteUser(id);
+  }
+
+  deleteMany(ids: string[]) {
+    return this.userRepository.deleteUsers(ids);
+  }
+
+  getById(id: string) {
+    return this.userRepository.findById(id);
+  }
+
+  search(params: SearchUserInput) {
+    return this.userRepository.search(params);
+  }
+}

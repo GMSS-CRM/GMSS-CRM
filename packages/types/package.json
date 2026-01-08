@@ -1,0 +1,11 @@
+{
+    "name": "@gmss/types",
+    "version": "1.0.0",
+    "description": "GMSS-types",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": ["dist"],
+    "scripts": {
+    "build": "tsc -b"
+    }
+}

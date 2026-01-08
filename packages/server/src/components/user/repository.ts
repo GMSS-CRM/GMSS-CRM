@@ -1,36 +1,84 @@
-// src/components/user/repository.ts
-import { AppDataSource } from "../../config/data-source";
-import { User } from "../../entities/User";
+import { inject, injectable } from 'inversify';
+import { DataSource, Repository } from 'typeorm';
+import { TYPES } from '../../inversify/types';
+import { User } from '../../entities/User';
+import { Role } from '../../entities/Role';
+import {
+  IUserRepository,
+  CreateUserInput,
+  UpdateUserInput,
+  SearchUserInput,
+} from './types';
 
-const repo = AppDataSource.getRepository(User);
+@injectable()
+export class UserRepository
+  extends Repository<User>
+  implements IUserRepository
+{
+  private roleRepo: Repository<Role>;
 
-export const userRepository = {
-  async create(data: any) {
-    const user = repo.create({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.email,
-      roleId: data.roleId,      // ✅ THIS WAS MISSING
-      createdBy: "SYSTEM",
+  constructor(
+    @inject(TYPES.DbContext) private readonly dbContext: DataSource
+  ) {
+    super(User, dbContext.manager);
+    this.roleRepo = dbContext.getRepository(Role);
+  }
+
+  async createUser(input: CreateUserInput): Promise<User> {
+    const { roleId, ...rest } = input;
+
+    const role = await this.roleRepo.findOneBy({ id: roleId });
+    if (!role) throw new Error('Invalid roleId');
+
+    const user = this.create({
+      ...rest,
+      role,
+      updatedBy: 'SYSTEM',
     });
 
-    return repo.save(user);
-  },
+    return this.save(user);
+  }
 
-  findById: (id: string) =>
-    repo.findOne({ where: { id } }),
+  findById(id: string) {
+    return this.findOne({
+      where: { id, isDeleted: false },
+      relations: ['role'],
+    });
+  }
 
-  search: (params: any) =>
-    repo.find({ where: params }),
+  search(params: SearchUserInput) {
+    return this.find({
+      where: { isDeleted: false },
+      relations: ['role'],
+      take: params.limit,
+      skip: params.offset,
+    });
+  }
 
-  delete: (id: string) =>
-    repo.delete(id),
+  async updateUser(id: string, input: UpdateUserInput) {
+    if (input.roleId) {
+      const role = await this.roleRepo.findOneBy({ id: input.roleId });
+      if (!role) throw new Error('Invalid roleId');
 
-  deleteMany: (ids: string[]) =>
-    repo.delete(ids),
+      (input as any).role = role;
+      delete (input as any).roleId;
+    }
 
-  update: async (id: string, data: any) => {
-    const user = await repo.findOne({ where: { id } }); 
+    await this.update(id, {
+      ...input,
+      updatedBy: 'SYSTEM',
+    });
+
+    return this.findById(id);
+  }
+
+  async deleteUser(id: string) {
+    await this.update(id, { isDeleted: true, updatedBy: 'SYSTEM' });
+    return true;
+  }
+
+  async deleteUsers(ids: string[]) {
+    await this.update(ids, { isDeleted: true, updatedBy: 'SYSTEM' });
+    return true;
   }
 }
-
