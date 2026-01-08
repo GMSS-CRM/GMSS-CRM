@@ -1,20 +1,85 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
+import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 import SubMenu from '../../../components/sub-menu';
-import type { SubMenuItem } from '../../../components/sub-menu';
+import type { SubMenuItemConfig } from '../../../components/sub-menu';
 import UsersList from './users/list';
 import UserDetailsForm from './users/details-form';
+import RolesPage from './roles';
+import PermissionsPage from './permissions';
 import type { User, Role } from '../types';
+import { createRole, updateRole, deleteRole } from '../services/roles.service';
 import styles from './index.module.css';
 
+type SecuritySubMenuItem = 'users' | 'roles' | 'permissions';
+
+const SECURITY_MENU_ITEMS: SubMenuItemConfig[] = [
+  {
+    key: 'users',
+    icon: <UserOutlined />,
+    label: 'Users',
+  },
+  {
+    key: 'roles',
+    icon: <TeamOutlined />,
+    label: 'Roles',
+  },
+  {
+    key: 'permissions',
+    icon: <LockOutlined />,
+    label: 'Permissions',
+  },
+];
+
 /**
- * Mock data - In production, this would come from an API
+ * Initial roles data - This is the master list of all roles
+ * In production, this would be fetched from the API
  */
-const MOCK_ROLES: Role[] = [
-  { id: '1', name: 'Member', description: 'Basic team member access' },
-  { id: '2', name: 'Manager', description: 'Team management access' },
-  { id: '3', name: 'Director', description: 'Department director access' },
-  { id: '4', name: 'System Administrator', description: 'Full system access' },
+const INITIAL_ROLES: Role[] = [
+  {
+    id: '1',
+    name: 'Member',
+    description: 'Basic team member access',
+    isActive: true,
+    isDeleted: false,
+    createdBy: 'system',
+    createdDate: new Date('2024-01-15').toISOString(),
+    userCount: 3,
+    isSystemRole: true,
+  },
+  {
+    id: '2',
+    name: 'Manager',
+    description: 'Team management access',
+    isActive: true,
+    isDeleted: false,
+    createdBy: 'admin',
+    createdDate: new Date('2024-01-20').toISOString(),
+    userCount: 2,
+    isSystemRole: false,
+  },
+  {
+    id: '3',
+    name: 'Director',
+    description: 'Department director access with full oversight capabilities',
+    isActive: true,
+    isDeleted: false,
+    createdBy: 'admin',
+    createdDate: new Date('2024-02-01').toISOString(),
+    userCount: 1,
+    isSystemRole: false,
+  },
+  {
+    id: '4',
+    name: 'System Administrator',
+    description: 'Full system access',
+    isActive: true,
+    isDeleted: false,
+    createdBy: 'system',
+    createdDate: new Date('2024-01-10').toISOString(),
+    userCount: 1,
+    isSystemRole: true,
+  },
 ];
 
 const MOCK_USERS: User[] = [
@@ -32,21 +97,48 @@ const MOCK_USERS: User[] = [
 
 /**
  * Main Security Page component
- * Three-section layout: Menu | Users List | User Details
+ * Manages both Users and Roles with shared state
+ * Roles are the single source of truth used across the application
  */
 export default function SecurityPage() {
-  const [selectedSubMenu, setSelectedSubMenu] = useState<SubMenuItem>('users');
+  const [selectedSubMenu, setSelectedSubMenu] = useState<SecuritySubMenuItem>('users');
+  
+  // Shared roles state - single source of truth
+  const [roles, setRoles] = useState<Role[]>(INITIAL_ROLES);
+  
+  // Users state
   const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
+  
+  // Roles management state
+  const [isRoleFormVisible, setIsRoleFormVisible] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [isRoleEditMode, setIsRoleEditMode] = useState(false);
+
+  // Initialize roles - in production, fetch from API
+  useEffect(() => {
+    // TODO: Replace with actual API call
+    // const loadRoles = async () => {
+    //   try {
+    //     const fetchedRoles = await fetchRoles();
+    //     setRoles(fetchedRoles);
+    //   } catch (error) {
+    //     console.error('Failed to fetch roles:', error);
+    //     message.error('Failed to load roles');
+    //   }
+    // };
+    // loadRoles();
+  }, []);
 
   // Auto-select first user on mount
   useEffect(() => {
-    if (users.length > 0 && !selectedUserId) {
+    if (selectedSubMenu === 'users' && users.length > 0 && !selectedUserId) {
       setSelectedUserId(users[0].id);
     }
-  }, [users, selectedUserId]);
+  }, [users, selectedUserId, selectedSubMenu]);
 
+  // Users handlers
   const handleUserSelect = useCallback((userId: string) => {
     setSelectedUserId(userId);
     setIsAddMode(false);
@@ -55,15 +147,43 @@ export default function SecurityPage() {
   const handleSaveUser = useCallback((updatedUser: User) => {
     setUsers((prevUsers) => {
       const existingIndex = prevUsers.findIndex((u) => u.id === updatedUser.id);
+      let newUsers: User[];
+      
       if (existingIndex >= 0) {
         // Update existing user
-        const newUsers = [...prevUsers];
+        const oldUser = prevUsers[existingIndex];
+        newUsers = [...prevUsers];
         newUsers[existingIndex] = updatedUser;
-        return newUsers;
+        
+        // Update role counts if role changed
+        if (oldUser.role !== updatedUser.role) {
+          setRoles((prevRoles) =>
+            prevRoles.map((r) => {
+              if (r.id === oldUser.role) {
+                return { ...r, userCount: (r.userCount || 0) - 1 };
+              }
+              if (r.id === updatedUser.role) {
+                return { ...r, userCount: (r.userCount || 0) + 1 };
+              }
+              return r;
+            })
+          );
+        }
       } else {
         // Add new user
-        return [...prevUsers, updatedUser];
+        newUsers = [...prevUsers, updatedUser];
+        
+        // Update role count for the new user's role
+        if (updatedUser.role) {
+          setRoles((prevRoles) =>
+            prevRoles.map((r) =>
+              r.id === updatedUser.role ? { ...r, userCount: (r.userCount || 0) + 1 } : r
+            )
+          );
+        }
       }
+      
+      return newUsers;
     });
     message.success(isAddMode ? 'User added successfully' : 'User updated successfully');
     setSelectedUserId(updatedUser.id);
@@ -89,10 +209,23 @@ export default function SecurityPage() {
   }, []);
 
   const handleDeleteUser = useCallback((userId: string) => {
+    const userToDelete = users.find(u => u.id === userId);
+    
     setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
+    
+    // Update role count if user had a role
+    if (userToDelete?.role) {
+      setRoles((prevRoles) =>
+        prevRoles.map((r) =>
+          r.id === userToDelete.role ? { ...r, userCount: Math.max(0, (r.userCount || 0) - 1) } : r
+        )
+      );
+    }
+    
     message.success('User deleted successfully');
     setSelectedUserId(null);
     setIsAddMode(false);
+    
     // Auto-select first user if available
     setTimeout(() => {
       if (users.length > 1) {
@@ -101,6 +234,62 @@ export default function SecurityPage() {
     }, 0);
   }, [users]);
 
+  // Roles handlers
+  const handleCreateRole = useCallback(() => {
+    setSelectedRole(null);
+    setIsRoleEditMode(false);
+    setIsRoleFormVisible(true);
+  }, []);
+
+  const handleEditRole = useCallback((role: Role) => {
+    setSelectedRole(role);
+    setIsRoleEditMode(true);
+    setIsRoleFormVisible(true);
+  }, []);
+
+  const handleSaveRole = useCallback(async (roleData: Partial<Role>) => {
+    try {
+      if (isRoleEditMode && selectedRole) {
+        // Update existing role
+        const updatedRole = await updateRole(selectedRole.id, roleData);
+        setRoles((prevRoles) =>
+          prevRoles.map((r) => (r.id === selectedRole.id ? { ...r, ...roleData, updatedDate: updatedRole.updatedDate } : r))
+        );
+        message.success('Role updated successfully');
+      } else {
+        // Create new role
+        const newRole = await createRole(roleData as Omit<Role, 'id' | 'createdDate' | 'isDeleted'>);
+        setRoles((prevRoles) => [...prevRoles, newRole]);
+        message.success('Role created successfully');
+      }
+      setIsRoleFormVisible(false);
+      setSelectedRole(null);
+    } catch (error) {
+      console.error('Failed to save role:', error);
+      message.error('Failed to save role');
+    }
+  }, [isRoleEditMode, selectedRole]);
+
+  const handleCancelRoleForm = useCallback(() => {
+    setIsRoleFormVisible(false);
+    setSelectedRole(null);
+  }, []);
+
+  const handleDeleteRole = useCallback(async (roleId: string) => {
+    try {
+      await deleteRole(roleId);
+      setRoles((prevRoles) =>
+        prevRoles.map((r) =>
+          r.id === roleId ? { ...r, isDeleted: true } : r
+        )
+      );
+      message.success('Role deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete role:', error);
+      message.error('Failed to delete role');
+    }
+  }, []);
+
   const selectedUser = isAddMode ? null : users.find((u) => u.id === selectedUserId) || null;
 
   return (
@@ -108,8 +297,10 @@ export default function SecurityPage() {
       {/* Left: Security Sub-Navigation Menu */}
       <div className={styles.menuSection}>
         <SubMenu
+          title="Security"
           selectedMenu={selectedSubMenu}
-          onMenuChange={setSelectedSubMenu}
+          onMenuChange={(key) => setSelectedSubMenu(key as SecuritySubMenuItem)}
+          items={SECURITY_MENU_ITEMS}
         />
       </div>
 
@@ -133,26 +324,33 @@ export default function SecurityPage() {
             onSave={handleSaveUser}
             onCancel={handleCancelEdit}
             onDelete={handleDeleteUser}
-            roles={MOCK_ROLES}
+            roles={roles.filter(r => !r.isDeleted && r.isActive)}
             isAddMode={isAddMode}
           />
         </div>
       )}
 
-      {/* Placeholder for other menu items */}
-      {selectedSubMenu !== 'users' && (
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'white',
-            fontSize: 16,
-            color: 'var(--text-secondary)',
-          }}
-        >
-          {selectedSubMenu.charAt(0).toUpperCase() + selectedSubMenu.slice(1)} section coming soon
+      {/* Roles Section */}
+      {selectedSubMenu === 'roles' && (
+        <div className={styles.rolesSection}>
+          <RolesPage
+            roles={roles}
+            onEdit={handleEditRole}
+            onCreate={handleCreateRole}
+            onDelete={handleDeleteRole}
+            onSave={handleSaveRole}
+            onCancel={handleCancelRoleForm}
+            visible={isRoleFormVisible}
+            selectedRole={selectedRole}
+            isEditMode={isRoleEditMode}
+          />
+        </div>
+      )}
+
+      {/* Permissions Section */}
+      {selectedSubMenu === 'permissions' && (
+        <div className={styles.rolesSection}>
+          <PermissionsPage roles={roles} />
         </div>
       )}
     </div>

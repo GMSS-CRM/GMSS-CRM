@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Form, Input, Button, Select, Switch, Row, Col } from 'antd';
+import { Form, Input, Select, Switch, Row, Col } from 'antd';
 import { SaveOutlined, CloseOutlined, DeleteFilled } from '@ant-design/icons';
 import type { User, Role } from '../../../types';
 import { showConfirmModal } from '../../../../../components/confirm-modal';
 import Avatar from '../../../../../components/avatar';
+import Button from '../../../../../components/button';
 import styles from './styles.module.css';
 
 interface UserDetailsFormProps {
@@ -229,11 +230,10 @@ function UserDetailsForm({
           <div>
             {!isNewUser && onDelete && (
               <Button
-                danger
+                variant="danger"
                 onClick={handleDelete}
                 icon={<DeleteFilled />}
                 size="large"
-                style={{ boxShadow: 'none' }}
               >
                 Delete
               </Button>
@@ -241,6 +241,7 @@ function UserDetailsForm({
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
+              variant="secondary"
               onClick={handleCancel}
               icon={<CloseOutlined />}
               size="large"
@@ -248,12 +249,11 @@ function UserDetailsForm({
               Cancel
             </Button>
             <Button
-              type="primary"
+              variant="primary"
               onClick={handleSave}
               icon={<SaveOutlined />}
               disabled={!isDirty && !isNewUser}
               size="large"
-              style={{ color: 'white'}}
             >
               Save
             </Button>

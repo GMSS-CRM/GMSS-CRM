@@ -17,10 +17,34 @@ export interface Role {
   id: string;
   name: string;
   description?: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdBy?: string;
+  createdDate: string;
+  updatedBy?: string;
+  updatedDate?: string;
+  userCount?: number; // For UI purposes - number of users with this role
+  isSystemRole?: boolean; // For UI purposes - prevent deletion of system roles
 }
 
 export interface Restriction {
   id: string;
   name: string;
   type: 'EquipmentTag' | 'Location' | 'Department';
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string;
+  module?: string;
+  isActive: boolean;
+  createdDate: string;
+}
+
+export interface RolePermission {
+  roleId: string;
+  permissionId: string;
+  assignedDate: string;
+  assignedBy?: string;
 }

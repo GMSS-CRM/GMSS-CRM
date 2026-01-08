@@ -1,7 +1,8 @@
-import { Dropdown, Button } from 'antd';
+import { Dropdown } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import type { MenuProps } from 'antd';
+import Button from '../button';
 import styles from './styles.module.css';
 
 /**
@@ -42,7 +43,7 @@ export default function ThemeSwitcher() {
       overlayClassName={styles.themeDropdown}
     >
       <Button
-        type="text"
+        variant="text"
         className={styles.themeSwitcherButton}
       >
         <span className={styles.currentThemeIcon}>{currentTheme.icon}</span>

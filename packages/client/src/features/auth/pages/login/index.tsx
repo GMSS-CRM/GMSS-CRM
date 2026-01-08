@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Form, Input, Button, message, Modal } from "antd";
+import { Form, Input, message, Modal } from "antd";
 import { 
   LockOutlined, 
   MailOutlined, 
@@ -14,6 +14,7 @@ import {
 import { loginWithEmailPassword, resetPassword } from "../../services/auth.service";
 import { useAuth } from "../../../../app/providers/AuthProvider";
 import Loader from "../../../../components/loader";
+import Button from "../../../../components/button";
 import styles from "./styles.module.css";
 
 export default function LoginPage() {
@@ -195,9 +196,9 @@ export default function LoginPage() {
                 </button>
               </div>
 
-              <Form.Item className={styles.submitButton}>
+              <Form.Item>
                 <Button
-                  type="primary"
+                  variant="primary"
                   htmlType="submit"
                   loading={loading}
                   block
@@ -274,7 +275,7 @@ export default function LoginPage() {
 
                 <Form.Item style={{ marginBottom: 0 }}>
                   <Button
-                    type="primary"
+                    variant="primary"
                     htmlType="submit"
                     loading={resetLoading}
                     block
@@ -306,7 +307,7 @@ export default function LoginPage() {
               </div>
 
               <Button
-                type="primary"
+                variant="primary"
                 block
                 size="large"
                 onClick={handleCloseResetModal}

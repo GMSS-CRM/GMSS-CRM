@@ -2,23 +2,22 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   Layout,
   Menu,
-  Button,
   Space,
   Dropdown,
-  Badge,
-  Tooltip,
   Avatar,   
 } from "antd";
 import {
-  BellOutlined,
   LogoutOutlined,
   DashboardOutlined,
   SafetyOutlined,
+  ShopOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
 import { showConfirmModal } from "../../components/confirm-modal";
 import ThemeSwitcher from "../../components/theme-switcher";
+import NotificationDropdown from "../../components/notifications";
 import type { MenuProps } from "antd";
 import styles from "./styles.module.css";
 
@@ -29,6 +28,16 @@ const menuItems: MenuProps["items"] = [
     key: "dashboard",
     icon: <DashboardOutlined style={{ fontSize: 22 }} />,
     label: "Dashboard",
+  },
+  {
+    key: "tenders",
+    icon: <FileTextOutlined style={{ fontSize: 22 }} />,
+    label: "Tenders",
+  },
+  {
+    key: "vendors",
+    icon: <ShopOutlined style={{ fontSize: 22 }} />,
+    label: "Vendors",
   },
   {
     key: "security",
@@ -113,20 +122,12 @@ export default function MainLayout() {
           <div className={styles.headerSpacer} />
 
           {/* Right Side Actions */}
-          <Space size={8} className={styles.headerActions}>
+          <Space size={16} className={styles.headerActions}>
             {/* Theme Switcher */}
             <ThemeSwitcher />
 
             {/* Notifications */}
-            <Tooltip title="Notifications">
-              <Badge count={3} size="small" offset={[-2, 2]}>
-                <Button
-                  type="text"
-                  icon={<BellOutlined style={{ fontSize: 18 }} />}
-                  className={styles.notificationButton}
-                />
-              </Badge>
-            </Tooltip>
+            <NotificationDropdown />
 
             {/* User Menu */}
             <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight">
