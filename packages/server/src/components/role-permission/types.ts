@@ -1,21 +1,18 @@
 import { Repository } from 'typeorm';
 import { RolePermission } from '../../entities/RolePermission';
-import { Permission } from '@gmss/types';
+import type {
+  Permission,
+  AssignPermissionsInput,
+  RolePermissionResult,
+} from '@gmss/types';
 
-export interface AssignPermissionsInput {
-  roleId: string;
-  permissions: Permission[];
-}
-
-export interface RolePermissionResult {
-  roleId: string;
-  permissions: Permission[];
-}
+// Re-export GraphQL types
+export type { Permission, AssignPermissionsInput, RolePermissionResult };
 
 export interface IRolePermissionRepository extends Repository<RolePermission> {
   findByRoleId(roleId: string): Promise<RolePermission[]>;
   deleteByRoleId(roleId: string): Promise<void>;
-  insertPermissions(roleId: string, permissions: Permission[]): Promise<void>;
+  insertPermissions(entities: Partial<RolePermission>[]): Promise<void>;
 }
 
 export interface IRolePermissionService {

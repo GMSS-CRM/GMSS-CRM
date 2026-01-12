@@ -13,11 +13,14 @@ export class Role {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
-  roleName!: string;
+  @Column({ unique: true })
+  name!: string;
 
   @Column({ nullable: true })
   description?: string;
+
+  @Column({ default: 'SYSTEM' })
+  createdBy!: string;
 
   @Column({ default: 'SYSTEM' })
   updatedBy!: string;

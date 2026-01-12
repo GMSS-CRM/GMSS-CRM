@@ -24,39 +24,27 @@ export class RoleRepository
     return this.findOne({ where: { id } });
   }
 
-  async search(input?: SearchRoleInput) {
-    if (!input?.search) {
-      return this.find({
-        take: input?.limit,
-        skip: input?.offset,
-      });
+  search(input: { search?: string; limit?: number; offset?: number }) {
+    const where: any = {};
+    if (input.search) {
+      where.name = Like(`%${input.search}%`);
     }
-
     return this.find({
-      where: { roleName: Like(`%${input.search}%`) },
+      where,
       take: input.limit,
       skip: input.offset,
     });
   }
 
-  async createRole(input: CreateRoleInput) {
-    const role = this.create({
-      ...input,
-      updatedBy: 'SYSTEM',
-    });
-    return this.save(role);
+  createRole(role: Partial<Role>) {
+    return this.save(this.create(role));
   }
 
-  async updateRole(id: string, input: UpdateRoleInput) {
-    await this.update(id, {
-      ...input,
-      updatedBy: 'SYSTEM',
-    });
-    return this.findById(id);
+  updateRole(id: string, role: Partial<Role>) {
+    return this.update(id, role).then(() => this.findById(id));
   }
 
-  async deleteRole(id: string) {
-    await this.delete(id);
-    return true;
+  deleteRole(id: string) {
+    return this.delete(id);
   }
 }

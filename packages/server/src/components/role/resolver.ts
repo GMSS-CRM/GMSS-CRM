@@ -1,29 +1,35 @@
-import { container } from '../../inversify/container';
+import { getContainer } from '../../inversify/container';
 import { TYPES } from '../../inversify/types';
 import { IRoleService } from './types';
+import {
+  MutationUpdateRoleArgs,
+  MutationCreateRoleArgs,
+  QueryGetRoleByIdArgs,
+  QuerySearchRolesArgs,
+} from '@gmss/types';
 
 export const roleResolvers = {
   Query: {
-    roleById: (_: any, { id }: any) =>
-      container.get<IRoleService>(TYPES.IRoleService).getRoleById(id),
+    getRoleById: (_: any, { id }: QueryGetRoleByIdArgs) =>
+      getContainer().get<IRoleService>(TYPES.IRoleService).getRoleById(id),
 
-    searchRoles: (_: any, { searchInput }: any) =>
-      container
+    searchRoles: (_: any, { searchInput }: QuerySearchRolesArgs) =>
+      getContainer()
         .get<IRoleService>(TYPES.IRoleService)
-        .searchRoles(searchInput),
+        .searchRoles(searchInput as any),
   },
 
   Mutation: {
-    createRole: (_: any, { input }: any) =>
-      container.get<IRoleService>(TYPES.IRoleService).createRole(input),
+    createRole: (_: any, { input }: MutationCreateRoleArgs) =>
+      getContainer().get<IRoleService>(TYPES.IRoleService).createRole(input as any),
 
-    updateRole: (_: any, { input }: any) =>
-      container.get<IRoleService>(TYPES.IRoleService).updateRole(
+    updateRole: (_: any, { input }: MutationUpdateRoleArgs) =>
+      getContainer().get<IRoleService>(TYPES.IRoleService).updateRole(
         input.id,
-        input
+        input as any
       ),
 
     deleteRole: (_: any, { id }: any) =>
-      container.get<IRoleService>(TYPES.IRoleService).deleteRole(id),
+      getContainer().get<IRoleService>(TYPES.IRoleService).deleteRole(id),
   },
 };

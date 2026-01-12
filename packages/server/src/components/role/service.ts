@@ -20,18 +20,45 @@ export class RoleService implements IRoleService {
   }
 
   searchRoles(input?: SearchRoleInput) {
-    return this.roleRepository.search(input);
+    const searchInput = {
+      search: input?.search ?? undefined,
+      limit: input?.limit ?? undefined,
+      offset: input?.offset ?? undefined,
+    };
+    return this.roleRepository.search(searchInput);
   }
 
   createRole(input: CreateRoleInput) {
-    return this.roleRepository.createRole(input);
+    if (!input.name || input.name.trim() === '') {
+      throw new Error('Role name is required');
+    }
+
+    return this.roleRepository.createRole({
+      name: input.name,
+      description: input.description ?? undefined,
+      createdBy: 'SYSTEM',
+      updatedBy: 'SYSTEM',
+    });
   }
 
   updateRole(id: string, input: UpdateRoleInput) {
-    return this.roleRepository.updateRole(id, input);
+    const updateData: any = { updatedBy: 'SYSTEM' };
+
+    if (input.name !== null && input.name !== undefined) {
+      if (input.name.trim() === '') {
+        throw new Error('Role name cannot be empty');
+      }
+      updateData.name = input.name;
+    }
+
+    if (input.description !== null && input.description !== undefined) {
+      updateData.description = input.description;
+    }
+
+    return this.roleRepository.updateRole(id, updateData);
   }
 
   deleteRole(id: string) {
-    return this.roleRepository.deleteRole(id);
+    return this.roleRepository.deleteRole(id).then(() => true);
   }
 }

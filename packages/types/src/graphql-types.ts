@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { GraphQLResolveInfo } from 'graphql';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -6,6 +6,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -13,16 +14,179 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  DateTime: { input: any; output: any; }
   _FieldSet: { input: any; output: any; }
+};
+
+export type AssignPermissionsInput = {
+  permissions: Array<Permission>;
+  roleId: Scalars['ID']['input'];
+};
+
+export type CreateRoleInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type CreateUserInput = {
+  email: Scalars['String']['input'];
+  firstName: Scalars['String']['input'];
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  roleId: Scalars['ID']['input'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
+  assignPermissions: RolePermissionResult;
+  createRole: Role;
+  createUser: User;
+  deleteRole: Scalars['Boolean']['output'];
+  deleteUser: Scalars['Boolean']['output'];
+  deleteUsers: Scalars['Boolean']['output'];
+  updateRole: Role;
+  updateUser: User;
 };
+
+
+export type MutationAssignPermissionsArgs = {
+  input: AssignPermissionsInput;
+};
+
+
+export type MutationCreateRoleArgs = {
+  input: CreateRoleInput;
+};
+
+
+export type MutationCreateUserArgs = {
+  input: CreateUserInput;
+};
+
+
+export type MutationDeleteRoleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteUsersArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpdateRoleArgs = {
+  input: UpdateRoleInput;
+};
+
+
+export type MutationUpdateUserArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateUserInput;
+};
+
+export enum Permission {
+  CREATE_ROLE = 'CREATE_ROLE',
+  CREATE_USER = 'CREATE_USER',
+  DELETE_ROLE = 'DELETE_ROLE',
+  DELETE_USER = 'DELETE_USER',
+  READ_APP_SETTING = 'READ_APP_SETTING',
+  READ_ROLE = 'READ_ROLE',
+  READ_USER = 'READ_USER',
+  UPDATE_APP_SETTING = 'UPDATE_APP_SETTING',
+  UPDATE_ROLE = 'UPDATE_ROLE',
+  UPDATE_USER = 'UPDATE_USER'
+}
 
 export type Query = {
   __typename?: 'Query';
+  getPermissionsByRoleId: Array<Permission>;
+  getRoleById?: Maybe<Role>;
+  getUserById?: Maybe<User>;
+  searchRoles: Array<Role>;
+  searchUsers: Array<User>;
+};
+
+
+export type QueryGetPermissionsByRoleIdArgs = {
+  roleId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetRoleByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetUserByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QuerySearchRolesArgs = {
+  searchInput?: InputMaybe<SearchRoleInput>;
+};
+
+
+export type QuerySearchUsersArgs = {
+  searchInput?: InputMaybe<SearchUserInput>;
+};
+
+export type Role = {
+  __typename?: 'Role';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedBy: Scalars['String']['output'];
+  updatedDate: Scalars['String']['output'];
+};
+
+export type RolePermissionResult = {
+  __typename?: 'RolePermissionResult';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  permissions: Array<Permission>;
+  roleId: Scalars['ID']['output'];
+};
+
+export type SearchRoleInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SearchUserInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateRoleInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateUserInput = {
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  roleId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type User = {
+  __typename?: 'User';
+  createdDate: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  firstName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  lastName?: Maybe<Scalars['String']['output']>;
+  role: Role;
+  roleId: Scalars['ID']['output'];
+  updatedDate: Scalars['String']['output'];
 };
 
 
@@ -98,27 +262,97 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
-  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
-  Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  AssignPermissionsInput: AssignPermissionsInput;
+  ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  CreateRoleInput: CreateRoleInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  CreateUserInput: CreateUserInput;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Permission: Permission;
+  Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  Role: ResolverTypeWrapper<Role>;
+  RolePermissionResult: ResolverTypeWrapper<RolePermissionResult>;
+  SearchRoleInput: SearchRoleInput;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  SearchUserInput: SearchUserInput;
+  UpdateRoleInput: UpdateRoleInput;
+  UpdateUserInput: UpdateUserInput;
+  User: ResolverTypeWrapper<User>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  DateTime: Scalars['DateTime']['output'];
-  Mutation: Record<PropertyKey, never>;
-  Query: Record<PropertyKey, never>;
-  Boolean: Scalars['Boolean']['output'];
+  AssignPermissionsInput: AssignPermissionsInput;
+  ID: Scalars['ID']['output'];
+  CreateRoleInput: CreateRoleInput;
   String: Scalars['String']['output'];
+  CreateUserInput: CreateUserInput;
+  Mutation: Record<PropertyKey, never>;
+  Boolean: Scalars['Boolean']['output'];
+  Query: Record<PropertyKey, never>;
+  Role: Role;
+  RolePermissionResult: RolePermissionResult;
+  SearchRoleInput: SearchRoleInput;
+  Int: Scalars['Int']['output'];
+  SearchUserInput: SearchUserInput;
+  UpdateRoleInput: UpdateRoleInput;
+  UpdateUserInput: UpdateUserInput;
+  User: User;
 };
 
-export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
-  name: 'DateTime';
-}
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  assignPermissions?: Resolver<ResolversTypes['RolePermissionResult'], ParentType, ContextType, RequireFields<MutationAssignPermissionsArgs, 'input'>>;
+  createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'input'>>;
+  createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
+  deleteRole?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteRoleArgs, 'id'>>;
+  deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'id'>>;
+  deleteUsers?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUsersArgs, 'ids'>>;
+  updateRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationUpdateRoleArgs, 'input'>>;
+  updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'id' | 'input'>>;
+};
+
+export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  getPermissionsByRoleId?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType, RequireFields<QueryGetPermissionsByRoleIdArgs, 'roleId'>>;
+  getRoleById?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<QueryGetRoleByIdArgs, 'id'>>;
+  getUserById?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserByIdArgs, 'id'>>;
+  searchRoles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType, Partial<QuerySearchRolesArgs>>;
+  searchUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QuerySearchUsersArgs>>;
+};
+
+export type RoleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Role'] = ResolversParentTypes['Role']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type RolePermissionResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RolePermissionResult'] = ResolversParentTypes['RolePermissionResult']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  permissions?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType>;
+  roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
+  roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
 
 export type Resolvers<ContextType = any> = {
-  DateTime?: GraphQLScalarType;
+  Mutation?: MutationResolvers<ContextType>;
+  Query?: QueryResolvers<ContextType>;
+  Role?: RoleResolvers<ContextType>;
+  RolePermissionResult?: RolePermissionResultResolvers<ContextType>;
+  User?: UserResolvers<ContextType>;
 };
 

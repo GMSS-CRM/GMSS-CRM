@@ -4,7 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  UpdateDateColumn,
+  CreateDateColumn,
   Index,
 } from 'typeorm';
 import { Role } from './Role';
@@ -24,8 +24,8 @@ export class RolePermission {
   permission!: Permission;
 
   @Column({ default: 'SYSTEM' })
-  updatedBy!: string;
+  createdBy!: string;
 
-  @UpdateDateColumn()
-  updatedDate!: Date;
+  @CreateDateColumn()
+  createdDate!: Date;
 }

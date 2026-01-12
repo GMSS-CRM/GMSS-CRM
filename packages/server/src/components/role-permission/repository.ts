@@ -2,7 +2,6 @@ import { inject, injectable } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
 import { TYPES } from '../../inversify/types';
 import { RolePermission } from '../../entities/RolePermission';
-import { Role } from '../../entities/Role';
 import { Permission } from '@gmss/types';
 import { IRolePermissionRepository } from './types';
 
@@ -11,13 +10,10 @@ export class RolePermissionRepository
   extends Repository<RolePermission>
   implements IRolePermissionRepository
 {
-  private roleRepo: Repository<Role>;
-
   constructor(
     @inject(TYPES.DbContext) private readonly dbContext: DataSource
   ) {
     super(RolePermission, dbContext.manager);
-    this.roleRepo = dbContext.getRepository(Role);
   }
 
   findByRoleId(roleId: string) {
@@ -27,25 +23,15 @@ export class RolePermissionRepository
     });
   }
 
-  async deleteByRoleId(roleId: string) {
-    await this.createQueryBuilder()
+  deleteByRoleId(roleId: string) {
+    return this.createQueryBuilder()
       .delete()
       .where('roleId = :roleId', { roleId })
-      .execute();
+      .execute()
+      .then(() => undefined);
   }
 
-  async insertPermissions(roleId: string, permissions: Permission[]) {
-    const role = await this.roleRepo.findOneBy({ id: roleId });
-    if (!role) throw new Error('Invalid roleId');
-
-    const entities = permissions.map((permission) =>
-      this.create({
-        role,
-        permission,
-        updatedBy: 'SYSTEM',
-      })
-    );
-
-    await this.save(entities);
+  insertPermissions(entities: Partial<RolePermission>[]) {
+    return this.save(entities as RolePermission[]).then(() => undefined);
   }
 }

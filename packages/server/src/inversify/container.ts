@@ -17,24 +17,37 @@ import { IRoleRepository,IRoleService } from '../components/role/types';
 import { RoleRepository } from '../components/role/repository';
 import { RoleService } from '../components/role/service';
 
-const container = new Container({ defaultScope: 'Singleton' });
+let _container: Container | null = null;
 
-container.bind(TYPES.DbContext).toConstantValue(AppDataSource);
+function createContainer(): Container {
+  const container = new Container({ defaultScope: 'Singleton' });
 
-container.bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository);
-container.bind<IUserService>(TYPES.IUserService).to(UserService);
-container
-  .bind<IRolePermissionRepository>(TYPES.IRolePermissionRepository)
-  .to(RolePermissionRepository);
+  container.bind(TYPES.DbContext).toConstantValue(AppDataSource);
 
-container
-  .bind<IRolePermissionService>(TYPES.IRolePermissionService)
-  .to(RolePermissionService);
+  container.bind<IUserRepository>(TYPES.IUserRepository).to(UserRepository);
+  container.bind<IUserService>(TYPES.IUserService).to(UserService);
   container
-  .bind<IRoleRepository>(TYPES.IRoleRepository)
-  .to(RoleRepository);
+    .bind<IRolePermissionRepository>(TYPES.IRolePermissionRepository)
+    .to(RolePermissionRepository);
 
-container
-  .bind<IRoleService>(TYPES.IRoleService)
-  .to(RoleService);
-export { container };
+  container
+    .bind<IRolePermissionService>(TYPES.IRolePermissionService)
+    .to(RolePermissionService);
+  container
+    .bind<IRoleRepository>(TYPES.IRoleRepository)
+    .to(RoleRepository);
+
+  container
+    .bind<IRoleService>(TYPES.IRoleService)
+    .to(RoleService);
+    
+  return container;
+}
+
+export function getContainer(): Container {
+  if (!_container) {
+    _container = createContainer();
+  }
+  return _container;
+}
+

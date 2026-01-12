@@ -1,22 +1,13 @@
 import { Repository } from 'typeorm';
 import { Role } from '../../entities/Role';
+import type {
+  CreateRoleInput,
+  UpdateRoleInput,
+  SearchRoleInput,
+} from '@gmss/types';
 
-export interface CreateRoleInput {
-  roleName: string;
-  description?: string;
-}
-
-export interface UpdateRoleInput {
-  id: string;
-  roleName?: string;
-  description?: string;
-}
-
-export interface SearchRoleInput {
-  search?: string;
-  limit?: number;
-  offset?: number;
-}
+// Re-export GraphQL types for use in resolvers and services
+export type { CreateRoleInput, UpdateRoleInput, SearchRoleInput };
 
 export interface SaveRoleResponse {
   roles?: Role[];
@@ -26,10 +17,10 @@ export interface SaveRoleResponse {
 
 export interface IRoleRepository extends Repository<Role> {
   findById(id: string): Promise<Role | null>;
-  search(input?: SearchRoleInput): Promise<Role[]>;
-  createRole(input: CreateRoleInput): Promise<Role>;
-  updateRole(id: string, input: UpdateRoleInput): Promise<Role | null>;
-  deleteRole(id: string): Promise<boolean>;
+  search(input: { search?: string; limit?: number; offset?: number }): Promise<Role[]>;
+  createRole(role: Partial<Role>): Promise<Role>;
+  updateRole(id: string, role: Partial<Role>): Promise<Role | null>;
+  deleteRole(id: string): Promise<any>;
 }
 
 export interface IRoleService {

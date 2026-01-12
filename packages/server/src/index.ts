@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { startApolloServer } from "./server";
 
 startApolloServer().catch((err) => {

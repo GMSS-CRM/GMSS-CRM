@@ -4,6 +4,8 @@ export const rolePermissionTypeDefs = gql`
   type RolePermissionResult {
     roleId: ID!
     permissions: [Permission!]!
+    createdBy: String!
+    createdDate: String!
   }
 
   input AssignPermissionsInput {
@@ -12,7 +14,7 @@ export const rolePermissionTypeDefs = gql`
   }
 
   extend type Query {
-    permissionsByRoleId(roleId: ID!): [Permission!]!
+    getPermissionsByRoleId(roleId: ID!): [Permission!]!
   }
 
   extend type Mutation {

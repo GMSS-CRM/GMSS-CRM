@@ -2,7 +2,6 @@ import { inject, injectable } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
 import { TYPES } from '../../inversify/types';
 import { User } from '../../entities/User';
-import { Role } from '../../entities/Role';
 import {
   IUserRepository,
   CreateUserInput,
@@ -15,28 +14,14 @@ export class UserRepository
   extends Repository<User>
   implements IUserRepository
 {
-  private roleRepo: Repository<Role>;
-
   constructor(
     @inject(TYPES.DbContext) private readonly dbContext: DataSource
   ) {
     super(User, dbContext.manager);
-    this.roleRepo = dbContext.getRepository(Role);
   }
 
-  async createUser(input: CreateUserInput): Promise<User> {
-    const { roleId, ...rest } = input;
-
-    const role = await this.roleRepo.findOneBy({ id: roleId });
-    if (!role) throw new Error('Invalid roleId');
-
-    const user = this.create({
-      ...rest,
-      role,
-      updatedBy: 'SYSTEM',
-    });
-
-    return this.save(user);
+  createUser(user: Partial<User>) {
+    return this.save(this.create(user));
   }
 
   findById(id: string) {
@@ -46,7 +31,7 @@ export class UserRepository
     });
   }
 
-  search(params: SearchUserInput) {
+  search(params: { search?: string; limit?: number; offset?: number }) {
     return this.find({
       where: { isDeleted: false },
       relations: ['role'],
@@ -55,30 +40,15 @@ export class UserRepository
     });
   }
 
-  async updateUser(id: string, input: UpdateUserInput) {
-    if (input.roleId) {
-      const role = await this.roleRepo.findOneBy({ id: input.roleId });
-      if (!role) throw new Error('Invalid roleId');
-
-      (input as any).role = role;
-      delete (input as any).roleId;
-    }
-
-    await this.update(id, {
-      ...input,
-      updatedBy: 'SYSTEM',
-    });
-
-    return this.findById(id);
+  updateUser(id: string, user: Partial<User>) {
+    return this.update(id, user).then(() => this.findById(id));
   }
 
-  async deleteUser(id: string) {
-    await this.update(id, { isDeleted: true, updatedBy: 'SYSTEM' });
-    return true;
+  deleteUser(id: string) {
+    return this.update(id, { isDeleted: true }).then(() => true);
   }
 
-  async deleteUsers(ids: string[]) {
-    await this.update(ids, { isDeleted: true, updatedBy: 'SYSTEM' });
-    return true;
+  deleteUsers(ids: string[]) {
+    return this.update({ id: ids as any }, { isDeleted: true }).then(() => true);
   }
 }

@@ -1,27 +1,37 @@
-import { container } from '../../inversify/container';
+import { getContainer } from '../../inversify/container';
 import { TYPES } from '../../inversify/types';
 import { IUserService } from './types';
+import {
+  QueryGetUserByIdArgs,
+  QuerySearchUsersArgs,
+  MutationCreateUserArgs,
+  MutationUpdateUserArgs,
+} from '@gmss/types';
 
 export const userResolvers = {
   Query: {
-    getUserById: (_: unknown, { id }: { id: string }) =>
-      container.get<IUserService>(TYPES.IUserService).getById(id),
+    getUserById: (_: unknown, { id }: QueryGetUserByIdArgs) =>
+      getContainer().get<IUserService>(TYPES.IUserService).getById(id),
 
-    searchUsers: (_: unknown, { searchInput }: any) =>
-      container.get<IUserService>(TYPES.IUserService).search(searchInput),
+    searchUsers: (_: unknown, { searchInput }: QuerySearchUsersArgs) =>
+      getContainer().get<IUserService>(TYPES.IUserService).searchUser(searchInput as any),
   },
 
   Mutation: {
-    createUser: (_: unknown, { input }: any) =>
-      container.get<IUserService>(TYPES.IUserService).create(input),
+    createUser: (_: unknown, { input }: MutationCreateUserArgs) =>
+      getContainer().get<IUserService>(TYPES.IUserService).createUser(input as any),
 
-    updateUser: (_: unknown, { id, input }: any) =>
-      container.get<IUserService>(TYPES.IUserService).update(id, input),
+    updateUser: (_: unknown, { id, input }: MutationUpdateUserArgs) =>
+      getContainer().get<IUserService>(TYPES.IUserService).updateUser(id, input as any),
 
     deleteUser: (_: unknown, { id }: any) =>
-      container.get<IUserService>(TYPES.IUserService).delete(id),
+      getContainer().get<IUserService>(TYPES.IUserService).deleteUser(id),
 
     deleteUsers: (_: unknown, { ids }: any) =>
-      container.get<IUserService>(TYPES.IUserService).deleteMany(ids),
+      getContainer().get<IUserService>(TYPES.IUserService).deleteUsers(ids),
+  },
+
+  User: {
+    roleId: (user: any) => user.role?.id,
   },
 };

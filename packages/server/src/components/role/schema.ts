@@ -3,20 +3,22 @@ import { gql } from 'graphql-tag';
 export const roleTypeDefs = gql`
   type Role {
     id: ID!
-    roleName: String!
+    name: String!
     description: String
+    createdBy: String!
+    updatedBy: String!
     createdDate: String!
     updatedDate: String!
   }
 
   input CreateRoleInput {
-    roleName: String!
+    name: String!
     description: String
   }
 
   input UpdateRoleInput {
     id: ID!
-    roleName: String
+    name: String
     description: String
   }
 
@@ -27,7 +29,7 @@ export const roleTypeDefs = gql`
   }
 
   extend type Query {
-    roleById(id: ID!): Role
+    getRoleById(id: ID!): Role
     searchRoles(searchInput: SearchRoleInput): [Role!]!
   }
 

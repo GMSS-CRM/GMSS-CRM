@@ -1,19 +1,23 @@
-import { container } from '../../inversify/container';
+import { getContainer } from '../../inversify/container';
 import { TYPES } from '../../inversify/types';
 import { IRolePermissionService } from './types';
+import {
+  MutationAssignPermissionsArgs,
+  QueryGetPermissionsByRoleIdArgs,
+} from '@gmss/types';
 
 export const rolePermissionResolvers = {
   Query: {
-    permissionsByRoleId: (_: any, { roleId }: any) =>
-      container
+    getPermissionsByRoleId: (_: any, { roleId }: QueryGetPermissionsByRoleIdArgs) =>
+      getContainer()
         .get<IRolePermissionService>(TYPES.IRolePermissionService)
         .getPermissionsByRoleId(roleId),
   },
 
   Mutation: {
-    assignPermissions: (_: any, { input }: any) =>
-      container
+    assignPermissions: (_: any, { input }: MutationAssignPermissionsArgs) =>
+      getContainer()
         .get<IRolePermissionService>(TYPES.IRolePermissionService)
-        .assignPermissions(input),
+        .assignPermissions(input as any),
   },
 };

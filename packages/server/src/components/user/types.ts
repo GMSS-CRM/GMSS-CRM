@@ -1,5 +1,13 @@
 import { Repository } from 'typeorm';
-import { User } from 'src/entities/User';
+import { User } from '../../entities/User';
+import type {
+  CreateUserInput,
+  UpdateUserInput,
+  SearchUserInput,
+} from '@gmss/types';
+
+// Re-export GraphQL types
+export type { CreateUserInput, UpdateUserInput, SearchUserInput };
 
 /**
  * Responses
@@ -13,10 +21,10 @@ export interface SaveUserResponse {
  * Repository contract
  */
 export interface IUserRepository extends Repository<User> {
-  createUser(input: CreateUserInput): Promise<User>;
+  createUser(user: Partial<User>): Promise<User>;
   findById(id: string): Promise<User | null>;
-  search(params: SearchUserInput): Promise<User[]>;
-  updateUser(id: string, input: UpdateUserInput): Promise<User | null>;
+  search(params: { search?: string; limit?: number; offset?: number }): Promise<User[]>;
+  updateUser(id: string, user: Partial<User>): Promise<User | null>;
   deleteUser(id: string): Promise<boolean>;
   deleteUsers(ids: string[]): Promise<boolean>;
 }
@@ -25,32 +33,10 @@ export interface IUserRepository extends Repository<User> {
  * Service contract
  */
 export interface IUserService {
-  create(input: CreateUserInput): Promise<User>;
-  update(id: string, input: UpdateUserInput): Promise<User | null>;
-  delete(id: string): Promise<boolean>;
-  deleteMany(ids: string[]): Promise<boolean>;
+  createUser(input: CreateUserInput): Promise<User>;
+  updateUser(id: string, input: UpdateUserInput): Promise<User | null>;
+  deleteUser(id: string): Promise<boolean>;
+  deleteUsers(ids: string[]): Promise<boolean>;
   getById(id: string): Promise<User | null>;
-  search(params: SearchUserInput): Promise<User[]>;
-}
-
-/**
- * Input DTOs
- */
-export interface CreateUserInput {
-  firstName: string;
-  lastName?: string;
-  email: string;
-  roleId: string;
-}
-
-export interface UpdateUserInput {
-  firstName?: string;
-  lastName?: string;
-  roleId?: string;
-}
-
-export interface SearchUserInput {
-  search?: string;
-  limit?: number;
-  offset?: number;
+  searchUser(params: SearchUserInput): Promise<User[]>;
 }
