@@ -2,11 +2,23 @@
  * Type definitions for Vendors module
  */
 
-export type VendorType = 'OEM' | 'Trader' | 'Distributor';
+export type VendorType = 'Vendor' | 'Consultant';
 
 export type VendorStatus = 'Draft' | 'Submitted' | 'Approved' | 'Rejected';
 
 export type DocumentStatus = 'Pending' | 'Verified' | 'Rejected';
+
+export interface ContactPerson {
+  id: string;
+  name: string;
+  designation?: string;
+  phone?: string;
+  email: {
+    mailto: string[];
+    cc: string[];
+    bcc: string[];
+  };
+}
 
 export interface Vendor {
   id: string;
@@ -14,9 +26,7 @@ export interface Vendor {
   companyName: string;
   vendorType: VendorType;
   address?: string;
-  contactPersonName?: string;
-  contactEmail?: string;
-  contactPhone?: string;
+  contactPersons: ContactPerson[];
   // Business Identity Fields
   gstNumber?: string;
   panNumber?: string;
@@ -40,7 +50,7 @@ export type DocumentType =
 export interface VendorDocument {
   id: string;
   vendorId: string;
-  documentType: DocumentType;
+  documentType: string;
   fileName?: string; // Optional file name for mock purposes
   status: DocumentStatus;
   remarks?: string; // Optional remarks/comments
@@ -48,20 +58,12 @@ export interface VendorDocument {
   uploadedBy?: string;
   verifiedDate?: string;
   verifiedBy?: string;
+  expired?: boolean;
+  expiryDate?: string;
 }
 
 export interface Tag {
   id: string;
   name: string;
   color?: string;
-}
-
-export interface ApprovalHistory {
-  id: string;
-  vendorId: string;
-  action: string;
-  status: VendorStatus;
-  performedBy: string;
-  performedDate: string;
-  comments?: string;
 }

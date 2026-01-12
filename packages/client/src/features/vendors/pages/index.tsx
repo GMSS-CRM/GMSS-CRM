@@ -49,6 +49,25 @@ export default function VendorsPage() {
     navigate('/vendors/create');
   }, [navigate]);
 
+  const handleUpload = useCallback(async (file: File) => {
+    try {
+      // TODO: Implement Excel file processing
+      // For now, just show a success message
+      message.success(`File "${file.name}" uploaded successfully. Processing vendors...`);
+
+      // Here you would typically:
+      // 1. Parse the Excel file
+      // 2. Validate the data
+      // 3. Create vendor records
+      // 4. Refresh the vendor list
+
+      console.log('Uploaded file:', file);
+    } catch (error) {
+      message.error('Failed to upload vendors');
+      console.error(error);
+    }
+  }, []);
+
   // Render list or details based on route
   if (isListPage) {
     return (
@@ -56,6 +75,7 @@ export default function VendorsPage() {
         vendors={vendors}
         onView={handleView}
         onCreate={handleCreate}
+        onUpload={handleUpload}
         loading={loading}
       />
     );

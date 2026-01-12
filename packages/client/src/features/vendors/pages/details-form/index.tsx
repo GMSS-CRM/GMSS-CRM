@@ -9,14 +9,12 @@ import {
   message,
   Tag,
   Table,
-  Timeline,
   Row,
   Col,
   Card,
 } from 'antd';
 import {
   ArrowLeftOutlined,
-  SaveOutlined,
   SendOutlined,
   UploadOutlined,
   InfoCircleOutlined,
@@ -24,10 +22,9 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   LockOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import type { Vendor, VendorDocument, Tag as VendorTag, ApprovalHistory, DocumentType } from '../../types';
+import type { Vendor, VendorDocument, Tag as VendorTag } from '../../types';
 import Button from '../../../../components/button';
 import SubMenu from '../../../../components/sub-menu';
 import type { SubMenuItemConfig } from '../../../../components/sub-menu';
@@ -37,13 +34,12 @@ import {
   updateVendor,
   fetchTags,
   fetchVendorDocuments,
-  fetchApprovalHistory,
 } from '../../services/vendors.service';
 import styles from './styles.module.css';
 
 const { TextArea } = Input;
 
-type VendorSubMenuItem = 'basic' | 'documents' | 'approval' | 'users';
+type VendorSubMenuItem = 'basic' | 'documents';
 
 const VENDOR_MENU_ITEMS: SubMenuItemConfig[] = [
   {
@@ -56,16 +52,6 @@ const VENDOR_MENU_ITEMS: SubMenuItemConfig[] = [
     icon: <FileTextOutlined />,
     label: 'Documents',
   },
-  {
-    key: 'approval',
-    icon: <CheckCircleOutlined />,
-    label: 'Approval',
-  },
-  {
-    key: 'users',
-    icon: <UserOutlined />,
-    label: 'Vendor Users',
-  },
 ];
 
 export default function VendorDetailsForm() {
@@ -77,7 +63,6 @@ export default function VendorDetailsForm() {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [tags, setTags] = useState<VendorTag[]>([]);
   const [documents, setDocuments] = useState<VendorDocument[]>([]);
-  const [approvalHistory, setApprovalHistory] = useState<ApprovalHistory[]>([]);
   const [selectedSubMenu, setSelectedSubMenu] = useState<VendorSubMenuItem>('basic');
 
   const isEditMode = !!id;
@@ -101,9 +86,7 @@ export default function VendorDetailsForm() {
               companyName: vendorData.companyName,
               vendorType: vendorData.vendorType,
               address: vendorData.address,
-              contactPersonName: vendorData.contactPersonName,
-              contactEmail: vendorData.contactEmail,
-              contactPhone: vendorData.contactPhone,
+              contactPersons: vendorData.contactPersons,
               gstNumber: vendorData.gstNumber,
               panNumber: vendorData.panNumber,
               msmeNumber: vendorData.msmeNumber,
@@ -111,12 +94,9 @@ export default function VendorDetailsForm() {
               tags: vendorData.tags,
             });
 
-            // Load documents and approval history
+            // Load documents
             const docsData = await fetchVendorDocuments(id);
             setDocuments(docsData);
-
-            const historyData = await fetchApprovalHistory(id);
-            setApprovalHistory(historyData);
           } else {
             message.error('Vendor not found');
             navigate('/vendors');
@@ -141,9 +121,7 @@ export default function VendorDetailsForm() {
     companyName: values.companyName,
     vendorType: values.vendorType,
     address: values.address,
-    contactPersonName: values.contactPersonName,
-    contactEmail: values.contactEmail,
-    contactPhone: values.contactPhone,
+    contactPersons: values.contactPersons,
     gstNumber: values.gstNumber,
     panNumber: values.panNumber,
     msmeNumber: values.msmeNumber,
@@ -153,33 +131,6 @@ export default function VendorDetailsForm() {
     createdBy: 'current-user', // TODO: Get from auth context
   }), []);
 
-  const handleSaveAsDraft = useCallback(async () => {
-    try {
-      const values = await form.validateFields();
-      setLoading(true);
-
-      const vendorData = buildVendorData(values, 'Draft');
-
-      if (isEditMode && vendor) {
-        await updateVendor(vendor.id, vendorData);
-        message.success('Vendor saved as draft');
-      } else {
-        await createVendor(vendorData);
-        message.success('Vendor created as draft');
-      }
-
-      navigate('/vendors');
-    } catch (error) {
-      if (error instanceof Error && 'errorFields' in error) {
-        message.warning('Please fill in all required fields');
-      } else {
-        message.error('Failed to save vendor');
-        console.error(error);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [form, isEditMode, vendor, navigate, buildVendorData]);
 
   const handleSubmitForApproval = useCallback(async () => {
     try {
@@ -208,21 +159,6 @@ export default function VendorDetailsForm() {
       setLoading(false);
     }
   }, [form, isEditMode, vendor, navigate, buildVendorData]);
-
-  const getStatusColor = useCallback((status: string): string => {
-    switch (status) {
-      case 'Approved':
-        return 'success';
-      case 'Submitted':
-        return 'processing';
-      case 'Rejected':
-        return 'error';
-      case 'Draft':
-        return 'default';
-      default:
-        return 'default';
-    }
-  }, []);
 
   const documentColumns: ColumnsType<VendorDocument> = [
     {
@@ -262,23 +198,16 @@ export default function VendorDetailsForm() {
       ),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: 'Expired',
+      dataIndex: 'expired',
+      key: 'expired',
       width: '15%',
-      render: (status: string) => (
-        <Tag
-          color={
-            status === 'Verified'
-              ? 'success'
-              : status === 'Rejected'
-              ? 'error'
-              : 'warning'
-          }
-        >
-          {status}
-        </Tag>
-      ),
+      render: (_: any, record: VendorDocument) => {
+        if (record.expired) {
+          return <Tag color="error">Expired{record.expiryDate ? ` (${record.expiryDate})` : ''}</Tag>;
+        }
+        return <Tag color="success">Not Expired</Tag>;
+      },
     },
     {
       title: 'Remarks',
@@ -325,16 +254,9 @@ export default function VendorDetailsForm() {
             </p>
           </div>
         </Space>
-        {/* Show buttons only for Draft, Rejected, or new vendors */}
+        {/* Show submit button only for Draft, Rejected, or new vendors */}
         {(!vendor || vendor.status === 'Draft' || vendor.status === 'Rejected') && (
           <Space>
-            <AntButton
-              icon={<SaveOutlined />}
-              onClick={handleSaveAsDraft}
-              loading={loading}
-            >
-              Save as Draft
-            </AntButton>
             <AntButton
               type="primary"
               icon={<SendOutlined />}
@@ -378,19 +300,8 @@ export default function VendorDetailsForm() {
             <DocumentsSection
               documents={documents}
               documentColumns={documentColumns}
+              onAddDocument={(doc) => setDocuments((prev) => [...prev, doc])}
             />
-          )}
-
-          {selectedSubMenu === 'approval' && (
-            <ApprovalSection
-              vendor={vendor}
-              approvalHistory={approvalHistory}
-              getStatusColor={getStatusColor}
-            />
-          )}
-
-          {selectedSubMenu === 'users' && (
-            <VendorUsersPlaceholder />
           )}
         </div>
       </div>
@@ -480,9 +391,8 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
                 ]}
               >
                 <Select placeholder="Select vendor type">
-                  <Select.Option value="OEM">OEM</Select.Option>
-                  <Select.Option value="Trader">Trader</Select.Option>
-                  <Select.Option value="Distributor">Distributor</Select.Option>
+                  <Select.Option value="Vendor">Vendor</Select.Option>
+                  <Select.Option value="Consultant">Consultant</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
@@ -564,29 +474,14 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
                 <h3 className={styles.sectionDividerTitle}>
                   Contact Information
                 </h3>
+                <p className={styles.sectionDividerSubtitle}>
+                  Add one or more contact persons for this vendor
+                </p>
               </div>
             </Col>
 
-            <Col span={12}>
-              <Form.Item label="Contact Person Name" name="contactPersonName">
-                <Input placeholder="Enter contact person name" />
-              </Form.Item>
-            </Col>
-
-            <Col span={12}>
-              <Form.Item
-                label="Contact Email"
-                name="contactEmail"
-                rules={[{ type: 'email', message: 'Please enter valid email' }]}
-              >
-                <Input placeholder="Enter email address" />
-              </Form.Item>
-            </Col>
-
-            <Col span={12}>
-              <Form.Item label="Contact Phone" name="contactPhone">
-                <Input placeholder="Enter phone number" />
-              </Form.Item>
+            <Col span={24}>
+              <ContactPersonsSection form={form} disabled={isFormDisabled} />
             </Col>
 
             <Col span={12}>
@@ -638,31 +533,65 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
 }
 
 // Documents Section Component
+import { Modal, DatePicker, Switch } from 'antd';
+import { useRef } from 'react';
+
 interface DocumentsSectionProps {
   documents: VendorDocument[];
   documentColumns: ColumnsType<VendorDocument>;
+  onAddDocument: (doc: VendorDocument) => void;
 }
 
-function DocumentsSection({ documents, documentColumns }: DocumentsSectionProps) {
-  // Define all required document types
-  const requiredDocTypes: DocumentType[] = [
-    'GST Certificate',
-    'PAN Card',
-    'MSME / UDYAM Certificate',
-    'Experience Certificate',
-  ];
+function DocumentsSection({ documents, documentColumns, onAddDocument }: DocumentsSectionProps) {
+  const [uploadModalVisible, setUploadModalVisible] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [docType, setDocType] = useState<string>('');
+  const [expired, setExpired] = useState(false);
+  const [expiryDate, setExpiryDate] = useState<string | null>(null);
+  const [remarks, setRemarks] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<any>(null);
 
-  // Create a complete document list with all required types
-  const completeDocuments = requiredDocTypes.map((docType) => {
-    const existing = documents.find((doc) => doc.documentType === docType);
-    return existing || {
-      id: `placeholder-${docType}`,
-      vendorId: '',
-      documentType: docType,
-      status: 'Pending' as const,
-    };
-  });
+  const handleOpenModal = () => setUploadModalVisible(true);
+  const handleCloseModal = () => {
+    setUploadModalVisible(false);
+    setFile(null);
+    setDocType('');
+    setExpired(false);
+    setExpiryDate(null);
+    setRemarks('');
+  };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = () => {
+    if (!file || !docType.trim()) {
+      message.error('Please select a file and enter document type.');
+      return;
+    }
+    setUploading(true);
+    setTimeout(() => {
+      const newDoc: VendorDocument = {
+        id: `doc-${Date.now()}`,
+        vendorId: '',
+        documentType: docType,
+        fileName: file.name,
+        status: 'Pending',
+        remarks,
+        uploadedDate: new Date().toISOString(),
+        uploadedBy: 'current-user',
+        ...(expired && expiryDate ? { expiryDate } : {}),
+      };
+      onAddDocument(newDoc);
+      setUploading(false);
+      handleCloseModal();
+      message.success('Document uploaded');
+    }, 800);
+  };
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
@@ -672,8 +601,15 @@ function DocumentsSection({ documents, documentColumns }: DocumentsSectionProps)
             Upload and verify required business documents for compliance
           </p>
         </div>
+        <AntButton
+          type="primary"
+          icon={<UploadOutlined />}
+          onClick={handleOpenModal}
+          style={{ display: 'flex', alignItems: 'center' }}
+        >
+          Upload Document
+        </AntButton>
       </div>
-
       <Card className={styles.card}>
         <div style={{ marginBottom: '16px', padding: '12px', background: '#f0f5ff', borderRadius: '6px', border: '1px solid #adc6ff' }}>
           <Space>
@@ -685,172 +621,275 @@ function DocumentsSection({ documents, documentColumns }: DocumentsSectionProps)
         </div>
         <Table
           columns={documentColumns}
-          dataSource={completeDocuments}
+          dataSource={documents}
           rowKey={(record) => record.id}
           pagination={false}
           size="middle"
         />
       </Card>
+      <Modal
+        open={uploadModalVisible}
+        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><UploadOutlined /> Upload Document</span>}
+        onCancel={handleCloseModal}
+        onOk={handleUpload}
+        okText={uploading ? 'Uploading...' : 'Upload'}
+        okButtonProps={{ loading: uploading }}
+        cancelButtonProps={{ disabled: uploading }}
+        centered
+        className={styles.uploadModal}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
+            <b>Note:</b> Please select a document file and fill all required fields. Only one document can be uploaded at a time.
+          </div>
+        </div>
+        <input
+          type="file"
+          accept="application/pdf,image/*,.doc,.docx"
+          style={{ marginBottom: 16 }}
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
+        <Input
+          placeholder="Enter Document Type"
+          value={docType}
+          onChange={e => setDocType(e.target.value as string)}
+          style={{ width: '100%', marginBottom: 16 }}
+          disabled={uploading}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16, gap: 12 }}>
+          <span>Expired?</span>
+          <Switch checked={expired} onChange={setExpired} disabled={uploading} />
+          {expired && (
+            <DatePicker
+              placeholder="Expiry Date"
+              onChange={(_, dateStr) => setExpiryDate(dateStr)}
+              style={{ marginLeft: 8 }}
+              disabled={uploading}
+            />
+          )}
+        </div>
+        <TextArea
+          placeholder="Remarks (optional)"
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+          rows={2}
+          maxLength={200}
+          style={{ marginBottom: 0 }}
+          disabled={uploading}
+        />
+      </Modal>
     </div>
   );
 }
 
-// Approval Section Component
-interface ApprovalSectionProps {
-  vendor: Vendor | null;
-  approvalHistory: ApprovalHistory[];
-  getStatusColor: (status: string) => string;
+// Contact Persons Section Component
+interface ContactPersonsSectionProps {
+  form: any;
+  disabled: boolean;
 }
 
-function ApprovalSection({ vendor, approvalHistory, getStatusColor }: ApprovalSectionProps) {
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return {
-      date: date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-      }),
-      time: date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      }),
+function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
+  const [contactPersons, setContactPersons] = useState<any[]>([]);
+
+  // Initialize contact persons from form
+  useEffect(() => {
+    const formContactPersons = form.getFieldValue('contactPersons') || [];
+    if (formContactPersons.length === 0) {
+      // Add at least one contact person by default
+      const defaultContact = {
+        id: `cp_${Date.now()}`,
+        name: '',
+        designation: '',
+        phone: '',
+        email: {
+          mailto: [],
+          cc: [],
+          bcc: [],
+        },
+      };
+      form.setFieldsValue({ contactPersons: [defaultContact] });
+      setContactPersons([defaultContact]);
+    } else {
+      setContactPersons(formContactPersons);
+    }
+  }, [form]);
+
+  const addContactPerson = () => {
+    const newContact = {
+      id: `cp_${Date.now()}`,
+      name: '',
+      designation: '',
+      phone: '',
+      email: {
+        mailto: [],
+        cc: [],
+        bcc: [],
+      },
     };
+    const updatedContacts = [...contactPersons, newContact];
+    setContactPersons(updatedContacts);
+    form.setFieldsValue({ contactPersons: updatedContacts });
   };
 
-  const getActionColor = (action: string) => {
-    if (action.includes('Approved')) return 'success';
-    if (action.includes('Rejected')) return 'error';
-    if (action.includes('Submitted')) return 'processing';
-    return 'default';
+  const removeContactPerson = (index: number) => {
+    if (contactPersons.length > 1) {
+      const updatedContacts = contactPersons.filter((_, i) => i !== index);
+      setContactPersons(updatedContacts);
+      form.setFieldsValue({ contactPersons: updatedContacts });
+    }
+  };
+
+  const updateContactPerson = (index: number, field: string, value: any) => {
+    const updatedContacts = [...contactPersons];
+    if (field.startsWith('email.')) {
+      const emailField = field.split('.')[1];
+      updatedContacts[index].email[emailField] = value;
+    } else {
+      updatedContacts[index][field] = value;
+    }
+    setContactPersons(updatedContacts);
+    form.setFieldsValue({ contactPersons: updatedContacts });
   };
 
   return (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>Approval & Status</h2>
-        <p className={styles.sectionSubtitle}>Track approval workflow and current vendor status</p>
-      </div>
-
-      <Card className={styles.card}>
-        <div className={styles.approvalStatusContainer}>
-          <div className={styles.approvalStatusWrapper}>
-            <div>
-              <div className={styles.statusLabelText}>
-                Current Status
+    <div className={styles.contactPersonsContainer}>
+      {contactPersons.map((contact, index) => (
+        <div key={contact.id} className={styles.contactPersonCard}>
+          <div className={styles.contactPersonHeader}>
+            <h4 className={styles.contactPersonTitle}>
+              Contact Person {index + 1}
+            </h4>
+            {!disabled && contactPersons.length > 1 && (
+              <div className={styles.contactPersonActions}>
+                <AntButton
+                  type="text"
+                  danger
+                  size="small"
+                  onClick={() => removeContactPerson(index)}
+                  className={styles.removeContactButton}
+                >
+                  Remove
+                </AntButton>
               </div>
-              <Tag
-                color={getStatusColor(vendor?.status || 'Draft')}
-                className={styles.statusTag}
-              >
-                {vendor?.status || 'Draft'}
-              </Tag>
+            )}
+          </div>
+          <div className={styles.contactPersonContent}>
+            <div className={styles.contactPersonFields}>
+              <div className={styles.contactPersonField}>
+                <label className={styles.contactPersonLabel}>
+                  Name *
+                </label>
+                <Input
+                  placeholder="Enter contact name"
+                  value={contact.name}
+                  onChange={(e) => updateContactPerson(index, 'name', e.target.value)}
+                  disabled={disabled}
+                />
+              </div>
+              <div className={styles.contactPersonField}>
+                <label className={styles.contactPersonLabel}>
+                  Designation
+                </label>
+                <Input
+                  placeholder="Enter designation"
+                  value={contact.designation}
+                  onChange={(e) => updateContactPerson(index, 'designation', e.target.value)}
+                  disabled={disabled}
+                />
+              </div>
+              <div className={styles.contactPersonField}>
+                <label className={styles.contactPersonLabel}>
+                  Phone
+                </label>
+                <Input
+                  placeholder="Enter phone number"
+                  value={contact.phone}
+                  onChange={(e) => updateContactPerson(index, 'phone', e.target.value)}
+                  disabled={disabled}
+                />
+              </div>
             </div>
-            {vendor?.status === 'Submitted' && (
-              <div className={`${styles.approvalBadge} ${styles.approvalBadgeInfo}`}>
-                <Space>
-                  <InfoCircleOutlined />
-                  <span>
-                    Under Review
-                  </span>
-                </Space>
+            <div className={styles.emailFields}>
+              <div className={styles.contactPersonField}>
+                <label className={styles.contactPersonLabel}>
+                  Email To *
+                </label>
+                <Select
+                  mode="tags"
+                  placeholder="Enter email addresses"
+                  value={contact.email.mailto}
+                  onChange={(value) => updateContactPerson(index, 'email.mailto', value)}
+                  disabled={disabled}
+                  style={{ width: '100%' }}
+                />
               </div>
-            )}
-            {vendor?.status === 'Rejected' && (
-              <div className={`${styles.approvalBadge} ${styles.approvalBadgeError}`}>
-                <Space>
-                  <ExclamationCircleOutlined />
-                  <span>
-                    Action Required
-                  </span>
-                </Space>
+              <div className={styles.contactPersonField}>
+                <label className={styles.contactPersonLabel}>
+                  CC
+                </label>
+                <Select
+                  mode="tags"
+                  placeholder="Enter CC email addresses"
+                  value={contact.email.cc}
+                  onChange={(value) => updateContactPerson(index, 'email.cc', value)}
+                  disabled={disabled}
+                  style={{ width: '100%' }}
+                />
               </div>
-            )}
+              <div className={styles.contactPersonField}>
+                <label className={styles.contactPersonLabel}>
+                  BCC
+                </label>
+                <Select
+                  mode="tags"
+                  placeholder="Enter BCC email addresses"
+                  value={contact.email.bcc}
+                  onChange={(value) => updateContactPerson(index, 'email.bcc', value)}
+                  disabled={disabled}
+                  style={{ width: '100%' }}
+                />
+              </div>
+            </div>
           </div>
         </div>
+      ))}
 
-        {approvalHistory.length > 0 && (
-          <div className={styles.historySection}>
-            <h3 className={styles.historyTitleText}>
-              Approval History
-            </h3>
-            <Timeline className={styles.timeline} mode="left">
-              {approvalHistory.map((item) => {
-                const dateTime = formatDateTime(item.performedDate);
-                return (
-                  <Timeline.Item 
-                    key={item.id}
-                    color={getActionColor(item.action) === 'success' ? 'green' : 
-                           getActionColor(item.action) === 'error' ? 'red' :
-                           getActionColor(item.action) === 'processing' ? 'blue' : 'gray'}
-                  >
-                    <div className={styles.historyItem}>
-                      <div className={styles.historyItemRow}>
-                        <Tag color={getActionColor(item.action)} style={{ margin: 0, fontWeight: 500 }}>
-                          {item.action}
-                        </Tag>
-                        <span className={styles.historyDate}>
-                          {dateTime.date} at {dateTime.time}
-                        </span>
-                      </div>
-                      <div className={styles.historyDetailsText} style={{ marginBottom: item.comments ? '8px' : '0' }}>
-                        Performed by: <span style={{ fontWeight: 500 }}>{item.performedBy}</span>
-                      </div>
-                      {item.comments && (
-                        <div className={styles.historyCommentsBox}>
-                          <span style={{ fontWeight: 500, marginRight: '4px' }}>Note:</span>
-                          {item.comments}
-                        </div>
-                      )}
-                    </div>
-                  </Timeline.Item>
-                );
-              })}
-            </Timeline>
-          </div>
-        )}
+      {!disabled && (
+        <AntButton
+          type="dashed"
+          onClick={addContactPerson}
+          block
+          icon={<InfoCircleOutlined />}
+          className={styles.addContactButton}
+        >
+          Add Another Contact Person
+        </AntButton>
+      )}
 
-        {approvalHistory.length === 0 && (
-          <div className={styles.emptyStateWrapper}>
-            <CheckCircleOutlined className={styles.emptyStateIcon} />
-            <p className={styles.emptyStateText}>No approval history yet</p>
-            <p className={styles.emptyStateSubtext}>
-              History will appear after vendor submission
-            </p>
-          </div>
-        )}
-      </Card>
-    </div>
-  );
-}
-
-// Vendor Users Placeholder Component
-function VendorUsersPlaceholder() {
-  return (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>Vendor Users</h2>
-        <p className={styles.sectionSubtitle}>Manage vendor user accounts and access</p>
-      </div>
-
-      <Card className={styles.card}>
-        <div className={styles.placeholderContainer}>
-          <UserOutlined className={styles.placeholderIcon} />
-          <div>
-            <h3 className={styles.placeholderTitle}>
-              Coming Soon
-            </h3>
-            <p className={styles.placeholderText}>
-              Vendor user management functionality will be available in a future release. 
-              This feature will allow you to create and manage user accounts for vendor representatives.
-            </p>
-          </div>
-          <Tag color="blue" style={{ fontSize: '12px', padding: '4px 12px', marginTop: '8px' }}>
-            Feature Under Development
-          </Tag>
-        </div>
-      </Card>
+      <Form.Item
+        name="contactPersons"
+        rules={[
+          {
+            validator: (_, value) => {
+              if (!value || value.length === 0) {
+                return Promise.reject('At least one contact person is required');
+              }
+              const hasValidContact = value.some((contact: any) =>
+                contact.name && contact.email?.mailto?.length > 0
+              );
+              if (!hasValidContact) {
+                return Promise.reject('At least one contact person with name and email is required');
+              }
+              return Promise.resolve();
+            },
+          },
+        ]}
+        style={{ display: 'none' }}
+      >
+        <Input />
+      </Form.Item>
     </div>
   );
 }
