@@ -6,14 +6,18 @@
   "dependencies": {
     "@apollo/server": "^5.2.0",
     "@as-integrations/express4": "^1.1.2",
+    "@gmss/types": "*",
     "dotenv": "^17.2.3",
     "express": "^4.18.2",
     "graphql": "^16.12.0",
+    "inversify": "^7.10.8",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
+    "tsconfig-paths": "^4.2.0",
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@gmss/types": "*",
     "@graphql-codegen/cli": "^6.1.0",
     "@graphql-codegen/typescript": "^5.0.7",
     "@graphql-codegen/typescript-operations": "^5.0.7",
@@ -31,7 +35,7 @@
     "dev:server": "nodemon",
     "dev:codegen": "graphql-codegen --config codegen.yml --watch",
     "codegen": "graphql-codegen --config codegen.yml",
-    "build": "tsc",
-    "start": "node dist/index.js"
+    "build": "tsc -b",
+    "start": "node -r tsconfig-paths/register dist/index.js"
   }
 }

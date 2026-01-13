@@ -4,15 +4,15 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  CreateDateColumn,
   UpdateDateColumn,
-} from "typeorm";
-import { Role } from "./Role";
+  CreateDateColumn,
+} from 'typeorm';
+import { Role } from './Role';
 
-@Entity("users")
+@Entity({ name: 'user' })
 export class User {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column({ unique: true })
   email!: string;
@@ -23,12 +23,11 @@ export class User {
   @Column({ nullable: true })
   middleName?: string;
 
-  // ✅ Nullable as per review
-  @Column({ nullable: true })
-  lastName?: string;
+  @Column()
+  lastName!: string;
 
-  @ManyToOne(() => Role)
-  @JoinColumn({ name: "roleId" })
+  @ManyToOne(() => Role, { nullable: false })
+  @JoinColumn({ name: 'roleId' })
   role!: Role;
 
   @Column({ default: true })
@@ -37,15 +36,15 @@ export class User {
   @Column({ default: false })
   isDeleted!: boolean;
 
-  @Column()
+   @Column({default: "SYSTEM"})
   createdBy!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamptz" })
   createdDate!: Date;
 
-  @Column()
-  updatedBy!: string;
+  @Column({default:"SYSTEM"})
+  updatedBy?: string;
 
-  @UpdateDateColumn()
-  updatedDate!: Date;
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedDate?: Date;
 }

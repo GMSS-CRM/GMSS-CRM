@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
@@ -9,6 +10,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "baseUrl": "."
-  }
+    "baseUrl": ".",
+  },
+    "references": [
+      { "path": "../types" }
+    ]
 }

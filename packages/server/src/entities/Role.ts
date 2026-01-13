@@ -2,16 +2,16 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
   UpdateDateColumn,
+  CreateDateColumn,
   OneToMany,
-} from "typeorm";
-import { RolePermission } from "./RolePermission";
+} from 'typeorm';
+import { RolePermission } from './RolePermission';
 
-@Entity("roles")
+@Entity({ name: 'role' })
 export class Role {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column({ unique: true })
   name!: string;
@@ -19,25 +19,18 @@ export class Role {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ default: true })
-  isActive!: boolean;
-
-  @Column({ default: false })
-  isDeleted!: boolean;
-
-  @Column()
+  @Column({ default: 'SYSTEM' })
   createdBy!: string;
+
+  @Column({ default: 'SYSTEM' })
+  updatedBy!: string;
 
   @CreateDateColumn()
   createdDate!: Date;
-  
-  @Column()
-  updatedBy!: string;
 
   @UpdateDateColumn()
   updatedDate!: Date;
 
-  // ✅ NOT mandatory – roles can exist without permissions
-  @OneToMany(() => RolePermission, (rp) => rp.role, { nullable: true })
-  rolePermissions?: RolePermission[];
+  @OneToMany(() => RolePermission, (rp) => rp.role)
+  rolePermissions!: RolePermission[];
 }

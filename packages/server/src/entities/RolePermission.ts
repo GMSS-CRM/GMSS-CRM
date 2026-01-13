@@ -1,41 +1,31 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
+  ManyToOne,
   JoinColumn,
-} from "typeorm";
-import { Role } from "./Role";
-import { Permission } from "./Permission";
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
+import { Role } from './Role';
+import { Permission } from '@gmss/types';
 
-@Entity("role_permissions")
+@Entity({ name: 'role_permission' })
+@Index(['role', 'permission'], { unique: true })
 export class RolePermission {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-  @ManyToOne(() => Role, (role) => role.rolePermissions, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({ name: "roleId" })
+  @ManyToOne(() => Role, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'roleId' })
   role!: Role;
 
-  @ManyToOne(() => Permission, (permission) => permission.rolePermissions, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({ name: "permissionId" })
+  @Column({ type: 'varchar' })
   permission!: Permission;
 
-  @Column()
+  @Column({ default: 'SYSTEM' })
   createdBy!: string;
 
   @CreateDateColumn()
   createdDate!: Date;
-
-  @Column()
-  updatedBy!: string;
-
-  @UpdateDateColumn()
-  updatedDate!: Date;
 }
