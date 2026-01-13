@@ -4,9 +4,6 @@ import { TYPES } from '../../inversify/types';
 import { Role } from '../../entities/Role';
 import {
   IRoleRepository,
-  CreateRoleInput,
-  UpdateRoleInput,
-  SearchRoleInput,
 } from './types';
 
 @injectable()

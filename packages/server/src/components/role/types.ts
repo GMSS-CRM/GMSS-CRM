@@ -6,14 +6,12 @@ import type {
   SearchRoleInput,
 } from '@gmss/types';
 
-// Re-export GraphQL types for use in resolvers and services
-export type { CreateRoleInput, UpdateRoleInput, SearchRoleInput };
 
-export interface SaveRoleResponse {
+/*export interface SaveRoleResponse {
   roles?: Role[];
   deletedIds?: string[];
   errors?: string[];
-}
+}*/
 
 export interface IRoleRepository extends Repository<Role> {
   findById(id: string): Promise<Role | null>;

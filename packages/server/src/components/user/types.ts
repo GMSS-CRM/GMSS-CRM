@@ -6,20 +6,6 @@ import type {
   SearchUserInput,
 } from '@gmss/types';
 
-// Re-export GraphQL types
-export type { CreateUserInput, UpdateUserInput, SearchUserInput };
-
-/**
- * Responses
- */
-export interface SaveUserResponse {
-  user?: User;
-  errors?: string[];
-}
-
-/**
- * Repository contract
- */
 export interface IUserRepository extends Repository<User> {
   createUser(user: Partial<User>): Promise<User>;
   findById(id: string): Promise<User | null>;
@@ -37,6 +23,6 @@ export interface IUserService {
   updateUser(id: string, input: UpdateUserInput): Promise<User | null>;
   deleteUser(id: string): Promise<boolean>;
   deleteUsers(ids: string[]): Promise<boolean>;
-  getById(id: string): Promise<User | null>;
+  getUserById(id: string): Promise<User | null>;
   searchUser(params: SearchUserInput): Promise<User[]>;
 }

@@ -4,10 +4,12 @@ import { TYPES } from '../../inversify/types';
 import { Role } from '../../entities/Role';
 import { Permission } from '@gmss/types';
 import {
-  AssignPermissionsInput,
+ 
   IRolePermissionRepository,
   IRolePermissionService,
 } from './types';
+import { AssignPermissionsInput,
+  RolePermissionResult, } from '@gmss/types';
 
 @injectable()
 export class RolePermissionService implements IRolePermissionService {
@@ -27,13 +29,13 @@ export class RolePermissionService implements IRolePermissionService {
     return records.map((r) => r.permission);
   }
 
-  async assignPermissions(input: AssignPermissionsInput) {
+  async assignPermissions(input: AssignPermissionsInput): Promise<RolePermissionResult> {
     const { roleId, permissions } = input;
 
     // Validate role exists
     const role = await this.roleRepo.findOneBy({ id: roleId });
     if (!role) {
-      throw new Error('Invalid roleId');
+      throw new Error('Provided roleId does not exist');
     }
 
     // Validate permissions array is not empty
@@ -44,7 +46,7 @@ export class RolePermissionService implements IRolePermissionService {
     // Delete existing permissions and insert new ones
     await this.rolePermissionRepo.deleteByRoleId(roleId);
 
-    const entities = permissions.map((permission) => ({
+    const entities = permissions.map((permission: Permission) => ({
       role,
       permission,
       createdBy: 'SYSTEM',
@@ -53,10 +55,11 @@ export class RolePermissionService implements IRolePermissionService {
     await this.rolePermissionRepo.insertPermissions(entities);
 
     return {
+      id: roleId,
       roleId,
       permissions,
       createdBy: 'SYSTEM',
       createdDate: new Date().toISOString(),
-    };
+    } as unknown as RolePermissionResult;
   }
 }

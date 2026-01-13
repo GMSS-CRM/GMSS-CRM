@@ -3,17 +3,19 @@ import { TYPES } from '../../inversify/types';
 import {
   IRoleService,
   IRoleRepository,
+} from './types';
+import {
   CreateRoleInput,
   UpdateRoleInput,
   SearchRoleInput,
-} from './types';
+} from '@gmss/types';
 
 @injectable()
 export class RoleService implements IRoleService {
   constructor(
     @inject(TYPES.IRoleRepository)
     private readonly roleRepository: IRoleRepository
-  ) {}
+  ) { }
 
   getRoleById(id: string) {
     return this.roleRepository.findById(id);
@@ -44,10 +46,7 @@ export class RoleService implements IRoleService {
   updateRole(id: string, input: UpdateRoleInput) {
     const updateData: any = { updatedBy: 'SYSTEM' };
 
-    if (input.name !== null && input.name !== undefined) {
-      if (input.name.trim() === '') {
-        throw new Error('Role name cannot be empty');
-      }
+    if (input.name !== null && input.name !== undefined && input.name.trim() !== '') {
       updateData.name = input.name;
     }
 

@@ -6,9 +6,6 @@ import type {
   RolePermissionResult,
 } from '@gmss/types';
 
-// Re-export GraphQL types
-export type { Permission, AssignPermissionsInput, RolePermissionResult };
-
 export interface IRolePermissionRepository extends Repository<RolePermission> {
   findByRoleId(roleId: string): Promise<RolePermission[]>;
   deleteByRoleId(roleId: string): Promise<void>;

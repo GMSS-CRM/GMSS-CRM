@@ -149,6 +149,7 @@ export type RolePermissionResult = {
   __typename?: 'RolePermissionResult';
   createdBy: Scalars['String']['output'];
   createdDate: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
   permissions: Array<Permission>;
   roleId: Scalars['ID']['output'];
 };
@@ -179,6 +180,7 @@ export type UpdateUserInput = {
 
 export type User = {
   __typename?: 'User';
+  createdBy: Scalars['String']['output'];
   createdDate: Scalars['String']['output'];
   email: Scalars['String']['output'];
   firstName: Scalars['String']['output'];
@@ -186,6 +188,7 @@ export type User = {
   lastName?: Maybe<Scalars['String']['output']>;
   role: Role;
   roleId: Scalars['ID']['output'];
+  updatedBy: Scalars['String']['output'];
   updatedDate: Scalars['String']['output'];
 };
 
@@ -333,11 +336,13 @@ export type RoleResolvers<ContextType = any, ParentType extends ResolversParentT
 export type RolePermissionResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RolePermissionResult'] = ResolversParentTypes['RolePermissionResult']> = {
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   permissions?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType>;
   roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -345,6 +350,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
   roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  updatedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 

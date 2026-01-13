@@ -5,10 +5,10 @@ import { Role } from '../../entities/Role';
 import {
   IUserService,
   IUserRepository,
-  CreateUserInput,
-  UpdateUserInput,
-  SearchUserInput,
 } from './types';
+import {CreateUserInput,
+  UpdateUserInput,
+  SearchUserInput} from '@gmss/types';
 
 @injectable()
 export class UserService implements IUserService {
@@ -33,7 +33,7 @@ export class UserService implements IUserService {
 
     return this.roleRepo.findOneBy({ id: input.roleId }).then((role: Role) => {
       if (!role) {
-        throw new Error('Invalid roleId');
+        throw new Error('Provided roleId does not exist');
       }
 
       return this.userRepository.createUser({
@@ -46,26 +46,15 @@ export class UserService implements IUserService {
     });
   }
 
-  updateUser(id: string, input: UpdateUserInput) {
+  async updateUser(id: string, input: UpdateUserInput) {
     const updateData: any = { updatedBy: 'SYSTEM' };
 
     if (input.roleId !== null && input.roleId !== undefined) {
-      return this.roleRepo.findOneBy({ id: input.roleId }).then((role: Role) => {
-        if (!role) {
-          throw new Error('Invalid roleId');
-        }
-        updateData.role = role;
-
-        if (input.firstName !== null && input.firstName !== undefined) {
-          updateData.firstName = input.firstName;
-        }
-
-        if (input.lastName !== null && input.lastName !== undefined) {
-          updateData.lastName = input.lastName;
-        }
-
-        return this.userRepository.updateUser(id, updateData);
-      });
+      const role = await this.roleRepo.findOneBy({ id: input.roleId });
+      if (!role) {
+        throw new Error('Provided role does not exist');
+      }
+      updateData.role = role;
     }
 
     if (input.firstName !== null && input.firstName !== undefined) {
@@ -87,7 +76,7 @@ export class UserService implements IUserService {
     return this.userRepository.deleteUsers(ids);
   }
 
-  getById(id: string) {
+  getUserById(id: string) {
     return this.userRepository.findById(id);
   }
 

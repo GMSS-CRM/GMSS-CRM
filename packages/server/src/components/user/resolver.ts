@@ -11,7 +11,7 @@ import {
 export const userResolvers = {
   Query: {
     getUserById: (_: unknown, { id }: QueryGetUserByIdArgs) =>
-      getContainer().get<IUserService>(TYPES.IUserService).getById(id),
+      getContainer().get<IUserService>(TYPES.IUserService).getUserById(id),
 
     searchUsers: (_: unknown, { searchInput }: QuerySearchUsersArgs) =>
       getContainer().get<IUserService>(TYPES.IUserService).searchUser(searchInput as any),
@@ -32,6 +32,7 @@ export const userResolvers = {
   },
 
   User: {
-    roleId: (user: any) => user.role?.id,
+    role: (parent: any) => parent.role || null,
+    roleId: (parent: any) => parent.role?.id ?? parent.roleId,
   },
 };

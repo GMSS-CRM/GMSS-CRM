@@ -4,9 +4,6 @@ import { TYPES } from '../../inversify/types';
 import { User } from '../../entities/User';
 import {
   IUserRepository,
-  CreateUserInput,
-  UpdateUserInput,
-  SearchUserInput,
 } from './types';
 
 @injectable()

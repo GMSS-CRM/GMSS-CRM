@@ -2,6 +2,7 @@ import { gql } from 'graphql-tag';
 
 export const rolePermissionTypeDefs = gql`
   type RolePermissionResult {
+    id: ID!
     roleId: ID!
     permissions: [Permission!]!
     createdBy: String!
