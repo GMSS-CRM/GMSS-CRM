@@ -10,6 +10,7 @@ import {
 } from './types';
 import { AssignPermissionsInput,
   RolePermissionResult, } from '@gmss/types';
+import ErrorInfo from '../common/error-info';
 
 @injectable()
 export class RolePermissionService implements IRolePermissionService {
@@ -35,12 +36,12 @@ export class RolePermissionService implements IRolePermissionService {
     // Validate role exists
     const role = await this.roleRepo.findOneBy({ id: roleId });
     if (!role) {
-      throw new Error('Provided roleId does not exist');
+      throw new Error(ErrorInfo.ROLE_ID_NOT_EXIST);
     }
 
     // Validate permissions array is not empty
     if (!permissions || permissions.length === 0) {
-      throw new Error('At least one permission is required');
+      throw new Error(ErrorInfo.AT_LEAST_ONE_PERMISSION);
     }
 
     // Delete existing permissions and insert new ones

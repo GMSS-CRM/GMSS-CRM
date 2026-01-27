@@ -27,6 +27,21 @@ export type CreateRoleInput = {
   name: Scalars['String']['input'];
 };
 
+export type CreateTagInput = {
+  name: Scalars['String']['input'];
+};
+
+export type CreateTenderDocumentInput = {
+  documentName: Scalars['String']['input'];
+  documentUrl: Scalars['String']['input'];
+  expiresOn?: InputMaybe<Scalars['String']['input']>;
+  tenderId: Scalars['ID']['input'];
+};
+
+export type CreateTenderInput = {
+  name: Scalars['String']['input'];
+};
+
 export type CreateUserInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
@@ -34,16 +49,70 @@ export type CreateUserInput = {
   roleId: Scalars['ID']['input'];
 };
 
+export type CreateVendorContactPersonInput = {
+  bcc?: InputMaybe<Scalars['String']['input']>;
+  categories?: InputMaybe<Array<Scalars['String']['input']>>;
+  cc?: InputMaybe<Scalars['String']['input']>;
+  designation?: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  phoneNumber: Scalars['String']['input'];
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+  vendorId: Scalars['ID']['input'];
+};
+
+export type CreateVendorDocumentInput = {
+  documentName: Scalars['String']['input'];
+  documentUrl: Scalars['String']['input'];
+  expiresOn?: InputMaybe<Scalars['String']['input']>;
+  vendorId: Scalars['ID']['input'];
+};
+
+export type CreateVendorInput = {
+  cinNumber?: InputMaybe<Scalars['String']['input']>;
+  gstNumber?: InputMaybe<Scalars['String']['input']>;
+  msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  panNumber?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<VendorStatus>;
+  type?: InputMaybe<VendorType>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   assignPermissions: RolePermissionResult;
   createRole: Role;
+  createTag: Tag;
+  createTender: Tender;
+  createTenderDocument: TenderDocument;
   createUser: User;
+  createVendor: Vendor;
+  createVendorContactPerson: VendorContactPerson;
+  createVendorDocument: VendorDocument;
   deleteRole: Scalars['Boolean']['output'];
+  deleteTag: Scalars['Boolean']['output'];
+  deleteTags: Scalars['Boolean']['output'];
+  deleteTender: Scalars['Boolean']['output'];
+  deleteTenderDocument: Scalars['Boolean']['output'];
+  deleteTenderDocuments: Scalars['Boolean']['output'];
+  deleteTenders: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   deleteUsers: Scalars['Boolean']['output'];
+  deleteVendor: Scalars['Boolean']['output'];
+  deleteVendorContactPerson: Scalars['Boolean']['output'];
+  deleteVendorContactPersons: Scalars['Boolean']['output'];
+  deleteVendorDocument: Scalars['Boolean']['output'];
+  deleteVendorDocuments: Scalars['Boolean']['output'];
+  deleteVendors: Scalars['Boolean']['output'];
   updateRole: Role;
+  updateTag: Tag;
+  updateTender: Tender;
+  updateTenderDocument: TenderDocument;
   updateUser: User;
+  updateVendor: Vendor;
+  updateVendorContactPerson: VendorContactPerson;
+  updateVendorDocument: VendorDocument;
+  uploadVendor: Vendor;
 };
 
 
@@ -57,13 +126,73 @@ export type MutationCreateRoleArgs = {
 };
 
 
+export type MutationCreateTagArgs = {
+  input: CreateTagInput;
+};
+
+
+export type MutationCreateTenderArgs = {
+  input: CreateTenderInput;
+};
+
+
+export type MutationCreateTenderDocumentArgs = {
+  input: CreateTenderDocumentInput;
+};
+
+
 export type MutationCreateUserArgs = {
   input: CreateUserInput;
 };
 
 
+export type MutationCreateVendorArgs = {
+  input: CreateVendorInput;
+};
+
+
+export type MutationCreateVendorContactPersonArgs = {
+  input: CreateVendorContactPersonInput;
+};
+
+
+export type MutationCreateVendorDocumentArgs = {
+  input: CreateVendorDocumentInput;
+};
+
+
 export type MutationDeleteRoleArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteTagArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteTagsArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteTenderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteTenderDocumentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteTenderDocumentsArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteTendersArgs = {
+  ids: Array<Scalars['ID']['input']>;
 };
 
 
@@ -77,14 +206,85 @@ export type MutationDeleteUsersArgs = {
 };
 
 
+export type MutationDeleteVendorArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteVendorContactPersonArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteVendorContactPersonsArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteVendorDocumentArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteVendorDocumentsArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteVendorsArgs = {
+  ids: Array<Scalars['ID']['input']>;
+};
+
+
 export type MutationUpdateRoleArgs = {
   input: UpdateRoleInput;
+};
+
+
+export type MutationUpdateTagArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateTagInput;
+};
+
+
+export type MutationUpdateTenderArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateTenderInput;
+};
+
+
+export type MutationUpdateTenderDocumentArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateTenderDocumentInput;
 };
 
 
 export type MutationUpdateUserArgs = {
   id: Scalars['ID']['input'];
   input: UpdateUserInput;
+};
+
+
+export type MutationUpdateVendorArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateVendorInput;
+};
+
+
+export type MutationUpdateVendorContactPersonArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateVendorContactPersonInput;
+};
+
+
+export type MutationUpdateVendorDocumentArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateVendorDocumentInput;
+};
+
+
+export type MutationUploadVendorArgs = {
+  input: CreateVendorInput;
 };
 
 export enum Permission {
@@ -104,9 +304,21 @@ export type Query = {
   __typename?: 'Query';
   getPermissionsByRoleId: Array<Permission>;
   getRoleById?: Maybe<Role>;
+  getTagById?: Maybe<Tag>;
+  getTenderById?: Maybe<Tender>;
+  getTenderDocumentById?: Maybe<TenderDocument>;
   getUserById?: Maybe<User>;
+  getVendorById?: Maybe<Vendor>;
+  getVendorContactPersonById?: Maybe<VendorContactPerson>;
+  getVendorDocumentById?: Maybe<VendorDocument>;
   searchRoles: Array<Role>;
+  searchTags: Array<Tag>;
+  searchTenderDocuments: Array<TenderDocument>;
+  searchTenders: Array<Tender>;
   searchUsers: Array<User>;
+  searchVendorContactPersons: Array<VendorContactPerson>;
+  searchVendorDocuments: Array<VendorDocument>;
+  searchVendors: Array<Vendor>;
 };
 
 
@@ -120,7 +332,37 @@ export type QueryGetRoleByIdArgs = {
 };
 
 
+export type QueryGetTagByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTenderByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTenderDocumentByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QueryGetUserByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetVendorByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetVendorContactPersonByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetVendorDocumentByIdArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -130,8 +372,38 @@ export type QuerySearchRolesArgs = {
 };
 
 
+export type QuerySearchTagsArgs = {
+  searchInput?: InputMaybe<SearchTagInput>;
+};
+
+
+export type QuerySearchTenderDocumentsArgs = {
+  searchInput?: InputMaybe<SearchTenderDocumentInput>;
+};
+
+
+export type QuerySearchTendersArgs = {
+  searchInput?: InputMaybe<SearchTenderInput>;
+};
+
+
 export type QuerySearchUsersArgs = {
   searchInput?: InputMaybe<SearchUserInput>;
+};
+
+
+export type QuerySearchVendorContactPersonsArgs = {
+  searchInput?: InputMaybe<SearchVendorContactPersonInput>;
+};
+
+
+export type QuerySearchVendorDocumentsArgs = {
+  searchInput?: InputMaybe<SearchVendorDocumentInput>;
+};
+
+
+export type QuerySearchVendorsArgs = {
+  searchInput?: InputMaybe<SearchVendorInput>;
 };
 
 export type Role = {
@@ -160,10 +432,92 @@ export type SearchRoleInput = {
   search?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type SearchTagInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SearchTenderDocumentInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  tenderId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type SearchTenderInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type SearchUserInput = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type SearchVendorContactPersonInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  vendorId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type SearchVendorDocumentInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  vendorId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type SearchVendorInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<VendorStatus>;
+  type?: InputMaybe<VendorType>;
+};
+
+export type Tag = {
+  __typename?: 'Tag';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  updatedBy?: Maybe<Scalars['String']['output']>;
+  updatedDate: Scalars['String']['output'];
+};
+
+export type Tender = {
+  __typename?: 'Tender';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  documents?: Maybe<Array<TenderDocument>>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  tags?: Maybe<Array<TenderTag>>;
+  updatedBy?: Maybe<Scalars['String']['output']>;
+  updatedDate: Scalars['String']['output'];
+};
+
+export type TenderDocument = {
+  __typename?: 'TenderDocument';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  documentName: Scalars['String']['output'];
+  documentUrl: Scalars['String']['output'];
+  expiresOn?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  tenderId: Scalars['ID']['output'];
+};
+
+export type TenderTag = {
+  __typename?: 'TenderTag';
+  id: Scalars['ID']['output'];
+  tag?: Maybe<Tag>;
+  tagId: Scalars['ID']['output'];
+  tenderId: Scalars['ID']['output'];
 };
 
 export type UpdateRoleInput = {
@@ -172,10 +526,51 @@ export type UpdateRoleInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateTagInput = {
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateTenderDocumentInput = {
+  documentName?: InputMaybe<Scalars['String']['input']>;
+  documentUrl?: InputMaybe<Scalars['String']['input']>;
+  expiresOn?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateTenderInput = {
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateUserInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   roleId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type UpdateVendorContactPersonInput = {
+  bcc?: InputMaybe<Scalars['String']['input']>;
+  categories?: InputMaybe<Array<Scalars['String']['input']>>;
+  cc?: InputMaybe<Scalars['String']['input']>;
+  designation?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+export type UpdateVendorDocumentInput = {
+  documentName?: InputMaybe<Scalars['String']['input']>;
+  documentUrl?: InputMaybe<Scalars['String']['input']>;
+  expiresOn?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateVendorInput = {
+  cinNumber?: InputMaybe<Scalars['String']['input']>;
+  gstNumber?: InputMaybe<Scalars['String']['input']>;
+  msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  panNumber?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<VendorStatus>;
+  type?: InputMaybe<VendorType>;
 };
 
 export type User = {
@@ -191,6 +586,76 @@ export type User = {
   updatedBy: Scalars['String']['output'];
   updatedDate: Scalars['String']['output'];
 };
+
+export type Vendor = {
+  __typename?: 'Vendor';
+  cinNumber?: Maybe<Scalars['String']['output']>;
+  contactPersons?: Maybe<Array<VendorContactPerson>>;
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  documents?: Maybe<Array<VendorDocument>>;
+  gstNumber?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  msmeUdyamNumber?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  panNumber?: Maybe<Scalars['String']['output']>;
+  status: VendorStatus;
+  tags?: Maybe<Array<VendorTag>>;
+  type: VendorType;
+  updatedBy?: Maybe<Scalars['String']['output']>;
+  updatedDate: Scalars['String']['output'];
+};
+
+export type VendorContactPerson = {
+  __typename?: 'VendorContactPerson';
+  bcc?: Maybe<Scalars['String']['output']>;
+  categories?: Maybe<Array<Scalars['String']['output']>>;
+  cc?: Maybe<Scalars['String']['output']>;
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  designation?: Maybe<Scalars['String']['output']>;
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  phoneNumber: Scalars['String']['output'];
+  tags?: Maybe<Array<Scalars['String']['output']>>;
+  updatedBy?: Maybe<Scalars['String']['output']>;
+  updatedDate: Scalars['String']['output'];
+  vendorId: Scalars['ID']['output'];
+};
+
+export type VendorDocument = {
+  __typename?: 'VendorDocument';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  documentName: Scalars['String']['output'];
+  documentUrl: Scalars['String']['output'];
+  expiresOn?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  updatedBy?: Maybe<Scalars['String']['output']>;
+  updatedDate: Scalars['String']['output'];
+  vendorId: Scalars['ID']['output'];
+};
+
+export enum VendorStatus {
+  Approved = 'Approved',
+  Draft = 'Draft',
+  Rejected = 'Rejected',
+  Submitted = 'Submitted'
+}
+
+export type VendorTag = {
+  __typename?: 'VendorTag';
+  id: Scalars['ID']['output'];
+  tag?: Maybe<Tag>;
+  tagId: Scalars['ID']['output'];
+  vendorId: Scalars['ID']['output'];
+};
+
+export enum VendorType {
+  Consultant = 'Consultant',
+  Vendor = 'Vendor'
+}
 
 
 
@@ -269,7 +734,13 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   CreateRoleInput: CreateRoleInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  CreateTagInput: CreateTagInput;
+  CreateTenderDocumentInput: CreateTenderDocumentInput;
+  CreateTenderInput: CreateTenderInput;
   CreateUserInput: CreateUserInput;
+  CreateVendorContactPersonInput: CreateVendorContactPersonInput;
+  CreateVendorDocumentInput: CreateVendorDocumentInput;
+  CreateVendorInput: CreateVendorInput;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Permission: Permission;
@@ -278,10 +749,32 @@ export type ResolversTypes = {
   RolePermissionResult: ResolverTypeWrapper<RolePermissionResult>;
   SearchRoleInput: SearchRoleInput;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  SearchTagInput: SearchTagInput;
+  SearchTenderDocumentInput: SearchTenderDocumentInput;
+  SearchTenderInput: SearchTenderInput;
   SearchUserInput: SearchUserInput;
+  SearchVendorContactPersonInput: SearchVendorContactPersonInput;
+  SearchVendorDocumentInput: SearchVendorDocumentInput;
+  SearchVendorInput: SearchVendorInput;
+  Tag: ResolverTypeWrapper<Tag>;
+  Tender: ResolverTypeWrapper<Tender>;
+  TenderDocument: ResolverTypeWrapper<TenderDocument>;
+  TenderTag: ResolverTypeWrapper<TenderTag>;
   UpdateRoleInput: UpdateRoleInput;
+  UpdateTagInput: UpdateTagInput;
+  UpdateTenderDocumentInput: UpdateTenderDocumentInput;
+  UpdateTenderInput: UpdateTenderInput;
   UpdateUserInput: UpdateUserInput;
+  UpdateVendorContactPersonInput: UpdateVendorContactPersonInput;
+  UpdateVendorDocumentInput: UpdateVendorDocumentInput;
+  UpdateVendorInput: UpdateVendorInput;
   User: ResolverTypeWrapper<User>;
+  Vendor: ResolverTypeWrapper<Vendor>;
+  VendorContactPerson: ResolverTypeWrapper<VendorContactPerson>;
+  VendorDocument: ResolverTypeWrapper<VendorDocument>;
+  VendorStatus: VendorStatus;
+  VendorTag: ResolverTypeWrapper<VendorTag>;
+  VendorType: VendorType;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -290,7 +783,13 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   CreateRoleInput: CreateRoleInput;
   String: Scalars['String']['output'];
+  CreateTagInput: CreateTagInput;
+  CreateTenderDocumentInput: CreateTenderDocumentInput;
+  CreateTenderInput: CreateTenderInput;
   CreateUserInput: CreateUserInput;
+  CreateVendorContactPersonInput: CreateVendorContactPersonInput;
+  CreateVendorDocumentInput: CreateVendorDocumentInput;
+  CreateVendorInput: CreateVendorInput;
   Mutation: Record<PropertyKey, never>;
   Boolean: Scalars['Boolean']['output'];
   Query: Record<PropertyKey, never>;
@@ -298,29 +797,86 @@ export type ResolversParentTypes = {
   RolePermissionResult: RolePermissionResult;
   SearchRoleInput: SearchRoleInput;
   Int: Scalars['Int']['output'];
+  SearchTagInput: SearchTagInput;
+  SearchTenderDocumentInput: SearchTenderDocumentInput;
+  SearchTenderInput: SearchTenderInput;
   SearchUserInput: SearchUserInput;
+  SearchVendorContactPersonInput: SearchVendorContactPersonInput;
+  SearchVendorDocumentInput: SearchVendorDocumentInput;
+  SearchVendorInput: SearchVendorInput;
+  Tag: Tag;
+  Tender: Tender;
+  TenderDocument: TenderDocument;
+  TenderTag: TenderTag;
   UpdateRoleInput: UpdateRoleInput;
+  UpdateTagInput: UpdateTagInput;
+  UpdateTenderDocumentInput: UpdateTenderDocumentInput;
+  UpdateTenderInput: UpdateTenderInput;
   UpdateUserInput: UpdateUserInput;
+  UpdateVendorContactPersonInput: UpdateVendorContactPersonInput;
+  UpdateVendorDocumentInput: UpdateVendorDocumentInput;
+  UpdateVendorInput: UpdateVendorInput;
   User: User;
+  Vendor: Vendor;
+  VendorContactPerson: VendorContactPerson;
+  VendorDocument: VendorDocument;
+  VendorTag: VendorTag;
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   assignPermissions?: Resolver<ResolversTypes['RolePermissionResult'], ParentType, ContextType, RequireFields<MutationAssignPermissionsArgs, 'input'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'input'>>;
+  createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'input'>>;
+  createTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationCreateTenderArgs, 'input'>>;
+  createTenderDocument?: Resolver<ResolversTypes['TenderDocument'], ParentType, ContextType, RequireFields<MutationCreateTenderDocumentArgs, 'input'>>;
   createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
+  createVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationCreateVendorArgs, 'input'>>;
+  createVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationCreateVendorContactPersonArgs, 'input'>>;
+  createVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationCreateVendorDocumentArgs, 'input'>>;
   deleteRole?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteRoleArgs, 'id'>>;
+  deleteTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagArgs, 'id'>>;
+  deleteTags?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagsArgs, 'ids'>>;
+  deleteTender?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderArgs, 'id'>>;
+  deleteTenderDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderDocumentArgs, 'id'>>;
+  deleteTenderDocuments?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderDocumentsArgs, 'ids'>>;
+  deleteTenders?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTendersArgs, 'ids'>>;
   deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'id'>>;
   deleteUsers?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUsersArgs, 'ids'>>;
+  deleteVendor?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorArgs, 'id'>>;
+  deleteVendorContactPerson?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorContactPersonArgs, 'id'>>;
+  deleteVendorContactPersons?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorContactPersonsArgs, 'ids'>>;
+  deleteVendorDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorDocumentArgs, 'id'>>;
+  deleteVendorDocuments?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorDocumentsArgs, 'ids'>>;
+  deleteVendors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorsArgs, 'ids'>>;
   updateRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationUpdateRoleArgs, 'input'>>;
+  updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id' | 'input'>>;
+  updateTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationUpdateTenderArgs, 'id' | 'input'>>;
+  updateTenderDocument?: Resolver<ResolversTypes['TenderDocument'], ParentType, ContextType, RequireFields<MutationUpdateTenderDocumentArgs, 'id' | 'input'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'id' | 'input'>>;
+  updateVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationUpdateVendorArgs, 'id' | 'input'>>;
+  updateVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationUpdateVendorContactPersonArgs, 'id' | 'input'>>;
+  updateVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationUpdateVendorDocumentArgs, 'id' | 'input'>>;
+  uploadVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationUploadVendorArgs, 'input'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   getPermissionsByRoleId?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType, RequireFields<QueryGetPermissionsByRoleIdArgs, 'roleId'>>;
   getRoleById?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<QueryGetRoleByIdArgs, 'id'>>;
+  getTagById?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType, RequireFields<QueryGetTagByIdArgs, 'id'>>;
+  getTenderById?: Resolver<Maybe<ResolversTypes['Tender']>, ParentType, ContextType, RequireFields<QueryGetTenderByIdArgs, 'id'>>;
+  getTenderDocumentById?: Resolver<Maybe<ResolversTypes['TenderDocument']>, ParentType, ContextType, RequireFields<QueryGetTenderDocumentByIdArgs, 'id'>>;
   getUserById?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserByIdArgs, 'id'>>;
+  getVendorById?: Resolver<Maybe<ResolversTypes['Vendor']>, ParentType, ContextType, RequireFields<QueryGetVendorByIdArgs, 'id'>>;
+  getVendorContactPersonById?: Resolver<Maybe<ResolversTypes['VendorContactPerson']>, ParentType, ContextType, RequireFields<QueryGetVendorContactPersonByIdArgs, 'id'>>;
+  getVendorDocumentById?: Resolver<Maybe<ResolversTypes['VendorDocument']>, ParentType, ContextType, RequireFields<QueryGetVendorDocumentByIdArgs, 'id'>>;
   searchRoles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType, Partial<QuerySearchRolesArgs>>;
+  searchTags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType, Partial<QuerySearchTagsArgs>>;
+  searchTenderDocuments?: Resolver<Array<ResolversTypes['TenderDocument']>, ParentType, ContextType, Partial<QuerySearchTenderDocumentsArgs>>;
+  searchTenders?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, Partial<QuerySearchTendersArgs>>;
   searchUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QuerySearchUsersArgs>>;
+  searchVendorContactPersons?: Resolver<Array<ResolversTypes['VendorContactPerson']>, ParentType, ContextType, Partial<QuerySearchVendorContactPersonsArgs>>;
+  searchVendorDocuments?: Resolver<Array<ResolversTypes['VendorDocument']>, ParentType, ContextType, Partial<QuerySearchVendorDocumentsArgs>>;
+  searchVendors?: Resolver<Array<ResolversTypes['Vendor']>, ParentType, ContextType, Partial<QuerySearchVendorsArgs>>;
 };
 
 export type RoleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Role'] = ResolversParentTypes['Role']> = {
@@ -341,6 +897,43 @@ export type RolePermissionResultResolvers<ContextType = any, ParentType extends 
   roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
+export type TagResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tag'] = ResolversParentTypes['Tag']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TenderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tender'] = ResolversParentTypes['Tender']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documents?: Resolver<Maybe<Array<ResolversTypes['TenderDocument']>>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  tags?: Resolver<Maybe<Array<ResolversTypes['TenderTag']>>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TenderDocumentResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderDocument'] = ResolversParentTypes['TenderDocument']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  expiresOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type TenderTagResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderTag'] = ResolversParentTypes['TenderTag']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  tag?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType>;
+  tagId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -354,11 +947,73 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type VendorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Vendor'] = ResolversParentTypes['Vendor']> = {
+  cinNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  contactPersons?: Resolver<Maybe<Array<ResolversTypes['VendorContactPerson']>>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documents?: Resolver<Maybe<Array<ResolversTypes['VendorDocument']>>, ParentType, ContextType>;
+  gstNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  msmeUdyamNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  panNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['VendorStatus'], ParentType, ContextType>;
+  tags?: Resolver<Maybe<Array<ResolversTypes['VendorTag']>>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['VendorType'], ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type VendorContactPersonResolvers<ContextType = any, ParentType extends ResolversParentTypes['VendorContactPerson'] = ResolversParentTypes['VendorContactPerson']> = {
+  bcc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  categories?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  cc?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  designation?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  phoneNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  tags?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type VendorDocumentResolvers<ContextType = any, ParentType extends ResolversParentTypes['VendorDocument'] = ResolversParentTypes['VendorDocument']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  expiresOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type VendorTagResolvers<ContextType = any, ParentType extends ResolversParentTypes['VendorTag'] = ResolversParentTypes['VendorTag']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  tag?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType>;
+  tagId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
 export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Role?: RoleResolvers<ContextType>;
   RolePermissionResult?: RolePermissionResultResolvers<ContextType>;
+  Tag?: TagResolvers<ContextType>;
+  Tender?: TenderResolvers<ContextType>;
+  TenderDocument?: TenderDocumentResolvers<ContextType>;
+  TenderTag?: TenderTagResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
+  Vendor?: VendorResolvers<ContextType>;
+  VendorContactPerson?: VendorContactPersonResolvers<ContextType>;
+  VendorDocument?: VendorDocumentResolvers<ContextType>;
+  VendorTag?: VendorTagResolvers<ContextType>;
 };
 

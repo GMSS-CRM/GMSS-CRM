@@ -4,6 +4,12 @@ import { baseTypeDefs } from "./base.schema";
 import { userTypeDefs } from "../components/user";
 import { roleTypeDefs } from "../components/role";
 import { rolePermissionTypeDefs } from "../components/role-permission";
+import { tagTypeDefs } from "../components/tag";
+import { vendorTypeDefs } from "../components/vendor";
+import { vendorContactPersonTypeDefs } from "../components/vendor-contact-person";
+import { vendorDocumentTypeDefs } from "../components/vendor-document";
+import { tenderTypeDefs } from "../components/tender";
+import { tenderDocumentTypeDefs } from "../components/tender-document";
 
 export const typeDefs = gql`
   scalar DateTime
@@ -18,4 +24,10 @@ export const mergedTypeDefs = [
   userTypeDefs,
   roleTypeDefs,
   rolePermissionTypeDefs,
+  tagTypeDefs,
+  vendorTypeDefs,
+  vendorContactPersonTypeDefs,
+  vendorDocumentTypeDefs,
+  tenderTypeDefs,
+  tenderDocumentTypeDefs,
 ];

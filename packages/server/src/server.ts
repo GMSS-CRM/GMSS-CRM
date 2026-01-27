@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
 import { mergedTypeDefs, resolvers } from "./graphql";
+import buildContext from './context';
 import { AppDataSource } from "./config/data-source";
 
 dotenv.config();
@@ -12,6 +13,9 @@ dotenv.config();
 interface GraphQLContext {
   req: express.Request;
   token: string | null;
+  user?: any;
+  pubsub?: any;
+  appName?: any;
 }
 
 const PORT = Number(process.env.PORT) || 4000;
@@ -23,25 +27,31 @@ export async function startApolloServer() {
   app.use(express.json());
 
   // DB init
-  await AppDataSource.initialize();
-  console.log("✅ Database connected!");
+  try {
+    await AppDataSource.initialize();
+    console.log("✅ Database connected!");
+  } catch (err) {
+    console.warn('⚠️ Database initialization failed, starting server in degraded mode:', (err as any)?.message ?? err);
+  }
 
   const server = new ApolloServer<GraphQLContext>({
     typeDefs: mergedTypeDefs,
     resolvers,
+    introspection: true,
   });
 
   await server.start();
   app.get("/", (_req, res) => {
     res.send("OK");
   });
+
   app.use(
     "/graphql",
     expressMiddleware(server, {
-      context: async ({ req }) => ({
-        req,
-        token: req.headers.authorization ?? null,
-      }),
+      context: async ({ req }) => {
+        const ctx = await buildContext({ req });
+        return { ...ctx, req, token: req.headers.authorization ?? null } as GraphQLContext;
+      },
     })
   );
 

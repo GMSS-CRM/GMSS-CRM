@@ -8,28 +8,26 @@ import {
   QuerySearchRolesArgs,
 } from '@gmss/types';
 
+const getService = () => {
+  const container = getContainer();
+  return container.get<IRoleService>(TYPES.IRoleService);
+};
+
 export const roleResolvers = {
   Query: {
-    getRoleById: (_: any, { id }: QueryGetRoleByIdArgs) =>
-      getContainer().get<IRoleService>(TYPES.IRoleService).getRoleById(id),
+    getRoleById: (_: any, { id }: QueryGetRoleByIdArgs) => getService().getRoleById(id),
 
     searchRoles: (_: any, { searchInput }: QuerySearchRolesArgs) =>
-      getContainer()
-        .get<IRoleService>(TYPES.IRoleService)
-        .searchRoles(searchInput as any),
+      getService().searchRoles(searchInput as any),
   },
 
   Mutation: {
-    createRole: (_: any, { input }: MutationCreateRoleArgs) =>
-      getContainer().get<IRoleService>(TYPES.IRoleService).createRole(input as any),
+    createRole: (_: any, { input }: MutationCreateRoleArgs, context: any) =>
+      getService().createRole(input as any, { email: context?.user?.email }),
 
-    updateRole: (_: any, { input }: MutationUpdateRoleArgs) =>
-      getContainer().get<IRoleService>(TYPES.IRoleService).updateRole(
-        input.id,
-        input as any
-      ),
+    updateRole: (_: any, { input }: MutationUpdateRoleArgs, context: any) =>
+      getService().updateRole(input.id, input as any, { email: context?.user?.email }),
 
-    deleteRole: (_: any, { id }: any) =>
-      getContainer().get<IRoleService>(TYPES.IRoleService).deleteRole(id),
+    deleteRole: (_: any, { id }: any) => getService().deleteRole(id),
   },
 };

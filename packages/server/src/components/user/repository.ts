@@ -28,6 +28,13 @@ export class UserRepository
     });
   }
 
+  findByEmail(email: string) {
+    return this.findOne({
+      where: { email, isDeleted: false },
+      relations: ['role'],
+    });
+  }
+
   search(params: { search?: string; limit?: number; offset?: number }) {
     return this.find({
       where: { isDeleted: false },

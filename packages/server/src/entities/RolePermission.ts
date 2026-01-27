@@ -16,10 +16,6 @@ export class RolePermission {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => Role, { nullable: false, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'roleId' })
-  role!: Role;
-
   @Column({ type: 'varchar' })
   permission!: Permission;
 
@@ -28,4 +24,8 @@ export class RolePermission {
 
   @CreateDateColumn()
   createdDate!: Date;
+
+  @ManyToOne(() => Role, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'roleId' })
+  role!: Role;
 }
