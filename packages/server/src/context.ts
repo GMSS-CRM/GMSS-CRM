@@ -67,10 +67,10 @@ export const buildContext = async ({ req }: { req: any }) => {
         permissions = [];
       }
     } else {
-      console.warn(`⚠️ User not found or has no role for email: ${email}`);
+      console.warn(`⚠️ User has no role for email: ${email}`);
     }
   } catch (error) {
-    console.error('Error fetching user:', error);
+    console.error('User Not Authorized:', error);
     // Continue without user for testing
   }
 

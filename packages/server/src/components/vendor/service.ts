@@ -3,7 +3,7 @@ import { TYPES } from '../../inversify/types';
 import { IVendorService, IVendorRepository } from './types';
 import { CompanyType } from '../../entities/Vendor';
 import ErrorInfo from '../common/error-info';
-import { getCurrentEmail } from '../common/has-permission';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class VendorService implements IVendorService {

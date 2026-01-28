@@ -11,7 +11,7 @@ import {CreateUserInput,
   SearchUserInput} from '@gmss/types';
 import { Permission } from '@gmss/types';
 import ErrorInfo from '../common/error-info';
-import { hasPermission, requirePermission, getCurrentEmail } from '../common/has-permission';
+import { hasPermission, requirePermission, getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class UserService implements IUserService {

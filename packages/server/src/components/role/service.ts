@@ -10,7 +10,7 @@ import {
   SearchRoleInput,
 } from '@gmss/types';
 import ErrorInfo from '../common/error-info';
-import { getCurrentEmail } from '../common/has-permission';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class RoleService implements IRoleService {

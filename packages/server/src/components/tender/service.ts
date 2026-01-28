@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { ITenderService, ITenderRepository } from './types';
 import ErrorInfo from '../common/error-info';
-import { getCurrentEmail } from '../common/has-permission';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class TenderService implements ITenderService {
