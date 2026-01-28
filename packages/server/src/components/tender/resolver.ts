@@ -15,7 +15,7 @@ export const tenderResolvers = {
 
   Mutation: {
     createTender: (_: unknown, { input }: any, context: any) =>
-      getService().createTender(input as any, { email: context?.user?.email }),
+      getService().createTender(input as any),
 
     updateTender: (_: unknown, { id, input }: any, context: any) =>
       getService().updateTender(id, input as any),

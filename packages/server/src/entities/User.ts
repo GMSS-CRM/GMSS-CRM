@@ -6,10 +6,12 @@ import {
   JoinColumn,
   UpdateDateColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 import { Role } from './Role';
 
 @Entity({ name: 'user' })
+@Index(['email'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

@@ -2,7 +2,12 @@ import { GraphQLError } from 'graphql';
 import { getContainer } from './inversify/container';
 import { TYPES } from './inversify/types';
 import { IUserService } from './components/user/types';
+import { IRolePermissionService } from './components/role-permission/types';
 import ErrorInfo from './components/common/error-info';
+
+declare global {
+  var graphqlContext: any;
+}
 
 /**
  * Safely decode a Firebase JWT token without verification
@@ -30,6 +35,7 @@ export const buildContext = async ({ req }: { req: any }) => {
   
   let user: any = null;
   let decoded: any = null;
+  let permissions: string[] = [];
 
   // Extract and decode token
   const bearerToken = token.replace(/^Bearer\s+/i, '');
@@ -44,22 +50,42 @@ export const buildContext = async ({ req }: { req: any }) => {
   // Extract email from Firebase JWT token
   const email = decoded?.email || 'demo@demo.com';
 
-  // Fetch user from database using email
+  // Fetch user and their permissions from database
   const container = getContainer();
   const userService = container.get<IUserService>(TYPES.IUserService);
+  const rolePermissionService = container.get<IRolePermissionService>(TYPES.IRolePermissionService);
 
   try {
     user = await userService.getUserByEmail(email);
-    // If user doesn't exist, proceed without user (for testing purposes)
-    if (!user) {
-      console.warn(`⚠️ User not found for email: ${email}`);
+    
+    // If user exists, fetch their permissions based on their role
+    if (user && user.role && user.role.id) {
+      try {
+        permissions = await rolePermissionService.getPermissionsByRoleId(user.role.id);
+      } catch (permError) {
+        console.warn(`⚠️ Could not fetch permissions for user: ${email}`, permError);
+        permissions = [];
+      }
+    } else {
+      console.warn(`⚠️ User not found or has no role for email: ${email}`);
     }
   } catch (error) {
     console.error('Error fetching user:', error);
     // Continue without user for testing
   }
 
-  return { user, decoded };
+  // Build context object with user, decoded token, and permissions
+  const context = { 
+    user, 
+    decoded,
+    permissions,
+    email 
+  };
+
+  // Store in global context for access throughout the application
+  global.graphqlContext = context;
+
+  return context;
 };
 
 export default buildContext;

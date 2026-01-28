@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { IVendorContactPersonService, IVendorContactPersonRepository } from './types';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/has-permission';
 
 @injectable()
 export class VendorContactPersonService implements IVendorContactPersonService {
@@ -10,7 +11,7 @@ export class VendorContactPersonService implements IVendorContactPersonService {
     private readonly contactPersonRepository: IVendorContactPersonRepository
   ) {}
 
-  async createContactPerson(input: any, context?: { email?: string }) {
+  async createContactPerson(input: any) {
     if (!input.vendorId || !input.vendorId.trim()) {
       throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
     }
@@ -27,6 +28,8 @@ export class VendorContactPersonService implements IVendorContactPersonService {
       throw new Error(ErrorInfo.EMAIL_REQUIRED);
     }
 
+    const createdBy = getCurrentEmail();
+
     return this.contactPersonRepository.createContactPerson({
       vendorId: input.vendorId,
       name: input.name.trim(),
@@ -35,8 +38,8 @@ export class VendorContactPersonService implements IVendorContactPersonService {
       email: input.email.trim(),
       cc: input.cc ?? undefined,
       bcc: input.bcc ?? undefined,
-      createdBy: context?.email ?? 'SYSTEM',
-      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: createdBy,
+      updatedBy: createdBy,
     });
   }
 
@@ -46,7 +49,7 @@ export class VendorContactPersonService implements IVendorContactPersonService {
       throw new Error(ErrorInfo.CONTACT_PERSON_NOT_FOUND);
     }
 
-    const updateData: any = { updatedBy: 'SYSTEM' };
+    const updateData: any = { updatedBy: getCurrentEmail() };
 
     if (input.name !== null && input.name !== undefined) {
       updateData.name = input.name.trim();

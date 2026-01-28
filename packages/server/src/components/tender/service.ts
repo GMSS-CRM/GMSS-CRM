@@ -2,12 +2,13 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { ITenderService, ITenderRepository } from './types';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/has-permission';
 
 @injectable()
 export class TenderService implements ITenderService {
   constructor(@inject(TYPES.ITenderRepository) private readonly tenderRepository: ITenderRepository) {}
 
-  async createTender(input: any, context?: { email?: string }) {
+  async createTender(input: any) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.TENDER_NAME_REQUIRED);
     }
@@ -17,10 +18,12 @@ export class TenderService implements ITenderService {
       throw new Error(ErrorInfo.TENDER_ALREADY_EXISTS);
     }
 
+    const createdBy = getCurrentEmail();
+
     return this.tenderRepository.createTender({
       name: input.name.trim(),
-      createdBy: context?.email ?? 'SYSTEM',
-      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: createdBy,
+      updatedBy: createdBy,
     });
   }
 
@@ -30,7 +33,7 @@ export class TenderService implements ITenderService {
       throw new Error(ErrorInfo.TENDER_NOT_FOUND);
     }
 
-    const updateData: any = { updatedBy: 'SYSTEM' };
+    const updateData: any = { updatedBy: getCurrentEmail() };
 
     if (input.name !== null && input.name !== undefined) {
       const duplicate = await this.tenderRepository.findByName(input.name);
