@@ -2,7 +2,19 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
 
-import { User, Role, RolePermission } from "../entities";
+import { 
+  User, 
+  Role, 
+  RolePermission, 
+  Tag, 
+  Vendor, 
+  VendorTag, 
+  VendorContactPerson, 
+  VendorDocument, 
+  Tender, 
+  TenderDocument, 
+  TenderTag 
+} from "../entities";
 
 dotenv.config();
 
@@ -15,7 +27,19 @@ export const AppDataSource = new DataSource({
     rejectUnauthorized: false,
   },
 
-  entities: [User, Role, RolePermission],
+  entities: [
+    User, 
+    Role, 
+    RolePermission, 
+    Tag, 
+    Vendor, 
+    VendorTag, 
+    VendorContactPerson, 
+    VendorDocument, 
+    Tender, 
+    TenderDocument, 
+    TenderTag
+  ],
 
   synchronize: true, // ❗ OK for now, disable later
   logging: false,

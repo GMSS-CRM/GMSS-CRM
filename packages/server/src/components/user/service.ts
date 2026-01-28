@@ -9,40 +9,55 @@ import {
 import {CreateUserInput,
   UpdateUserInput,
   SearchUserInput} from '@gmss/types';
+import { Permission } from '@gmss/types';
+import ErrorInfo from '../common/error-info';
+import { IRolePermissionService } from '../role-permission/types';
 
 @injectable()
 export class UserService implements IUserService {
   private roleRepo: any;
+  private readonly userRepository: IUserRepository;
+  private readonly dbContext: DataSource;
 
   constructor(
-    @inject(TYPES.IUserRepository)
-    private readonly userRepository: IUserRepository,
-    @inject(TYPES.DbContext)
-    private readonly dbContext: DataSource
+    @inject(TYPES.IUserRepository) userRepository: IUserRepository,
+    @inject(TYPES.DbContext) dbContext: DataSource,
+    @inject(TYPES.IRolePermissionService) private readonly rolePermissionService?: IRolePermissionService
   ) {
+    this.userRepository = userRepository;
+    this.dbContext = dbContext;
     this.roleRepo = dbContext.getRepository(Role);
   }
 
-  createUser(input: CreateUserInput) {
+  async createUser(input: CreateUserInput, context?: { id?: string; email?: string; roleId?: string; roleName?: string }) {
     if (!input.firstName || input.firstName.trim() === '') {
-      throw new Error('First name is required');
+      throw new Error(ErrorInfo.FIRST_NAME_REQUIRED);
     }
     if (!input.email || input.email.trim() === '') {
-      throw new Error('Email is required');
+      throw new Error(ErrorInfo.EMAIL_REQUIRED);
     }
 
-    return this.roleRepo.findOneBy({ id: input.roleId }).then((role: Role) => {
-      if (!role) {
-        throw new Error('Provided roleId does not exist');
+    // If context is provided, ensure they have permission to create users
+    if (context && context.roleId) {
+      const perms = await this.rolePermissionService?.getPermissionsByRoleId(context.roleId);
+      const canCreate = context.roleName === 'ADMIN' || (perms && perms.includes(Permission.CREATE_USER));
+      if (!canCreate) {
+        throw new Error('context does not have permission to create users');
       }
+    }
 
-      return this.userRepository.createUser({
-        firstName: input.firstName,
-        lastName: input.lastName ?? undefined,
-        email: input.email,
-        role,
-        updatedBy: 'SYSTEM',
-      });
+    const role: Role | null = input.roleId ? await this.roleRepo.findOneBy({ id: input.roleId }) : null;
+    if (!role && input.roleId) {
+      throw new Error(ErrorInfo.ROLE_ID_NOT_EXIST);
+    }
+
+    return this.userRepository.createUser({
+      firstName: input.firstName,
+      lastName: input.lastName ?? undefined,
+      email: input.email,
+      role: role ?? undefined,
+      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
     });
   }
 
@@ -52,7 +67,7 @@ export class UserService implements IUserService {
     if (input.roleId !== null && input.roleId !== undefined) {
       const role = await this.roleRepo.findOneBy({ id: input.roleId });
       if (!role) {
-        throw new Error('Provided role does not exist');
+        throw new Error(ErrorInfo.ROLE_NOT_EXIST);
       }
       updateData.role = role;
     }
@@ -78,6 +93,10 @@ export class UserService implements IUserService {
 
   getUserById(id: string) {
     return this.userRepository.findById(id);
+  }
+
+  getUserByEmail(email: string) {
+    return this.userRepository.findByEmail(email);
   }
 
   searchUser(params: SearchUserInput) {

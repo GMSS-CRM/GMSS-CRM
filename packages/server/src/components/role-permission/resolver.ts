@@ -6,18 +6,19 @@ import {
   QueryGetPermissionsByRoleIdArgs,
 } from '@gmss/types';
 
+const getService = () => {
+  const container = getContainer();
+  return container.get<IRolePermissionService>(TYPES.IRolePermissionService);
+};
+
 export const rolePermissionResolvers = {
   Query: {
     getPermissionsByRoleId: (_: any, { roleId }: QueryGetPermissionsByRoleIdArgs) =>
-      getContainer()
-        .get<IRolePermissionService>(TYPES.IRolePermissionService)
-        .getPermissionsByRoleId(roleId),
+      getService().getPermissionsByRoleId(roleId),
   },
 
   Mutation: {
-    assignPermissions: (_: any, { input }: MutationAssignPermissionsArgs) =>
-      getContainer()
-        .get<IRolePermissionService>(TYPES.IRolePermissionService)
-        .assignPermissions(input as any),
+    assignPermissions: (_: any, { input }: MutationAssignPermissionsArgs, context: any) =>
+      getService().assignPermissions(input as any),
   },
 };

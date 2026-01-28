@@ -17,6 +17,30 @@ import { IRoleRepository,IRoleService } from '../components/role/types';
 import { RoleRepository } from '../components/role/repository';
 import { RoleService } from '../components/role/service';
 
+import { TagRepository } from '../components/tag/repository';
+import { TagService } from '../components/tag/service';
+import { ITagRepository, ITagService } from '../components/tag/types';
+
+import { VendorRepository } from '../components/vendor/repository';
+import { VendorService } from '../components/vendor/service';
+import { IVendorRepository, IVendorService } from '../components/vendor/types';
+
+import { VendorContactPersonRepository } from '../components/vendor-contact-person/repository';
+import { VendorContactPersonService } from '../components/vendor-contact-person/service';
+import { IVendorContactPersonRepository, IVendorContactPersonService } from '../components/vendor-contact-person/types';
+
+import { VendorDocumentRepository } from '../components/vendor-document/repository';
+import { VendorDocumentService } from '../components/vendor-document/service';
+import { IVendorDocumentRepository, IVendorDocumentService } from '../components/vendor-document/types';
+
+import { TenderRepository } from '../components/tender/repository';
+import { TenderService } from '../components/tender/service';
+import { ITenderRepository, ITenderService } from '../components/tender/types';
+
+import { TenderDocumentRepository } from '../components/tender-document/repository';
+import { TenderDocumentService } from '../components/tender-document/service';
+import { ITenderDocumentRepository, ITenderDocumentService } from '../components/tender-document/types';
+
 let _container: Container | null = null;
 
 function createContainer(): Container {
@@ -40,6 +64,36 @@ function createContainer(): Container {
   container
     .bind<IRoleService>(TYPES.IRoleService)
     .to(RoleService);
+
+  container.bind<ITagRepository>(TYPES.ITagRepository).to(TagRepository);
+  container.bind<ITagService>(TYPES.ITagService).to(TagService);
+
+  container.bind<IVendorRepository>(TYPES.IVendorRepository).to(VendorRepository);
+  container.bind<IVendorService>(TYPES.IVendorService).to(VendorService);
+
+  container
+    .bind<IVendorContactPersonRepository>(TYPES.IVendorContactPersonRepository)
+    .to(VendorContactPersonRepository);
+  container
+    .bind<IVendorContactPersonService>(TYPES.IVendorContactPersonService)
+    .to(VendorContactPersonService);
+
+  container
+    .bind<IVendorDocumentRepository>(TYPES.IVendorDocumentRepository)
+    .to(VendorDocumentRepository);
+  container
+    .bind<IVendorDocumentService>(TYPES.IVendorDocumentService)
+    .to(VendorDocumentService);
+
+  container.bind<ITenderRepository>(TYPES.ITenderRepository).to(TenderRepository);
+  container.bind<ITenderService>(TYPES.ITenderService).to(TenderService);
+
+  container
+    .bind<ITenderDocumentRepository>(TYPES.ITenderDocumentRepository)
+    .to(TenderDocumentRepository);
+  container
+    .bind<ITenderDocumentService>(TYPES.ITenderDocumentService)
+    .to(TenderDocumentService);
     
   return container;
 }
