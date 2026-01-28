@@ -12,7 +12,7 @@ export interface ITenderDocumentRepository extends Repository<TenderDocument> {
 }
 
 export interface ITenderDocumentService {
-  createDocument(input: any, actor?: { email?: string }): Promise<TenderDocument>;
+  createDocument(input: any, context?: { email?: string }): Promise<TenderDocument>;
   updateDocument(id: string, input: any): Promise<TenderDocument | null>;
   deleteDocument(id: string): Promise<boolean>;
   deleteDocuments(ids: string[]): Promise<boolean>;

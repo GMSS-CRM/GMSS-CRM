@@ -24,7 +24,7 @@ export interface IRoleRepository extends Repository<Role> {
 export interface IRoleService {
   getRoleById(id: string): Promise<Role | null>;
   searchRoles(input?: SearchRoleInput): Promise<Role[]>;
-  createRole(input: CreateRoleInput, actor?: { email?: string }): Promise<Role>;
-  updateRole(id: string, input: UpdateRoleInput, actor?: { email?: string }): Promise<Role | null>;
+  createRole(input: CreateRoleInput, context?: { email?: string }): Promise<Role>;
+  updateRole(id: string, input: UpdateRoleInput, context?: { email?: string }): Promise<Role | null>;
   deleteRole(id: string): Promise<boolean>;
 }

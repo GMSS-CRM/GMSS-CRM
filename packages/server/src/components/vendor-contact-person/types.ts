@@ -12,7 +12,7 @@ export interface IVendorContactPersonRepository extends Repository<VendorContact
 }
 
 export interface IVendorContactPersonService {
-  createContactPerson(input: any, actor?: { email?: string }): Promise<VendorContactPerson>;
+  createContactPerson(input: any, context?: { email?: string }): Promise<VendorContactPerson>;
   updateContactPerson(id: string, input: any): Promise<VendorContactPerson | null>;
   deleteContactPerson(id: string): Promise<boolean>;
   deleteContactPersons(ids: string[]): Promise<boolean>;

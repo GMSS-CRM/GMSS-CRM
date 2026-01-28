@@ -10,7 +10,7 @@ export class VendorDocumentService implements IVendorDocumentService {
     private readonly documentRepository: IVendorDocumentRepository
   ) {}
 
-  async createDocument(input: any, actor?: { email?: string }) {
+  async createDocument(input: any, context?: { email?: string }) {
     if (!input.vendorId || !input.vendorId.trim()) {
       throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
     }
@@ -28,8 +28,8 @@ export class VendorDocumentService implements IVendorDocumentService {
       documentName: input.documentName.trim(),
       documentUrl: input.documentUrl.trim(),
       expiresOn: input.expiresOn ? new Date(input.expiresOn) : undefined,
-      createdBy: actor?.email ?? 'SYSTEM',
-      updatedBy: actor?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
     });
   }
 

@@ -12,7 +12,7 @@ export interface ITenderRepository extends Repository<Tender> {
 }
 
 export interface ITenderService {
-  createTender(input: any, actor?: { email?: string }): Promise<Tender>;
+  createTender(input: any, context?: { email?: string }): Promise<Tender>;
   updateTender(id: string, input: any): Promise<Tender | null>;
   deleteTender(id: string): Promise<boolean>;
   deleteTenders(ids: string[]): Promise<boolean>;

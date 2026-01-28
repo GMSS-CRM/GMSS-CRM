@@ -1,7 +1,8 @@
 import { inject, injectable } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
 import { TYPES } from '../../inversify/types';
-import { Vendor, VendorStatus, VendorType } from '../../entities/Vendor';
+import { Vendor, CompanyType } from '../../entities/Vendor';
+import { VendorTag } from '../../entities/VendorTag';
 import { IVendorRepository } from './types';
 
 @injectable()
@@ -29,8 +30,8 @@ export class VendorRepository extends Repository<Vendor> implements IVendorRepos
 
   search(params: {
     search?: string;
-    status?: VendorStatus;
-    type?: VendorType;
+    status?: CompanyType;
+    type?: string;
     limit?: number;
     offset?: number;
   }) {
@@ -77,5 +78,15 @@ export class VendorRepository extends Repository<Vendor> implements IVendorRepos
 
   deleteVendors(ids: string[]) {
     return this.delete(ids).then(() => true);
+  }
+
+  async createVendorTag(vendorTag: Partial<VendorTag>) {
+    const vendorTagRepository = this.dbContext.getRepository(VendorTag);
+    return vendorTagRepository.save(vendorTagRepository.create(vendorTag));
+  }
+
+  async deleteVendorTag(id: string) {
+    const vendorTagRepository = this.dbContext.getRepository(VendorTag);
+    return vendorTagRepository.delete(id).then(() => true);
   }
 }

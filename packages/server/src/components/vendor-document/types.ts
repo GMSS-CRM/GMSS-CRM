@@ -12,7 +12,7 @@ export interface IVendorDocumentRepository extends Repository<VendorDocument> {
 }
 
 export interface IVendorDocumentService {
-  createDocument(input: any, actor?: { email?: string }): Promise<VendorDocument>;
+  createDocument(input: any, context?: { email?: string }): Promise<VendorDocument>;
   updateDocument(id: string, input: any): Promise<VendorDocument | null>;
   deleteDocument(id: string): Promise<boolean>;
   deleteDocuments(ids: string[]): Promise<boolean>;

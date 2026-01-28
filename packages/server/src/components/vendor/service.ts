@@ -1,14 +1,14 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { IVendorService, IVendorRepository } from './types';
-import { VendorStatus, VendorType } from '../../entities/Vendor';
+import { CompanyType } from '../../entities/Vendor';
 import ErrorInfo from '../common/error-info';
 
 @injectable()
 export class VendorService implements IVendorService {
   constructor(@inject(TYPES.IVendorRepository) private readonly vendorRepository: IVendorRepository) {}
 
-  async createVendor(input: any, actor?: { email?: string }) {
+  async createVendor(input: any, context?: { email?: string }) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.VENDOR_NAME_REQUIRED);
     }
@@ -20,14 +20,15 @@ export class VendorService implements IVendorService {
 
     return this.vendorRepository.createVendor({
       name: input.name.trim(),
-      type: input.type ?? VendorType.VENDOR,
-      status: input.status ?? VendorStatus.DRAFT,
+      type: input.type ?? undefined,
+      status: input.status ?? CompanyType.NEW,
       gstNumber: input.gstNumber ?? undefined,
       panNumber: input.panNumber ?? undefined,
       msmeUdyamNumber: input.msmeUdyamNumber ?? undefined,
       cinNumber: input.cinNumber ?? undefined,
-      createdBy: actor?.email ?? 'SYSTEM',
-      updatedBy: actor?.email ?? 'SYSTEM',
+      address: input.address ?? undefined,
+      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
     });
   }
 
@@ -71,6 +72,10 @@ export class VendorService implements IVendorService {
       updateData.cinNumber = input.cinNumber || undefined;
     }
 
+    if (input.address !== null && input.address !== undefined) {
+      updateData.address = input.address || undefined;
+    }
+
     return this.vendorRepository.updateVendor(id, updateData);
   }
 
@@ -99,5 +104,31 @@ export class VendorService implements IVendorService {
 
   async searchVendor(params: any) {
     return this.vendorRepository.search(params as any);
+  }
+
+  async createVendorTag(input: any, context?: { email?: string }) {
+    if (!input.vendorId || !input.vendorId.trim()) {
+      throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
+    }
+
+    if (!input.tagId || !input.tagId.trim()) {
+      throw new Error('Tag ID is required');
+    }
+
+    // Verify vendor exists
+    const vendor = await this.vendorRepository.findById(input.vendorId);
+    if (!vendor) {
+      throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
+    }
+
+    return this.vendorRepository.createVendorTag({
+      vendorId: input.vendorId,
+      tagId: input.tagId,
+      createdBy: context?.email ?? 'SYSTEM',
+    });
+  }
+
+  async deleteVendorTag(id: string) {
+    return this.vendorRepository.deleteVendorTag(id);
   }
 }

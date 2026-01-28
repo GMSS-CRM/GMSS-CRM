@@ -74,7 +74,7 @@ export type CreateVendorInput = {
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   panNumber?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<VendorStatus>;
+  status?: InputMaybe<CompanyType>;
   type?: InputMaybe<VendorType>;
 };
 
@@ -475,7 +475,7 @@ export type SearchVendorInput = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<VendorStatus>;
+  status?: InputMaybe<CompanyType>;
   type?: InputMaybe<VendorType>;
 };
 
@@ -569,7 +569,7 @@ export type UpdateVendorInput = {
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   panNumber?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<VendorStatus>;
+  status?: InputMaybe<CompanyType>;
   type?: InputMaybe<VendorType>;
 };
 
@@ -599,7 +599,7 @@ export type Vendor = {
   msmeUdyamNumber?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   panNumber?: Maybe<Scalars['String']['output']>;
-  status: VendorStatus;
+  status: CompanyType;
   tags?: Maybe<Array<VendorTag>>;
   type: VendorType;
   updatedBy?: Maybe<Scalars['String']['output']>;
@@ -637,7 +637,7 @@ export type VendorDocument = {
   vendorId: Scalars['ID']['output'];
 };
 
-export enum VendorStatus {
+export enum CompanyType {
   Approved = 'Approved',
   Draft = 'Draft',
   Rejected = 'Rejected',
@@ -772,7 +772,7 @@ export type ResolversTypes = {
   Vendor: ResolverTypeWrapper<Vendor>;
   VendorContactPerson: ResolverTypeWrapper<VendorContactPerson>;
   VendorDocument: ResolverTypeWrapper<VendorDocument>;
-  VendorStatus: VendorStatus;
+  CompanyType: CompanyType;
   VendorTag: ResolverTypeWrapper<VendorTag>;
   VendorType: VendorType;
 };
@@ -958,7 +958,7 @@ export type VendorResolvers<ContextType = any, ParentType extends ResolversParen
   msmeUdyamNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   panNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['VendorStatus'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['CompanyType'], ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['VendorTag']>>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['VendorType'], ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

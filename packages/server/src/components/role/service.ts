@@ -31,7 +31,7 @@ export class RoleService implements IRoleService {
     return this.roleRepository.search(searchInput);
   }
 
-  createRole(input: CreateRoleInput, actor?: { email?: string }) {
+  createRole(input: CreateRoleInput, context?: { email?: string }) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.ROLE_NAME_REQUIRED);
     }
@@ -39,13 +39,13 @@ export class RoleService implements IRoleService {
     return this.roleRepository.createRole({
       name: input.name,
       description: input.description ?? undefined,
-      createdBy: actor?.email ?? 'SYSTEM',
-      updatedBy: actor?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
     });
   }
 
-  updateRole(id: string, input: UpdateRoleInput, actor?: { email?: string }) {
-    const updateData: any = { updatedBy: actor?.email ?? 'SYSTEM' };
+  updateRole(id: string, input: UpdateRoleInput, context?: { email?: string }) {
+    const updateData: any = { updatedBy: context?.email ?? 'SYSTEM' };
 
     if (input.name !== null && input.name !== undefined && input.name.trim() !== '') {
       updateData.name = input.name;

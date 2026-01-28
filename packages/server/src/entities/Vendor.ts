@@ -6,20 +6,16 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { VendorTag } from './VendorTag';
-import { VendorContactPerson } from './VendorContactPerson';
-import { VendorDocument } from './VendorDocument';
+import type { VendorTag } from './VendorTag';
+import type { VendorContactPerson } from './VendorContactPerson';
+import type { VendorDocument } from './VendorDocument';
 
-export enum VendorType {
-  VENDOR = 'Vendor',
-  CONSULTANT = 'Consultant',
-}
-
-export enum VendorStatus {
-  APPROVED = 'Approved',
-  DRAFT = 'Draft',
-  SUBMITTED = 'Submitted',
-  REJECTED = 'Rejected',
+export enum CompanyType {
+  NEW = 'New',
+  INTERESTED = 'Interested',
+  NOT_INTERESTED = 'Not Interested',
+  FINAL = 'Final',
+  DELETED = 'Deleted',
 }
 
 @Entity({ name: 'vendor' })
@@ -30,11 +26,11 @@ export class Vendor {
   @Column()
   name!: string;
 
-  @Column({ type: 'enum', enum: VendorType, default: VendorType.VENDOR })
-  type!: VendorType;
+  @Column({ nullable: true })
+  type?: string;
 
-  @Column({ type: 'enum', enum: VendorStatus, default: VendorStatus.DRAFT })
-  status!: VendorStatus;
+  @Column({ type: 'enum', enum: CompanyType, default: CompanyType.NEW })
+  status!: CompanyType;
 
   @Column({ nullable: true })
   gstNumber?: string;
@@ -48,6 +44,9 @@ export class Vendor {
   @Column({ nullable: true })
   cinNumber?: string;
 
+  @Column({ nullable: true })
+  address?: string;
+
   @Column({ default: 'SYSTEM' })
   createdBy!: string;
 
@@ -60,12 +59,12 @@ export class Vendor {
   @UpdateDateColumn()
   updatedDate!: Date;
 
-  @OneToMany(() => VendorTag, (vendorTag) => vendorTag.vendor, { cascade: true })
+  @OneToMany('VendorTag', 'vendor', { cascade: true })
   tags!: VendorTag[];
 
-  @OneToMany(() => VendorContactPerson, (contact) => contact.vendor, { cascade: true })
+  @OneToMany('VendorContactPerson', 'vendor', { cascade: true })
   contactPersons!: VendorContactPerson[];
 
-  @OneToMany(() => VendorDocument, (doc) => doc.vendor, { cascade: true })
+  @OneToMany('VendorDocument', 'vendor', { cascade: true })
   documents!: VendorDocument[];
 }

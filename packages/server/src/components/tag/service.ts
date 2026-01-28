@@ -7,7 +7,7 @@ import ErrorInfo from '../common/error-info';
 export class TagService implements ITagService {
   constructor(@inject(TYPES.ITagRepository) private readonly tagRepository: ITagRepository) {}
 
-  async createTag(input: any, actor?: { email?: string }) {
+  async createTag(input: any, context?: { email?: string }) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.TAG_NAME_REQUIRED);
     }
@@ -19,8 +19,8 @@ export class TagService implements ITagService {
 
     return this.tagRepository.createTag({
       name: input.name.trim(),
-      createdBy: actor?.email ?? 'SYSTEM',
-      updatedBy: actor?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
     });
   }
 

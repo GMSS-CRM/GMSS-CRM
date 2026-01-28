@@ -29,7 +29,7 @@ export class UserService implements IUserService {
     this.roleRepo = dbContext.getRepository(Role);
   }
 
-  async createUser(input: CreateUserInput, actor?: { id?: string; email?: string; roleId?: string; roleName?: string }) {
+  async createUser(input: CreateUserInput, context?: { id?: string; email?: string; roleId?: string; roleName?: string }) {
     if (!input.firstName || input.firstName.trim() === '') {
       throw new Error(ErrorInfo.FIRST_NAME_REQUIRED);
     }
@@ -37,12 +37,12 @@ export class UserService implements IUserService {
       throw new Error(ErrorInfo.EMAIL_REQUIRED);
     }
 
-    // If actor is provided, ensure they have permission to create users
-    if (actor && actor.roleId) {
-      const perms = await this.rolePermissionService?.getPermissionsByRoleId(actor.roleId);
-      const canCreate = actor.roleName === 'ADMIN' || (perms && perms.includes(Permission.CREATE_USER));
+    // If context is provided, ensure they have permission to create users
+    if (context && context.roleId) {
+      const perms = await this.rolePermissionService?.getPermissionsByRoleId(context.roleId);
+      const canCreate = context.roleName === 'ADMIN' || (perms && perms.includes(Permission.CREATE_USER));
       if (!canCreate) {
-        throw new Error('Actor does not have permission to create users');
+        throw new Error('context does not have permission to create users');
       }
     }
 
@@ -56,8 +56,8 @@ export class UserService implements IUserService {
       lastName: input.lastName ?? undefined,
       email: input.email,
       role: role ?? undefined,
-      updatedBy: actor?.email ?? 'SYSTEM',
-      createdBy: actor?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
     });
   }
 

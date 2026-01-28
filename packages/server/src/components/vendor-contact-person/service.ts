@@ -10,7 +10,7 @@ export class VendorContactPersonService implements IVendorContactPersonService {
     private readonly contactPersonRepository: IVendorContactPersonRepository
   ) {}
 
-  async createContactPerson(input: any, actor?: { email?: string }) {
+  async createContactPerson(input: any, context?: { email?: string }) {
     if (!input.vendorId || !input.vendorId.trim()) {
       throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
     }
@@ -35,17 +35,15 @@ export class VendorContactPersonService implements IVendorContactPersonService {
       email: input.email.trim(),
       cc: input.cc ?? undefined,
       bcc: input.bcc ?? undefined,
-      tags: input.tags ?? [],
-      categories: input.categories ?? [],
-      createdBy: actor?.email ?? 'SYSTEM',
-      updatedBy: actor?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
     });
   }
 
   async updateContactPerson(id: string, input: any) {
     const existingContact = await this.contactPersonRepository.findById(id);
     if (!existingContact) {
-      throw new Error('Contact person not found');
+      throw new Error(ErrorInfo.CONTACT_PERSON_NOT_FOUND);
     }
 
     const updateData: any = { updatedBy: 'SYSTEM' };
@@ -72,14 +70,6 @@ export class VendorContactPersonService implements IVendorContactPersonService {
 
     if (input.bcc !== null && input.bcc !== undefined) {
       updateData.bcc = input.bcc || undefined;
-    }
-
-    if (input.tags !== null && input.tags !== undefined) {
-      updateData.tags = input.tags || [];
-    }
-
-    if (input.categories !== null && input.categories !== undefined) {
-      updateData.categories = input.categories || [];
     }
 
     return this.contactPersonRepository.updateContactPerson(id, updateData);

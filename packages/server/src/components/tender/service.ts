@@ -7,7 +7,7 @@ import ErrorInfo from '../common/error-info';
 export class TenderService implements ITenderService {
   constructor(@inject(TYPES.ITenderRepository) private readonly tenderRepository: ITenderRepository) {}
 
-  async createTender(input: any, actor?: { email?: string }) {
+  async createTender(input: any, context?: { email?: string }) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.TENDER_NAME_REQUIRED);
     }
@@ -19,8 +19,8 @@ export class TenderService implements ITenderService {
 
     return this.tenderRepository.createTender({
       name: input.name.trim(),
-      createdBy: actor?.email ?? 'SYSTEM',
-      updatedBy: actor?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: context?.email ?? 'SYSTEM',
     });
   }
 

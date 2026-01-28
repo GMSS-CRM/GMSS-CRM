@@ -1,27 +1,24 @@
 import { gql } from 'graphql-tag';
 
 export const vendorTypeDefs = gql`
-  enum VendorType {
-    Vendor
-    Consultant
-  }
-
-  enum VendorStatus {
-    Approved
-    Draft
-    Submitted
-    Rejected
+  enum CompanyType {
+    New
+    Interested
+    NotInterested
+    Final
+    Deleted
   }
 
   type Vendor {
     id: ID!
     name: String!
-    type: VendorType!
-    status: VendorStatus!
+    type: String
+    status: CompanyType!
     gstNumber: String
     panNumber: String
     msmeUdyamNumber: String
     cinNumber: String
+    address: String
     createdBy: String!
     createdDate: String!
     updatedBy: String
@@ -33,28 +30,30 @@ export const vendorTypeDefs = gql`
 
   input CreateVendorInput {
     name: String!
-    type: VendorType
-    status: VendorStatus
+    type: String
+    status: CompanyType
     gstNumber: String
     panNumber: String
     msmeUdyamNumber: String
     cinNumber: String
+    address: String
   }
 
   input UpdateVendorInput {
     name: String
-    type: VendorType
-    status: VendorStatus
+    type: String
+    status: CompanyType
     gstNumber: String
     panNumber: String
     msmeUdyamNumber: String
     cinNumber: String
+    address: String
   }
 
   input SearchVendorInput {
     search: String
-    status: VendorStatus
-    type: VendorType
+    status: CompanyType
+    type: String
     limit: Int
     offset: Int
   }
@@ -64,6 +63,13 @@ export const vendorTypeDefs = gql`
     vendorId: ID!
     tagId: ID!
     tag: Tag
+    createdBy: String!
+    createdDate: String!
+  }
+
+  input CreateVendorTagInput {
+    vendorId: ID!
+    tagId: ID!
   }
 
   extend type Query {
@@ -77,5 +83,7 @@ export const vendorTypeDefs = gql`
     deleteVendor(id: ID!): Boolean!
     deleteVendors(ids: [ID!]!): Boolean!
     uploadVendor(input: CreateVendorInput!): Vendor!
+    createVendorTag(input: CreateVendorTagInput!): VendorTag!
+    deleteVendorTag(id: ID!): Boolean!
   }
 `;

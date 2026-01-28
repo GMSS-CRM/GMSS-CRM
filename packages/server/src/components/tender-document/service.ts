@@ -10,7 +10,7 @@ export class TenderDocumentService implements ITenderDocumentService {
     private readonly documentRepository: ITenderDocumentRepository
   ) {}
 
-  async createDocument(input: any, actor?: { email?: string }) {
+  async createDocument(input: any, context?: { email?: string }) {
     if (!input.tenderId || !input.tenderId.trim()) {
       throw new Error(ErrorInfo.TENDER_ID_REQUIRED);
     }
@@ -28,7 +28,7 @@ export class TenderDocumentService implements ITenderDocumentService {
       documentName: input.documentName.trim(),
       documentUrl: input.documentUrl.trim(),
       expiresOn: input.expiresOn ? new Date(input.expiresOn) : undefined,
-      createdBy: actor?.email ?? 'SYSTEM',
+      createdBy: context?.email ?? 'SYSTEM',
     });
   }
 

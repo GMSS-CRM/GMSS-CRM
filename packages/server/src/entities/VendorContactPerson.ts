@@ -14,10 +14,6 @@ export class VendorContactPerson {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne('Vendor', 'contactPersons', { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'vendorId' })
-  vendor!: Vendor;
-
   @Column()
   vendorId!: string;
 
@@ -39,12 +35,6 @@ export class VendorContactPerson {
   @Column({ nullable: true })
   bcc?: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  tags?: string[];
-
-  @Column({ type: 'simple-array', nullable: true })
-  categories?: string[];
-
   @Column({ default: 'SYSTEM' })
   createdBy!: string;
 
@@ -56,4 +46,8 @@ export class VendorContactPerson {
 
   @UpdateDateColumn()
   updatedDate!: Date;
+
+  @ManyToOne('Vendor', 'contactPersons', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'vendorId' })
+  vendor!: Vendor;
 }

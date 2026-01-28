@@ -26,6 +26,11 @@ export const vendorResolvers = {
     deleteVendor: (_: unknown, { id }: any) => getService().deleteVendor(id),
 
     deleteVendors: (_: unknown, { ids }: any) => getService().deleteVendors(ids),
+
+    createVendorTag: (_: unknown, { input }: any, context: any) =>
+      getService().createVendorTag(input as any, { email: context?.user?.email }),
+
+    deleteVendorTag: (_: unknown, { id }: any) => getService().deleteVendorTag(id),
   },
 
   Vendor: {

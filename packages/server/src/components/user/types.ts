@@ -20,7 +20,7 @@ export interface IUserRepository extends Repository<User> {
  * Service contract
  */
 export interface IUserService {
-  createUser(input: CreateUserInput, actor?: { id?: string; email?: string; roleId?: string; roleName?: string }): Promise<User>;
+  createUser(input: CreateUserInput, context?: { id?: string; email?: string; roleId?: string; roleName?: string }): Promise<User>;
   updateUser(id: string, input: UpdateUserInput): Promise<User | null>;
   deleteUser(id: string): Promise<boolean>;
   deleteUsers(ids: string[]): Promise<boolean>;
