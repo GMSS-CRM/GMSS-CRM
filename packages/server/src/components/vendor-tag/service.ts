@@ -25,7 +25,7 @@ export class VendorTagService implements IVendorTagService {
     return this.vendorTagRepository.createVendorTag({
       vendorId: input.vendorId,
       tagId: input.tagId,
-      sentMail: input.sentMail ?? true,
+      enableMail: input.enableMail ?? true,
       createdBy: createdBy,
     });
   }

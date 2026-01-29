@@ -5,7 +5,7 @@ export const vendorTagTypeDefs = gql`
     id: ID!
     vendorId: ID!
     tagId: ID!
-    sentMail: Boolean!
+    enableMail: Boolean!
     tag: Tag
     createdBy: String!
     createdDate: String!
@@ -14,7 +14,7 @@ export const vendorTagTypeDefs = gql`
   input CreateVendorTagInput {
     vendorId: ID!
     tagId: ID!
-    sentMail: Boolean
+    enableMail: Boolean
   }
 
   extend type Query {

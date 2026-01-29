@@ -21,7 +21,7 @@ export class VendorTag {
     tagId!: string;
 
     @Column({ default: true })
-    sentMail!: boolean;
+    enableMail!: boolean;
 
     @Column({ default: 'SYSTEM' })
     createdBy!: string;
