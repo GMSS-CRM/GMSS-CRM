@@ -14,23 +14,18 @@ export const vendorResolvers = {
   },
 
   Mutation: {
-    createVendor: (_: unknown, { input }: any, context: any) =>
-      getService().createVendor(input as any, { email: context?.user?.email }),
+    createVendor: (_: unknown, { input }: any) =>
+      getService().createVendor(input as any),
 
-    uploadVendor: (_: unknown, { input }: any, context: any) =>
-      getService().createVendor(input as any, { email: context?.user?.email }),
+    uploadVendor: (_: unknown, { input }: any) =>
+      getService().createVendor(input as any),
 
-    updateVendor: (_: unknown, { id, input }: any, context: any) =>
+    updateVendor: (_: unknown, { id, input }: any) =>
       getService().updateVendor(id, input as any),
 
     deleteVendor: (_: unknown, { id }: any) => getService().deleteVendor(id),
 
     deleteVendors: (_: unknown, { ids }: any) => getService().deleteVendors(ids),
-
-    createVendorTag: (_: unknown, { input }: any, context: any) =>
-      getService().createVendorTag(input as any, { email: context?.user?.email }),
-
-    deleteVendorTag: (_: unknown, { id }: any) => getService().deleteVendorTag(id),
   },
 
   Vendor: {

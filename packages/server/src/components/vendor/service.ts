@@ -108,30 +108,4 @@ export class VendorService implements IVendorService {
   async searchVendor(params: any) {
     return this.vendorRepository.search(params as any);
   }
-
-  async createVendorTag(input: any) {
-    if (!input.vendorId || !input.vendorId.trim()) {
-      throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
-    }
-
-    if (!input.tagId || !input.tagId.trim()) {
-      throw new Error('Tag ID is required');
-    }
-
-    // Verify vendor exists
-    const vendor = await this.vendorRepository.findById(input.vendorId);
-    if (!vendor) {
-      throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
-    }
-
-    return this.vendorRepository.createVendorTag({
-      vendorId: input.vendorId,
-      tagId: input.tagId,
-      createdBy: getCurrentEmail(),
-    });
-  }
-
-  async deleteVendorTag(id: string) {
-    return this.vendorRepository.deleteVendorTag(id);
-  }
 }

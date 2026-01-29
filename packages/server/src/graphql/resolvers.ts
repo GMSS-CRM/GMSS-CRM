@@ -3,6 +3,7 @@ import { roleResolvers } from "../components/role";
 import { rolePermissionResolvers } from "../components/role-permission";
 import { tagResolvers } from "../components/tag";
 import { vendorResolvers } from "../components/vendor";
+import { vendorTagResolvers } from "../components/vendor-tag";
 import { vendorContactPersonResolvers } from "../components/vendor-contact-person";
 import { vendorDocumentResolvers } from "../components/vendor-document";
 import { tenderResolvers } from "../components/tender";
@@ -14,6 +15,7 @@ export const resolvers = [
   rolePermissionResolvers,
   tagResolvers,
   vendorResolvers,
+  vendorTagResolvers,
   vendorContactPersonResolvers,
   vendorDocumentResolvers,
   tenderResolvers,

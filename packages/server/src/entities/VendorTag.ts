@@ -20,6 +20,9 @@ export class VendorTag {
     @Column()
     tagId!: string;
 
+    @Column({ default: true })
+    sentMail!: boolean;
+
     @Column({ default: 'SYSTEM' })
     createdBy!: string;
 

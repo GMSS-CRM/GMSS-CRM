@@ -22,6 +22,9 @@ export const TYPES = {
   IVendorDocumentRepository: Symbol.for('IVendorDocumentRepository'),
   IVendorDocumentService: Symbol.for('IVendorDocumentService'),
 
+  IVendorTagRepository: Symbol.for('IVendorTagRepository'),
+  IVendorTagService: Symbol.for('IVendorTagService'),
+
   ITenderRepository: Symbol.for('ITenderRepository'),
   ITenderService: Symbol.for('ITenderService'),
 
