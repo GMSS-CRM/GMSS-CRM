@@ -15,7 +15,7 @@ export const vendorDocumentResolvers = {
 
   Mutation: {
     createVendorDocument: (_: unknown, { input }: any, context: any) =>
-      getService().createDocument(input as any, { email: context?.user?.email }),
+      getService().createDocument(input as any),
 
     updateVendorDocument: (_: unknown, { id, input }: any, context: any) =>
       getService().updateDocument(id, input as any),

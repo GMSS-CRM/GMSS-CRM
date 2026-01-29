@@ -18,7 +18,7 @@ export const vendorContactPersonResolvers = {
 
   Mutation: {
     createVendorContactPerson: (_: unknown, { input }: any, context: any) =>
-      getService().createContactPerson(input as any, { email: context?.user?.email }),
+      getService().createContactPerson(input as any),
 
     updateVendorContactPerson: (_: unknown, { id, input }: any, context: any) =>
       getService().updateContactPerson(id, input as any),

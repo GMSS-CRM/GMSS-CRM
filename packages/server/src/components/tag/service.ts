@@ -2,12 +2,13 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { ITagService, ITagRepository } from './types';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class TagService implements ITagService {
   constructor(@inject(TYPES.ITagRepository) private readonly tagRepository: ITagRepository) {}
 
-  async createTag(input: any, context?: { email?: string }) {
+  async createTag(input: any) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.TAG_NAME_REQUIRED);
     }
@@ -17,10 +18,12 @@ export class TagService implements ITagService {
       throw new Error(ErrorInfo.TAG_ALREADY_EXISTS);
     }
 
+    const email = getCurrentEmail();
+
     return this.tagRepository.createTag({
       name: input.name.trim(),
-      createdBy: context?.email ?? 'SYSTEM',
-      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: email,
+      updatedBy: email,
     });
   }
 
@@ -30,7 +33,7 @@ export class TagService implements ITagService {
       throw new Error(ErrorInfo.TAG_NOT_FOUND);
     }
 
-    const updateData: any = { updatedBy: 'SYSTEM' };
+    const updateData: any = { updatedBy: getCurrentEmail() };
 
     if (input.name !== null && input.name !== undefined) {
       const duplicate = await this.tagRepository.findByName(input.name);

@@ -11,7 +11,7 @@ import {CreateUserInput,
   SearchUserInput} from '@gmss/types';
 import { Permission } from '@gmss/types';
 import ErrorInfo from '../common/error-info';
-import { IRolePermissionService } from '../role-permission/types';
+import { hasPermission, requirePermission, getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class UserService implements IUserService {
@@ -21,15 +21,17 @@ export class UserService implements IUserService {
 
   constructor(
     @inject(TYPES.IUserRepository) userRepository: IUserRepository,
-    @inject(TYPES.DbContext) dbContext: DataSource,
-    @inject(TYPES.IRolePermissionService) private readonly rolePermissionService?: IRolePermissionService
+    @inject(TYPES.DbContext) dbContext: DataSource
   ) {
     this.userRepository = userRepository;
     this.dbContext = dbContext;
     this.roleRepo = dbContext.getRepository(Role);
   }
 
-  async createUser(input: CreateUserInput, context?: { id?: string; email?: string; roleId?: string; roleName?: string }) {
+  async createUser(input: CreateUserInput) {
+    // Check permission from global context
+    requirePermission(Permission.CREATE_USER);
+
     if (!input.firstName || input.firstName.trim() === '') {
       throw new Error(ErrorInfo.FIRST_NAME_REQUIRED);
     }
@@ -37,32 +39,28 @@ export class UserService implements IUserService {
       throw new Error(ErrorInfo.EMAIL_REQUIRED);
     }
 
-    // If context is provided, ensure they have permission to create users
-    if (context && context.roleId) {
-      const perms = await this.rolePermissionService?.getPermissionsByRoleId(context.roleId);
-      const canCreate = context.roleName === 'ADMIN' || (perms && perms.includes(Permission.CREATE_USER));
-      if (!canCreate) {
-        throw new Error('context does not have permission to create users');
-      }
-    }
-
     const role: Role | null = input.roleId ? await this.roleRepo.findOneBy({ id: input.roleId }) : null;
     if (!role && input.roleId) {
       throw new Error(ErrorInfo.ROLE_ID_NOT_EXIST);
     }
+
+    const createdBy = getCurrentEmail() ?? 'SYSTEM';
 
     return this.userRepository.createUser({
       firstName: input.firstName,
       lastName: input.lastName ?? undefined,
       email: input.email,
       role: role ?? undefined,
-      updatedBy: context?.email ?? 'SYSTEM',
-      createdBy: context?.email ?? 'SYSTEM',
+      updatedBy: createdBy,
+      createdBy: createdBy,
     });
   }
 
   async updateUser(id: string, input: UpdateUserInput) {
-    const updateData: any = { updatedBy: 'SYSTEM' };
+    // Check permission from global context
+    requirePermission(Permission.UPDATE_USER);
+
+    const updateData: any = { updatedBy: getCurrentEmail() ?? 'SYSTEM' };
 
     if (input.roleId !== null && input.roleId !== undefined) {
       const role = await this.roleRepo.findOneBy({ id: input.roleId });
@@ -84,10 +82,12 @@ export class UserService implements IUserService {
   }
 
   deleteUser(id: string) {
+    requirePermission(Permission.DELETE_USER);
     return this.userRepository.deleteUser(id);
   }
 
   deleteUsers(ids: string[]) {
+    requirePermission(Permission.DELETE_USER);
     return this.userRepository.deleteUsers(ids);
   }
 

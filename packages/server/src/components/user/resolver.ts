@@ -22,10 +22,10 @@ export const userResolvers = {
   },
 
   Mutation: {
-    createUser: (_: unknown, { input }: MutationCreateUserArgs, context: any) =>
-      getService().createUser(input as any, { email: context?.user?.email, roleId: context?.user?.role?.id, roleName: context?.user?.role?.name }),
+    createUser: (_: unknown, { input }: MutationCreateUserArgs) =>
+      getService().createUser(input as any),
 
-    updateUser: (_: unknown, { id, input }: MutationUpdateUserArgs, context: any) =>
+    updateUser: (_: unknown, { id, input }: MutationUpdateUserArgs) =>
       getService().updateUser(id, input as any),
 
     deleteUser: (_: unknown, { id }: any) => getService().deleteUser(id),
@@ -35,6 +35,5 @@ export const userResolvers = {
 
   User: {
     role: (parent: any) => parent.role || null,
-    roleId: (parent: any) => parent.role?.id ?? parent.roleId,
   },
 };

@@ -10,6 +10,7 @@ import {
   SearchRoleInput,
 } from '@gmss/types';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class RoleService implements IRoleService {
@@ -31,21 +32,23 @@ export class RoleService implements IRoleService {
     return this.roleRepository.search(searchInput);
   }
 
-  createRole(input: CreateRoleInput, context?: { email?: string }) {
+  createRole(input: CreateRoleInput) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.ROLE_NAME_REQUIRED);
     }
 
+    const createdBy = getCurrentEmail();
+
     return this.roleRepository.createRole({
       name: input.name,
       description: input.description ?? undefined,
-      createdBy: context?.email ?? 'SYSTEM',
-      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: createdBy,
+      updatedBy: createdBy,
     });
   }
 
-  updateRole(id: string, input: UpdateRoleInput, context?: { email?: string }) {
-    const updateData: any = { updatedBy: context?.email ?? 'SYSTEM' };
+  updateRole(id: string, input: UpdateRoleInput) {
+    const updateData: any = { updatedBy: getCurrentEmail() };
 
     if (input.name !== null && input.name !== undefined && input.name.trim() !== '') {
       updateData.name = input.name;

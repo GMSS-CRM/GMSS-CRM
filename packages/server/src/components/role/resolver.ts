@@ -23,10 +23,10 @@ export const roleResolvers = {
 
   Mutation: {
     createRole: (_: any, { input }: MutationCreateRoleArgs, context: any) =>
-      getService().createRole(input as any, { email: context?.user?.email }),
+      getService().createRole(input as any),
 
     updateRole: (_: any, { input }: MutationUpdateRoleArgs, context: any) =>
-      getService().updateRole(input.id, input as any, { email: context?.user?.email }),
+      getService().updateRole(input.id, input as any),
 
     deleteRole: (_: any, { id }: any) => getService().deleteRole(id),
   },

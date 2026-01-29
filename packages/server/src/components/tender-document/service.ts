@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { ITenderDocumentService, ITenderDocumentRepository } from './types';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class TenderDocumentService implements ITenderDocumentService {
@@ -10,7 +11,7 @@ export class TenderDocumentService implements ITenderDocumentService {
     private readonly documentRepository: ITenderDocumentRepository
   ) {}
 
-  async createDocument(input: any, context?: { email?: string }) {
+  async createDocument(input: any) {
     if (!input.tenderId || !input.tenderId.trim()) {
       throw new Error(ErrorInfo.TENDER_ID_REQUIRED);
     }
@@ -28,7 +29,7 @@ export class TenderDocumentService implements ITenderDocumentService {
       documentName: input.documentName.trim(),
       documentUrl: input.documentUrl.trim(),
       expiresOn: input.expiresOn ? new Date(input.expiresOn) : undefined,
-      createdBy: context?.email ?? 'SYSTEM',
+      createdBy: getCurrentEmail(),
     });
   }
 

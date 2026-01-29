@@ -3,12 +3,13 @@ import { TYPES } from '../../inversify/types';
 import { IVendorService, IVendorRepository } from './types';
 import { CompanyType } from '../../entities/Vendor';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class VendorService implements IVendorService {
   constructor(@inject(TYPES.IVendorRepository) private readonly vendorRepository: IVendorRepository) {}
 
-  async createVendor(input: any, context?: { email?: string }) {
+  async createVendor(input: any) {
     if (!input.name || input.name.trim() === '') {
       throw new Error(ErrorInfo.VENDOR_NAME_REQUIRED);
     }
@@ -17,6 +18,8 @@ export class VendorService implements IVendorService {
     if (existingVendor) {
       throw new Error(ErrorInfo.VENDOR_ALREADY_EXISTS);
     }
+
+    const email = getCurrentEmail();
 
     return this.vendorRepository.createVendor({
       name: input.name.trim(),
@@ -27,8 +30,8 @@ export class VendorService implements IVendorService {
       msmeUdyamNumber: input.msmeUdyamNumber ?? undefined,
       cinNumber: input.cinNumber ?? undefined,
       address: input.address ?? undefined,
-      createdBy: context?.email ?? 'SYSTEM',
-      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: email,
+      updatedBy: email,
     });
   }
 
@@ -38,7 +41,7 @@ export class VendorService implements IVendorService {
       throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
     }
 
-    const updateData: any = { updatedBy: 'SYSTEM' };
+    const updateData: any = { updatedBy: getCurrentEmail() };
 
     if (input.name !== null && input.name !== undefined) {
       const duplicate = await this.vendorRepository.findByName(input.name);
@@ -106,7 +109,7 @@ export class VendorService implements IVendorService {
     return this.vendorRepository.search(params as any);
   }
 
-  async createVendorTag(input: any, context?: { email?: string }) {
+  async createVendorTag(input: any) {
     if (!input.vendorId || !input.vendorId.trim()) {
       throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
     }
@@ -124,7 +127,7 @@ export class VendorService implements IVendorService {
     return this.vendorRepository.createVendorTag({
       vendorId: input.vendorId,
       tagId: input.tagId,
-      createdBy: context?.email ?? 'SYSTEM',
+      createdBy: getCurrentEmail(),
     });
   }
 

@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { IVendorDocumentService, IVendorDocumentRepository } from './types';
 import ErrorInfo from '../common/error-info';
+import { getCurrentEmail } from '../common/utils';
 
 @injectable()
 export class VendorDocumentService implements IVendorDocumentService {
@@ -10,7 +11,7 @@ export class VendorDocumentService implements IVendorDocumentService {
     private readonly documentRepository: IVendorDocumentRepository
   ) {}
 
-  async createDocument(input: any, context?: { email?: string }) {
+  async createDocument(input: any) {
     if (!input.vendorId || !input.vendorId.trim()) {
       throw new Error(ErrorInfo.VENDOR_ID_REQUIRED);
     }
@@ -23,13 +24,15 @@ export class VendorDocumentService implements IVendorDocumentService {
       throw new Error(ErrorInfo.DOCUMENT_URL_REQUIRED);
     }
 
+    const createdBy = getCurrentEmail();
+
     return this.documentRepository.createDocument({
       vendorId: input.vendorId,
       documentName: input.documentName.trim(),
       documentUrl: input.documentUrl.trim(),
       expiresOn: input.expiresOn ? new Date(input.expiresOn) : undefined,
-      createdBy: context?.email ?? 'SYSTEM',
-      updatedBy: context?.email ?? 'SYSTEM',
+      createdBy: createdBy,
+      updatedBy: createdBy,
     });
   }
 
@@ -39,7 +42,7 @@ export class VendorDocumentService implements IVendorDocumentService {
       throw new Error(ErrorInfo.DOCUMENT_NOT_FOUND);
     }
 
-    const updateData: any = { updatedBy: 'SYSTEM' };
+    const updateData: any = { updatedBy: getCurrentEmail() };
 
     if (input.documentName !== null && input.documentName !== undefined) {
       updateData.documentName = input.documentName.trim();
