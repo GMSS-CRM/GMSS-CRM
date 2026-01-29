@@ -1,0 +1,392 @@
+/* ============ Page Container ============ */
+.pageContainer {
+  padding: 24px;
+  min-height: 100%;
+  background: var(--color-bg-secondary, #f5f5f5);
+}
+
+/* ============ Page Header ============ */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pageTitle {
+  margin: 0 !important;
+  font-weight: 600;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-primary, #1d2129);
+}
+
+.titleIcon {
+  font-size: 28px;
+  color: var(--color-primary, #1677ff);
+}
+
+.pageSubtitle {
+  color: var(--color-text-secondary, #8c8c8c);
+  font-size: 14px;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.createButton {
+  height: 40px;
+  font-weight: 500;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============ Stats Cards ============ */
+.statsSection {
+  margin-bottom: 24px;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  max-width: 600px;
+}
+
+.statCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.statIconWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.statIconBlue {
+  background: #e6f4ff;
+  color: #1677ff;
+}
+
+.statIconGreen {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.statIconPurple {
+  background: #f9f0ff;
+  color: #722ed1;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text-primary, #1d2129);
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--color-text-secondary, #8c8c8c);
+  margin-top: 2px;
+}
+
+/* ============ Table Card ============ */
+.tableCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.searchSection {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.searchInput {
+  width: 280px;
+  border-radius: 8px;
+}
+
+.tableActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bulkDeleteBtn {
+  border-radius: 6px;
+}
+
+/* ============ Table Styles ============ */
+.tagTable {
+  /* Custom table styles via Ant Design overrides */
+}
+
+tagName {
+  font-weight: 500;
+  color: var(--color-text-primary, #1d2129);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+tagIcon {
+  color: var(--color-primary, #1677ff);
+  font-size: 14px;
+}
+
+.vendorBadge {
+  min-width: 36px;
+  height: 24px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.dateText {
+  color: var(--color-text-secondary, #8c8c8c);
+  font-size: 13px;
+}
+
+.statusActive {
+  color: #52c41a;
+}
+
+.statusEmpty {
+  color: #d9d9d9;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.actionBtn {
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.actionBtn:hover {
+  background: #f5f5f5;
+}
+
+.actionBtnDanger:hover {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+/* ============ Empty State ============ */
+.emptyState {
+  padding: 60px 20px;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  color: #d9d9d9;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  color: var(--color-text-primary, #1d2129);
+  margin-bottom: 8px;
+}
+
+.emptySubtitle {
+  color: var(--color-text-secondary, #8c8c8c);
+  margin-bottom: 20px;
+}
+
+/* ============ Drawer Styles ============ */
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawerTagBadge {
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.drawerStats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #8c8c8c);
+  background: #f5f5f5;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.vendorRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vendorName {
+  font-weight: 500;
+  color: var(--color-text-primary, #1d2129);
+}
+
+.vendorEmail {
+  font-size: 13px;
+  color: var(--color-text-secondary, #8c8c8c);
+}
+
+.emailToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggleLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary, #8c8c8c);
+  min-width: 55px;
+}
+
+.toggleEnabled {
+  color: #52c41a;
+}
+
+.toggleDisabled {
+  color: #ff4d4f;
+}
+
+/* ============ Modal Styles ============ */
+.modalTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.modalIcon {
+  color: var(--color-primary, #1677ff);
+  font-size: 20px;
+}
+
+dangerModalTitle {
+  color: #ff4d4f;
+}
+
+dangerIcon {
+  color: #ff4d4f;
+}
+
+.formContainer {
+  padding: 8px 0;
+}
+
+.warningBox {
+  background: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.warningIcon {
+  color: #faad14;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.warningText {
+  color: #8c6e00;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.deleteTagName {
+  font-weight: 600;
+  color: var(--color-text-primary, #1d2129);
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+  
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .searchInput {
+    width: 100%;
+  }
+  
+  .tableHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .searchSection {
+    width: 100%;
+  }
+}
