@@ -6,7 +6,7 @@ export const userTypeDefs = gql`
     firstName: String!
     lastName: String
     email: String!
-    roleId: ID!
+    roleId: ID
     role: Role!
     createdBy: String!
     createdDate: String!
@@ -18,7 +18,7 @@ export const userTypeDefs = gql`
     firstName: String!
     lastName: String
     email: String!
-    roleId: ID!
+    roleId: ID
   }
 
   input UpdateUserInput {

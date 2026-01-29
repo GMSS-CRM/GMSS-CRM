@@ -35,6 +35,5 @@ export const userResolvers = {
 
   User: {
     role: (parent: any) => parent.role || null,
-    roleId: (parent: any) => parent.role?.id ?? parent.roleId,
   },
 };

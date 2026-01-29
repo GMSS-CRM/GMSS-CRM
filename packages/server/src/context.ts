@@ -58,16 +58,16 @@ export const buildContext = async ({ req }: { req: any }) => {
   try {
     user = await userService.getUserByEmail(email);
     
-    // If user exists, fetch their permissions based on their role
-    if (user && user.role && user.role.id) {
+    // If user exists, fetch their permissions based on their roleId
+    if (user && user.roleId) {
       try {
-        permissions = await rolePermissionService.getPermissionsByRoleId(user.role.id);
+        permissions = await rolePermissionService.getPermissionsByRoleId(user.roleId);
       } catch (permError) {
         console.warn(`⚠️ Could not fetch permissions for user: ${email}`, permError);
         permissions = [];
       }
     } else {
-      console.warn(`⚠️ User has no role for email: ${email}`);
+      console.warn(`⚠️ User has no roleId for email: ${email}`);
     }
   } catch (error) {
     console.error('User Not Authorized:', error);

@@ -28,6 +28,9 @@ export class User {
   @Column()
   lastName!: string;
 
+  @Column({nullable: true})
+  roleId!: string;
+
   @ManyToOne(() => Role, { nullable: false })
   @JoinColumn({ name: 'roleId' })
   role!: Role;
