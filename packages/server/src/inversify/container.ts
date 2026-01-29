@@ -33,6 +33,10 @@ import { VendorDocumentRepository } from '../components/vendor-document/reposito
 import { VendorDocumentService } from '../components/vendor-document/service';
 import { IVendorDocumentRepository, IVendorDocumentService } from '../components/vendor-document/types';
 
+import { VendorTagRepository } from '../components/vendor-tag/repository';
+import { VendorTagService } from '../components/vendor-tag/service';
+import { IVendorTagRepository, IVendorTagService } from '../components/vendor-tag/types';
+
 import { TenderRepository } from '../components/tender/repository';
 import { TenderService } from '../components/tender/service';
 import { ITenderRepository, ITenderService } from '../components/tender/types';
@@ -84,6 +88,13 @@ function createContainer(): Container {
   container
     .bind<IVendorDocumentService>(TYPES.IVendorDocumentService)
     .to(VendorDocumentService);
+
+  container
+    .bind<IVendorTagRepository>(TYPES.IVendorTagRepository)
+    .to(VendorTagRepository);
+  container
+    .bind<IVendorTagService>(TYPES.IVendorTagService)
+    .to(VendorTagService);
 
   container.bind<ITenderRepository>(TYPES.ITenderRepository).to(TenderRepository);
   container.bind<ITenderService>(TYPES.ITenderService).to(TenderService);

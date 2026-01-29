@@ -58,20 +58,6 @@ export const vendorTypeDefs = gql`
     offset: Int
   }
 
-  type VendorTag {
-    id: ID!
-    vendorId: ID!
-    tagId: ID!
-    tag: Tag
-    createdBy: String!
-    createdDate: String!
-  }
-
-  input CreateVendorTagInput {
-    vendorId: ID!
-    tagId: ID!
-  }
-
   extend type Query {
     getVendorById(id: ID!): Vendor
     searchVendors(searchInput: SearchVendorInput): [Vendor!]!
@@ -83,7 +69,5 @@ export const vendorTypeDefs = gql`
     deleteVendor(id: ID!): Boolean!
     deleteVendors(ids: [ID!]!): Boolean!
     uploadVendor(input: CreateVendorInput!): Vendor!
-    createVendorTag(input: CreateVendorTagInput!): VendorTag!
-    deleteVendorTag(id: ID!): Boolean!
   }
 `;
