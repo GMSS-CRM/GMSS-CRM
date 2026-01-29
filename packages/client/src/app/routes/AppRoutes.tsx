@@ -1,3 +1,5 @@
+
+import { TagsListPage } from '../../features/tags';
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../../features/auth/pages/login";
 import ResetPasswordPage from "../../features/auth/pages/reset-password";
@@ -31,6 +33,14 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/dashboard/tags"
+          element={
+            <ProtectedRoute>
+              <TagsListPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/security" element={<SecurityPage />} />
         <Route path="/vendors" element={<VendorsPage />} />
         <Route path="/vendors/create" element={<VendorDetailsForm />} />

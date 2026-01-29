@@ -12,6 +12,7 @@ import {
   SafetyOutlined,
   ShopOutlined,
   FileTextOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
@@ -40,6 +41,11 @@ const menuItems: MenuProps["items"] = [
     label: "Vendors",
   },
   {
+    key: "dashboard/tags",
+    icon: <TagsOutlined style={{ fontSize: 22 }} />,
+    label: "Tags",
+  },
+  {
     key: "security",
     icon: <SafetyOutlined style={{ fontSize: 22 }} />,
     label: "Security",
@@ -52,7 +58,10 @@ export default function MainLayout() {
   const location = useLocation();
 
   // Get the current route to highlight the correct menu item
-  const selectedKey = location.pathname.split("/")[1] || "dashboard";
+  // Highlight correct menu item for nested routes
+  let selectedKey = location.pathname.replace(/^\//, "");
+  if (selectedKey.startsWith("dashboard/tags")) selectedKey = "dashboard/tags";
+  else selectedKey = selectedKey.split("/")[0] || "dashboard";
 
   const handleLogout = () => {
     showConfirmModal({
@@ -83,7 +92,12 @@ export default function MainLayout() {
   ];
 
   const handleMenuClick = (key: string) => {
-    navigate(`/${key}`);
+    // For nested dashboard routes
+    if (key === "dashboard/tags") {
+      navigate("/dashboard/tags");
+    } else {
+      navigate(`/${key}`);
+    }
   };
 
   return (
