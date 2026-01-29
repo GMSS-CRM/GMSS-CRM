@@ -1,3 +1,4 @@
+// packages/client/src/features/tags/components/VendorEmailToggle.tsx
 import { useState } from 'react';
 import { Switch } from 'antd';
 import styles from '../styles/tags.module.css';

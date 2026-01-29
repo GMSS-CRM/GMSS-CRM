@@ -1,4 +1,4 @@
-
+// packages/client/src/features/tags/components/TagSearchBar.tsx
 import { Input, Button, Tooltip } from 'antd';
 import { SearchOutlined, ReloadOutlined, DeleteOutlined } from '@ant-design/icons';
 import styles from '../styles/tags.module.css';

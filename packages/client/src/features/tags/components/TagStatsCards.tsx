@@ -1,4 +1,4 @@
-
+// packages/client/src/features/tags/components/TagStatsCards.tsx
 import { TagsOutlined, TeamOutlined, MailOutlined } from '@ant-design/icons';
 import styles from '../styles/tags.module.css';
 
@@ -25,7 +25,7 @@ export default function TagStatsCards({
     {
       icon: <TeamOutlined />,
       value: totalAssignments,
-      label: 'Vendor Assignments',
+      label: 'Assigned Vendors',
       colorClass: styles.statIconGreen,
     },
     {
