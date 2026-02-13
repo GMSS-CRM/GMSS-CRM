@@ -1,0 +1,774 @@
+/* === Layout === */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-app, #f5f7fa);
+  overflow: hidden;
+}
+
+.header {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--border-color, #e8ecf1);
+  flex-shrink: 0;
+  gap: 16px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.titleIcon {
+  color: var(--accent, #1677ff);
+  font-size: 18px;
+}
+
+.pageTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  margin: 0;
+  line-height: 1;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* === Role Pill === */
+.rolePill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-muted, #f1f5f9);
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-size: 13px;
+  height: 32px;
+}
+
+.roleOption {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--text-tertiary, #94a3b8);
+  transition: color 0.15s;
+  user-select: none;
+  padding: 0 4px;
+}
+
+.roleActive {
+  color: var(--accent, #1677ff);
+  font-weight: 600;
+}
+
+/* === Body === */
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  gap: 12px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* === Contextual Bars (upload, mail) === */
+.topBar {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+/* === Upload === */
+.uploadBtn {
+  height: 38px;
+  border-style: dashed !important;
+  color: var(--text-secondary, #64748b) !important;
+  font-size: 13px;
+  border-radius: 8px !important;
+}
+
+.uploadBtn:hover {
+  color: var(--accent, #1677ff) !important;
+  border-color: var(--accent, #1677ff) !important;
+}
+
+.uploadZone {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.uploadZone :global(.ant-upload-wrapper) {
+  display: block;
+}
+
+.uploadZone :global(.ant-upload-drag) {
+  border: none !important;
+  background: transparent !important;
+  padding: 20px 0;
+}
+
+.draggerIcon {
+  font-size: 32px;
+  color: var(--accent, #1677ff);
+}
+
+.draggerText {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary, #64748b);
+}
+
+.draggerText span {
+  color: var(--accent, #1677ff);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.draggerHint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.uploadClose {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+.uploadParsed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.parsedLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #166534;
+  font-weight: 500;
+}
+
+/* === Preview Table === */
+.previewWrap {
+  background: #fff;
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.previewBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color, #e8ecf1);
+  background: var(--bg-muted, #f8fafc);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.previewInfo {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+
+.previewInfo strong {
+  color: var(--text-primary, #111827);
+}
+
+.previewWrap :global(.ant-table-thead > tr > th) {
+  background: var(--bg-muted, #f8fafc);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 8px 12px;
+}
+
+.previewWrap :global(.ant-table-tbody > tr > td) {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* === Tabs (main workspace) === */
+.tabs {
+  flex: 1;
+  min-height: 0;
+  background: #fff;
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tabs :global(.ant-tabs-nav) {
+  margin: 0;
+  padding: 0 16px;
+  background: var(--bg-muted, #f8fafc);
+  flex-shrink: 0;
+}
+
+.tabs :global(.ant-tabs-nav::before) {
+  border-bottom: 1px solid var(--border-color, #e8ecf1);
+}
+
+.tabs :global(.ant-tabs-tab) {
+  padding: 12px 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  transition: color 0.15s;
+}
+
+.tabs :global(.ant-tabs-tab:hover) {
+  color: var(--text-primary, #111827);
+}
+
+.tabs :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: var(--accent, #1677ff);
+  font-weight: 600;
+}
+
+.tabs :global(.ant-tabs-ink-bar) {
+  height: 2px;
+  background: var(--accent, #1677ff);
+}
+
+.tabs :global(.ant-tabs-content-holder) {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.tabs :global(.ant-tabs-content) {
+  height: 100%;
+}
+
+.tabs :global(.ant-tabs-tabpane) {
+  height: 100%;
+  padding: 0;
+}
+
+.tabLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--border-color, #e2e8f0);
+  color: var(--text-secondary, #64748b);
+  border-radius: 9px;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.tabCountActive {
+  background: var(--accent, #1677ff);
+  color: #fff;
+}
+
+/* === Workspace Grid (table area) === */
+.gridWrap {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bulkBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(22, 119, 255, 0.04);
+  border-bottom: 1px solid rgba(22, 119, 255, 0.12);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.bulkInfo {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent, #1677ff);
+}
+
+.tableArea {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+.tableArea :global(.ant-table-wrapper) {
+  height: 100%;
+}
+
+.tableArea :global(.ant-table-thead > tr > th) {
+  background: var(--bg-muted, #f8fafc);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color, #e8ecf1);
+}
+
+.tableArea :global(.ant-table-tbody > tr > td) {
+  padding: 10px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-color, #f1f5f9);
+}
+
+.tableArea :global(.ant-table-tbody > tr:hover > td) {
+  background: rgba(22, 119, 255, 0.02);
+}
+
+.tableArea :global(.ant-table-row-selected > td) {
+  background: rgba(22, 119, 255, 0.04) !important;
+}
+
+.tableArea :global(.ant-pagination) {
+  margin: 12px 14px;
+}
+
+.tableArea :global(.ant-table-empty .ant-table-body) {
+  min-height: 200px;
+}
+
+/* === Table cells === */
+.refCode {
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  background: var(--bg-muted, #f1f5f9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tenderName {
+  font-weight: 500;
+  color: var(--text-primary, #111827);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+}
+
+.rejectionDot {
+  color: var(--color-error, #ef4444);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.valueCell {
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  white-space: nowrap;
+}
+
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.noTags {
+  color: var(--text-tertiary, #94a3b8);
+  font-size: 12px;
+}
+
+/* === Empty state === */
+.emptyBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 8px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 40px;
+  color: var(--border-color, #d1d5db);
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #374151);
+}
+
+.emptyHint {
+  font-size: 13px;
+  color: var(--text-tertiary, #9ca3af);
+  max-width: 300px;
+}
+
+/* === Status Badge === */
+.statusTag {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  border-radius: 4px;
+  line-height: 20px;
+}
+
+/* === Mail Action Bar === */
+.mailBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mailStats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.mailStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.mailStatValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  line-height: 1.2;
+}
+
+.mailStatLabel {
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.sendAllBtn {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.sendAllBtn:hover {
+  background: #15803d !important;
+  border-color: #15803d !important;
+}
+
+/* === Mail confirm modal === */
+.mailConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mailList {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+}
+
+.mailList :global(.ant-list-item) {
+  padding: 10px 14px;
+}
+
+.mailItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mailItemTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.mailSummary {
+  padding: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* === Drawer (MD Tagging) === */
+.drawerBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section {
+  background: var(--bg-muted, #f8fafc);
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.infoValue {
+  font-size: 14px;
+  color: var(--text-primary, #111827);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.descriptionText {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.6;
+  margin: 0;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.tagHint {
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  margin: 0 0 12px;
+}
+
+.tagChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.drawerFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rejectArea {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rejectActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* === Upload Modals (NIT / Docs) === */
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalInfo {
+  background: var(--bg-muted, #f8fafc);
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modalInfoRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.modalInfoLabel {
+  color: var(--text-tertiary, #94a3b8);
+  font-size: 12px;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.modalInfoValue {
+  color: var(--text-primary, #111827);
+  font-weight: 500;
+}
+
+.modalUpload :global(.ant-upload-drag) {
+  border-radius: 8px !important;
+  border-color: var(--border-color, #e8ecf1) !important;
+  background: var(--bg-muted, #f8fafc) !important;
+}
+
+.modalUpload :global(.ant-upload-drag:hover) {
+  border-color: var(--accent, #1677ff) !important;
+}
+
+.fileReady {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.fileReadyInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #166534;
+  font-weight: 500;
+}
+
+.fileSize {
+  color: var(--text-tertiary, #94a3b8);
+  font-weight: 400;
+}
+
+.docTypeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.pendingList {
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pendingList :global(.ant-list-item) {
+  padding: 8px 12px;
+}
+
+.existingList {
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.existingList :global(.ant-list-item) {
+  padding: 8px 12px;
+  background: var(--bg-muted, #f8fafc);
+}
+
+.sectionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+  margin: 0 0 8px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 14px;
+    height: 48px;
+  }
+
+  .pageTitle {
+    font-size: 15px;
+  }
+
+  .body {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .rolePill {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+
+  .mailStats {
+    gap: 16px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}

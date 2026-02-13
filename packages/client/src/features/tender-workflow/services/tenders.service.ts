@@ -1,4 +1,4 @@
-import type { Tender, TenderFormData, TenderStatus } from '../types';
+import type { Tender, TenderFormData, TenderStatus } from '../types/tender.types';
 
 // Mock data for tenders
 const mockTenders: Tender[] = [

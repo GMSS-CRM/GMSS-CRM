@@ -1,0 +1,148 @@
+import React, { useState } from "react";
+import { Modal, Upload, Button, Typography, Space, message, Select, List, Tag } from "antd";
+import { UploadOutlined, FileTextOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import type { UploadFile } from "antd";
+import type { Tender, TenderDocument } from "../types/tender.types";
+import { DOCUMENT_TYPES } from "../types/tender.types";
+import s from "../styles/tender-workflow.module.css";
+
+const { Text } = Typography;
+
+interface PendingDoc {
+  file: UploadFile;
+  type: "TECHNICAL" | "FINANCIAL" | "OTHER";
+}
+
+interface Props {
+  tender: Tender | null;
+  open: boolean;
+  onClose: () => void;
+  onUpload: (tenderId: string, docs: Omit<TenderDocument, "id">[]) => void;
+}
+
+const typeColor = (t: string) => (t === "TECHNICAL" ? "blue" : t === "FINANCIAL" ? "green" : "default");
+
+export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpload }) => {
+  const [pending, setPending] = useState<PendingDoc[]>([]);
+  const [docType, setDocType] = useState<"TECHNICAL" | "FINANCIAL" | "OTHER">("TECHNICAL");
+  const [uploading, setUploading] = useState(false);
+
+  const handleClose = () => { setPending([]); onClose(); };
+
+  const addFile = (file: File) => {
+    const ok = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type);
+    if (!ok) { message.error("PDF or Word only"); return false; }
+    if (file.size / 1024 / 1024 > 10) { message.error("Max 10MB"); return false; }
+    const uf: UploadFile = { uid: `${Date.now()}-${file.name}`, name: file.name, size: file.size, type: file.type, status: "done" };
+    setPending((p) => [...p, { file: uf, type: docType }]);
+    return false;
+  };
+
+  const handleUpload = async () => {
+    if (!tender || !pending.length) return;
+    setUploading(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    const docs: Omit<TenderDocument, "id">[] = pending.map((d) => ({
+      name: d.file.name, type: d.type, uploadedAt: new Date(), size: d.file.size,
+    }));
+    onUpload(tender.id, docs);
+    message.success(`${docs.length} document(s) uploaded`);
+    setPending([]);
+    setUploading(false);
+    onClose();
+  };
+
+  if (!tender) return null;
+
+  return (
+    <Modal
+      title="Upload Documents"
+      open={open}
+      onCancel={handleClose}
+      width={540}
+      footer={[
+        <Button key="c" onClick={handleClose} disabled={uploading}>Cancel</Button>,
+        <Button key="u" type="primary" onClick={handleUpload} disabled={!pending.length} loading={uploading} icon={<UploadOutlined />}>
+          Upload {pending.length || ""} Document{pending.length !== 1 ? "s" : ""}
+        </Button>,
+      ]}
+    >
+      <div className={s.modalBody}>
+        <div className={s.modalInfo}>
+          <div className={s.modalInfoRow}>
+            <span className={s.modalInfoLabel}>Tender</span>
+            <span className={s.modalInfoValue}>{tender.name}</span>
+          </div>
+          <div className={s.modalInfoRow}>
+            <span className={s.modalInfoLabel}>Reference</span>
+            <span className={s.refCode}>{tender.referenceNumber}</span>
+          </div>
+        </div>
+
+        <div>
+          <div className={s.docTypeRow}>
+            <Text>Type:</Text>
+            <Select value={docType} onChange={setDocType} options={DOCUMENT_TYPES as any} style={{ width: 180 }} size="small" />
+          </div>
+
+          <div className={s.modalUpload} style={{ marginTop: 12 }}>
+            <Upload.Dragger
+              beforeUpload={(f) => addFile(f as unknown as File)}
+              showUploadList={false}
+              multiple
+              accept=".pdf,.doc,.docx"
+            >
+              <PlusOutlined style={{ fontSize: 24, color: "var(--accent, #1677ff)" }} />
+              <p className={s.draggerText}>Drop files or <span>browse</span></p>
+              <p className={s.draggerHint}>PDF, DOC, DOCX — max 10MB each</p>
+            </Upload.Dragger>
+          </div>
+        </div>
+
+        {pending.length > 0 && (
+          <div>
+            <p className={s.sectionLabel}>To upload ({pending.length})</p>
+            <List
+              size="small"
+              className={s.pendingList}
+              dataSource={pending}
+              renderItem={(d) => (
+                <List.Item
+                  actions={[
+                    <Button key="d" type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => setPending((p) => p.filter((x) => x.file.uid !== d.file.uid))} />,
+                  ]}
+                >
+                  <Space>
+                    <FileTextOutlined />
+                    <Text>{d.file.name}</Text>
+                    <Tag color={typeColor(d.type)}>{DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}</Tag>
+                  </Space>
+                </List.Item>
+              )}
+            />
+          </div>
+        )}
+
+        {tender.documents.length > 0 && (
+          <div>
+            <p className={s.sectionLabel}>Existing ({tender.documents.length})</p>
+            <List
+              size="small"
+              className={s.existingList}
+              dataSource={tender.documents}
+              renderItem={(d) => (
+                <List.Item>
+                  <Space>
+                    <FileTextOutlined />
+                    <Text>{d.name}</Text>
+                    <Tag color={typeColor(d.type)}>{DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}</Tag>
+                  </Space>
+                </List.Item>
+              )}
+            />
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+};
