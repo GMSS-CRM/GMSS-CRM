@@ -31,7 +31,7 @@ const menuItems: MenuProps["items"] = [
     label: "Dashboard",
   },
   {
-    key: "tenders",
+    key: "tender-workflow",
     icon: <FileTextOutlined style={{ fontSize: 22 }} />,
     label: "Tenders",
   },

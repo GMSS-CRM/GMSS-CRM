@@ -1,119 +1,139 @@
-import React, { useState, useMemo } from 'react';
-import { Button, Modal } from 'antd';
-import { PlusOutlined, TagsOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+// packages/client/src/features/tags/pages/TagsListPage.tsx
+import { useState, useEffect, useMemo } from 'react';
+import { Button, Typography, message, Modal } from 'antd';
+import { 
+  PlusOutlined, 
+  TagsOutlined,
+  ExclamationCircleOutlined 
+} from '@ant-design/icons';
+import TagTable from '../components/TagTable';
 import TagStatsCards from '../components/TagStatsCards';
 import TagSearchBar from '../components/TagSearchBar';
-import TagTable from '../components/TagTable';
 import CreateTagModal from './CreateTagModal';
-import EditTagModal from './EditTagModal';
 import DeleteTagModal from './DeleteTagModal';
-import TagVendorsDrawer from './TagVendorsDrawer';
-import { useTagsData, useTagMutations } from '../hooks/useTagData';
 import type { TagWithVendorCount } from '../types/tagTypes';
+import { dummyTags, simulateDelay } from '../data/dummyData';
 import styles from '../styles/tags.module.css';
+import TagTendersDrawer from './TagTenderDrawer';
+
+const { Title } = Typography;
 
 export default function TagsListPage() {
-  // Data hooks
-  const { tags, loading, stats, refetch } = useTagsData();
-  const { createTag, updateTag, deleteTag, deleteTags, loading: mutationLoading } = useTagMutations(refetch);
-
-  // Search & Selection
+  const [tags, setTags] = useState<TagWithVendorCount[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
+  
   // Modal states
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [vendorsDrawerOpen, setVendorsDrawerOpen] = useState(false);
-
-  // Selected tag for operations
   const [selectedTag, setSelectedTag] = useState<TagWithVendorCount | null>(null);
+  
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTag, setDrawerTag] = useState<TagWithVendorCount | null>(null);
+
+  // Load tags
+  useEffect(() => {
+    loadTags();
+  }, []);
+
+  const loadTags = async () => {
+    setLoading(true);
+    await simulateDelay(500);
+    setTags(dummyTags);
+    setLoading(false);
+  };
 
   // Filter tags based on search
   const filteredTags = useMemo(() => {
     if (!searchText.trim()) return tags;
     const search = searchText.toLowerCase();
-    return tags.filter((tag) =>
+    return tags.filter(tag => 
       tag.name.toLowerCase().includes(search)
     );
   }, [tags, searchText]);
 
+  // Calculate stats
+  const stats = useMemo(() => {
+    return {
+      totalTags: tags.length,
+      totalAssignments: tags.reduce((sum, tag) => sum + tag.vendorCount, 0),
+      totalEmailEnabled: tags.reduce((sum, tag) => sum + tag.enabledMailCount, 0),
+    };
+  }, [tags]);
+
   // Handlers
   const handleView = (tag: TagWithVendorCount) => {
-    setSelectedTag(tag);
-    setVendorsDrawerOpen(true);
+    setDrawerTag(tag);
+    setDrawerOpen(true);
   };
 
-  const handleEdit = (tag: TagWithVendorCount) => {
-    setSelectedTag(tag);
-    setEditModalOpen(true);
-  };
-
-  const handleDeleteClick = (tag: TagWithVendorCount) => {
+  const handleDelete = (tag: TagWithVendorCount) => {
     setSelectedTag(tag);
     setDeleteModalOpen(true);
   };
 
-  const handleCreateSubmit = async (name: string): Promise<boolean> => {
-    const result = await createTag({ name });
-    return !!result;
-  };
-
-  const handleEditSubmit = async (id: string, name: string): Promise<boolean> => {
-    const result = await updateTag(id, { name });
-    return !!result;
-  };
-
-  const handleDeleteConfirm = async (): Promise<boolean> => {
-    if (!selectedTag) return false;
-    const result = await deleteTag(selectedTag.id, selectedTag.name);
-    return !!result;
+  const handleConfirmDelete = async () => {
+    if (!selectedTag) return;
+    
+    await simulateDelay(300);
+    setTags(prev => prev.filter(t => t.id !== selectedTag.id));
+    message.success(`Tag "${selectedTag.name}" deleted successfully`);
+    setDeleteModalOpen(false);
+    setSelectedTag(null);
   };
 
   const handleBulkDelete = () => {
     Modal.confirm({
       title: 'Delete Selected Tags',
       icon: <ExclamationCircleOutlined />,
-      content: `Are you sure you want to delete ${selectedRowKeys.length} selected tags?`,
-      okText: 'Delete',
-      okButtonProps: { danger: true },
+      content: `Are you sure you want to delete ${selectedRowKeys.length} selected tags? This action cannot be undone.`,
+      okText: 'Delete All',
+      okType: 'danger',
       cancelText: 'Cancel',
       onOk: async () => {
-        const success = await deleteTags(selectedRowKeys as string[]);
-        if (success) {
-          setSelectedRowKeys([]);
-        }
+        await simulateDelay(300);
+        setTags(prev => prev.filter(t => !selectedRowKeys.includes(t.id)));
+        setSelectedRowKeys([]);
+        message.success(`${selectedRowKeys.length} tags deleted successfully`);
       },
     });
   };
 
-  const handleCloseModals = () => {
+  const handleCreateTag = async (values: { name: string }) => {
+    await simulateDelay(300);
+    const newTag: TagWithVendorCount = {
+      id: `new-${Date.now()}`,
+      name: values.name,
+      createdBy: 'current-user@gmss.com',
+      createdDate: new Date().toISOString(),
+      updatedDate: new Date().toISOString(),
+      vendorCount: 0,
+      enabledMailCount: 0,
+      tenderCount: 0,
+    };
+    setTags(prev => [newTag, ...prev]);
+    message.success(`Tag "${values.name}" created successfully`);
     setCreateModalOpen(false);
-    setEditModalOpen(false);
-    setDeleteModalOpen(false);
-    setVendorsDrawerOpen(false);
-    setSelectedTag(null);
   };
 
   return (
     <div className={styles.pageContainer}>
-      {/* Page Header */}
+      {/* Header */}
       <div className={styles.pageHeader}>
         <div className={styles.titleSection}>
-          <h1 className={styles.pageTitle}>
+          <Title level={4} className={styles.pageTitle}>
             <TagsOutlined className={styles.titleIcon} />
             Tag Management
-          </h1>
+          </Title>
           <p className={styles.pageSubtitle}>
-            Organize vendors with tags and manage email preferences
+            Organize and manage vendor tags for efficient categorization
           </p>
         </div>
-        
         <div className={styles.headerActions}>
           <Button
             type="primary"
-            size="large"
             icon={<PlusOutlined />}
             onClick={() => setCreateModalOpen(true)}
             className={styles.createButton}
@@ -131,65 +151,55 @@ export default function TagsListPage() {
         loading={loading}
       />
 
-      {/* Table Card */}
-      <div className={styles.tableCard}>
+      {/* Table Section */}
+      <div className={styles.tableSection}>
+        {/* Search & Actions Bar */}
         <TagSearchBar
           searchText={searchText}
           onSearchChange={setSearchText}
-          onRefresh={refetch}
+          onRefresh={loadTags}
           selectedCount={selectedRowKeys.length}
           onBulkDelete={handleBulkDelete}
           loading={loading}
         />
-        
+
+        {/* Table */}
         <TagTable
           data={filteredTags}
           loading={loading}
           selectedRowKeys={selectedRowKeys}
           onSelectChange={setSelectedRowKeys}
           onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onDelete={handleDelete}
         />
       </div>
 
-      {/* Modals & Drawer */}
+      {/* Create Modal */}
       <CreateTagModal
         open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onSubmit={handleCreateSubmit}
-        loading={mutationLoading}
+        onCancel={() => setCreateModalOpen(false)}
+        onSubmit={handleCreateTag}
       />
 
-      <EditTagModal
-        open={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setSelectedTag(null);
-        }}
-        tag={selectedTag}
-        onSubmit={handleEditSubmit}
-        loading={mutationLoading}
-      />
-
+      {/* Delete Modal */}
       <DeleteTagModal
         open={deleteModalOpen}
-        onClose={() => {
+        tag={selectedTag}
+        onCancel={() => {
           setDeleteModalOpen(false);
           setSelectedTag(null);
         }}
-        tag={selectedTag}
-        onConfirm={handleDeleteConfirm}
-        loading={mutationLoading}
+        onConfirm={handleConfirmDelete}
       />
 
-      <TagVendorsDrawer
-        open={vendorsDrawerOpen}
+      {/* Tenders Drawer */}
+      <TagTendersDrawer
+        open={drawerOpen}
+        tag={drawerTag}
         onClose={() => {
-          setVendorsDrawerOpen(false);
-          setSelectedTag(null);
+          setDrawerOpen(false);
+          setDrawerTag(null);
         }}
-        tag={selectedTag}
       />
     </div>
   );

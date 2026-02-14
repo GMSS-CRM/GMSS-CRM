@@ -1,0 +1,165 @@
+// packages/client/src/features/tender-workflow/types/tender.types.ts
+
+export type TenderStatus =
+  | "DRAFT"
+  | "PENDING_MD_TAGGING"
+  | "MD_TAGGED"
+  | "REJECTED"
+  | "NIT_UPLOADED"
+  | "NIT_VERIFIED"
+  | "DOCS_UPLOADED"
+  | "READY_TO_MAIL"
+  | "MAIL_SENT";
+
+export type UserRole = "USER" | "MD";
+
+export interface TenderTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface TenderDocument {
+  id: string;
+  name: string;
+  type: "NIT" | "TECHNICAL" | "FINANCIAL" | "OTHER";
+  uploadedAt: Date;
+  url?: string;
+  size?: number;
+}
+
+export interface Tender {
+  id: string;
+  name: string;
+  referenceNumber: string;
+  issuingDepartment: string;
+  description?: string;
+  status: TenderStatus;
+  tags: TenderTag[];
+  documents: TenderDocument[];
+  nitDocument?: TenderDocument;
+  createdAt: Date;
+  updatedAt: Date;
+  submissionDeadline?: Date;
+  rejectionReason?: string;
+  mailSentAt?: Date;
+}
+
+export interface ExcelTenderRow {
+  key: string;
+  name: string;
+  referenceNumber: string;
+  issuingDepartment: string;
+  estimatedValue: number;
+  description?: string;
+  publishDate?: string;
+  submissionDeadline?: string;
+}
+
+export interface TenderWorkflowItem {
+  id: string;
+  department: string;
+  tenderNo: string;
+  tenderTitle: string;
+  statusFromExcel: string;
+  openingDateTime: string;
+  dueDateTime: string;
+  dueDays: number;
+  workflowStatus: "DRAFT";
+}
+
+export interface TenderWorkflowState {
+  tenders: Tender[];
+  previewData: TenderWorkflowItem[];
+  selectedPreviewKeys: React.Key[];
+  isLoading: boolean;
+  activeDrawerTender: Tender | null;
+  isDrawerOpen: boolean;
+}
+
+// Status transition map - defines valid transitions
+export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
+  DRAFT: ["PENDING_MD_TAGGING"],
+  PENDING_MD_TAGGING: ["MD_TAGGED", "REJECTED"],
+  MD_TAGGED: ["NIT_UPLOADED"],
+  REJECTED: ["DRAFT", "PENDING_MD_TAGGING"],
+  NIT_UPLOADED: ["NIT_VERIFIED"],
+  NIT_VERIFIED: ["DOCS_UPLOADED"],
+  DOCS_UPLOADED: ["READY_TO_MAIL"],
+  READY_TO_MAIL: ["MAIL_SENT"],
+  MAIL_SENT: [],
+};
+
+// Role-based allowed status targets
+export const ROLE_CAN_SET_STATUS: Record<UserRole, TenderStatus[]> = {
+  USER: ["DRAFT", "PENDING_MD_TAGGING", "NIT_UPLOADED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"],
+  MD: ["MD_TAGGED", "REJECTED", "NIT_VERIFIED"],
+};
+
+export const STATUS_COLORS: Record<TenderStatus, string> = {
+  DRAFT: "default",
+  PENDING_MD_TAGGING: "warning",
+  MD_TAGGED: "processing",
+  REJECTED: "error",
+  NIT_UPLOADED: "purple",
+  NIT_VERIFIED: "cyan",
+  DOCS_UPLOADED: "success",
+  READY_TO_MAIL: "gold",
+  MAIL_SENT: "success",
+};
+
+export const STATUS_LABELS: Record<TenderStatus, string> = {
+  DRAFT: "Draft",
+  PENDING_MD_TAGGING: "Pending MD Tagging",
+  MD_TAGGED: "MD Tagged",
+  REJECTED: "Rejected",
+  NIT_UPLOADED: "NIT Uploaded",
+  NIT_VERIFIED: "NIT Verified",
+  DOCS_UPLOADED: "Documents Uploaded",
+  READY_TO_MAIL: "Ready to Mail",
+  MAIL_SENT: "Mail Sent",
+};
+
+// Tab configuration for each role
+export interface TabConfig {
+  key: string;
+  label: string;
+  statuses: TenderStatus[];
+  icon?: string;
+}
+
+export const USER_TABS: TabConfig[] = [
+  { key: "draft", label: "Draft", statuses: ["DRAFT", "REJECTED"] },
+  { key: "sentToMd", label: "Sent to MD", statuses: ["PENDING_MD_TAGGING"] },
+  { key: "nitPending", label: "NIT Pending", statuses: ["MD_TAGGED", "NIT_UPLOADED"] },
+  { key: "docsPending", label: "Docs Pending", statuses: ["NIT_VERIFIED", "DOCS_UPLOADED"] },
+  { key: "readyToMail", label: "Ready to Mail", statuses: ["READY_TO_MAIL"] },
+  { key: "completed", label: "Completed", statuses: ["MAIL_SENT"] },
+];
+
+export const MD_TABS: TabConfig[] = [
+  { key: "pendingTagging", label: "Pending Tagging", statuses: ["PENDING_MD_TAGGING"] },
+  { key: "nitVerification", label: "NIT Verification", statuses: ["NIT_UPLOADED"] },
+  { key: "mdCompleted", label: "Completed", statuses: ["MD_TAGGED", "NIT_VERIFIED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"] },
+];
+
+// Available tags for MD to assign
+export const AVAILABLE_TAGS: TenderTag[] = [
+  { id: "tag-1", name: "Infrastructure", color: "blue" },
+  { id: "tag-2", name: "IT Services", color: "green" },
+  { id: "tag-3", name: "Construction", color: "orange" },
+  { id: "tag-4", name: "Healthcare", color: "red" },
+  { id: "tag-5", name: "Education", color: "purple" },
+  { id: "tag-6", name: "Transportation", color: "cyan" },
+  { id: "tag-7", name: "Energy", color: "gold" },
+  { id: "tag-8", name: "Agriculture", color: "lime" },
+  { id: "tag-9", name: "Defense", color: "magenta" },
+  { id: "tag-10", name: "Environment", color: "geekblue" },
+];
+
+// Document type options
+export const DOCUMENT_TYPES = [
+  { value: "TECHNICAL", label: "Technical Document" },
+  { value: "FINANCIAL", label: "Financial Document" },
+  { value: "OTHER", label: "Other Document" },
+] as const;

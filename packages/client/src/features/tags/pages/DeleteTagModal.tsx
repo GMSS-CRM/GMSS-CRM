@@ -1,63 +1,53 @@
- 
-import { Modal, Typography } from 'antd';
+// packages/client/src/features/tags/pages/DeleteTagModal.tsx
+import { Modal } from 'antd';
 import { ExclamationCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import type { TagWithVendorCount } from '../types/tagTypes';
 import styles from '../styles/tags.module.css';
 
-const { Text } = Typography;
-
 interface DeleteTagModalProps {
   open: boolean;
-  onClose: () => void;
   tag: TagWithVendorCount | null;
-  onConfirm: () => Promise<boolean>;
-  loading?: boolean;
+  onCancel: () => void;
+  onConfirm: () => Promise<void>;
 }
 
 export default function DeleteTagModal({
   open,
-  onClose,
   tag,
+  onCancel,
   onConfirm,
-  loading,
 }: DeleteTagModalProps) {
-  const handleDelete = async () => {
-    const success = await onConfirm();
-    if (success) {
-      onClose();
-    }
-  };
+  if (!tag) return null;
 
   return (
     <Modal
-      open={open}
-      onCancel={onClose}
-      onOk={handleDelete}
-      confirmLoading={loading}
       title={
-        <div className={`${styles.modalTitle} ${styles.dangerModalTitle}`}>
+        <span className={`${styles.modalTitle} ${styles.dangerModalTitle}`}>
           <ExclamationCircleOutlined className={styles.dangerIcon} />
           Delete Tag
-        </div>
+        </span>
       }
+      open={open}
+      onOk={onConfirm}
+      onCancel={onCancel}
       okText="Delete"
       okButtonProps={{ danger: true }}
-      cancelText="Cancel"
-      width={440}
+      destroyOnClose
     >
-      <div style={{ marginTop: 8 }}>
-        <Text>
+      <div style={{ padding: '8px 0' }}>
+        <p style={{ marginBottom: 16 }}>
           Are you sure you want to delete the tag{' '}
-          <span className={styles.deleteTagName}>"{tag?.name}"</span>?
-        </Text>
-
-        {tag && tag.vendorCount > 0 && (
+          <span className={styles.deleteTagName}>"{tag.name}"</span>?
+        </p>
+        
+        {(tag.vendorCount > 0 || tag.tenderCount > 0) && (
           <div className={styles.warningBox}>
             <WarningOutlined className={styles.warningIcon} />
             <span className={styles.warningText}>
-              This tag is assigned to <strong>{tag.vendorCount}</strong> vendor
-              {tag.vendorCount > 1 ? 's' : ''}. Deleting it will remove the tag
-              from all associated vendors.
+              This tag is currently assigned to{' '}
+              <strong>{tag.tenderCount} tenders</strong> and{' '}
+              <strong>{tag.vendorCount} vendors</strong>. 
+              Deleting it will remove all associations.
             </span>
           </div>
         )}

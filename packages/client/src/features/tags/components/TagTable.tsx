@@ -1,11 +1,12 @@
+// packages/client/src/features/tags/components/TagTable.tsx
 import React from 'react';
-import { Table, Button, Badge, Tooltip, Empty, Tag as AntTag } from 'antd';
+import { Table, Button, Badge, Tooltip, Empty } from 'antd';
 import { 
   EyeOutlined, 
-  EditOutlined, 
   DeleteOutlined, 
   TagOutlined,
-  InboxOutlined 
+  InboxOutlined,
+  FileTextOutlined
 } from '@ant-design/icons';
 import type { TagWithVendorCount } from '../types/tagTypes';
 import styles from '../styles/tags.module.css';
@@ -16,7 +17,6 @@ interface TagTableProps {
   selectedRowKeys: React.Key[];
   onSelectChange: (keys: React.Key[]) => void;
   onView: (tag: TagWithVendorCount) => void;
-  onEdit: (tag: TagWithVendorCount) => void;
   onDelete: (tag: TagWithVendorCount) => void;
 }
 
@@ -26,7 +26,6 @@ export default function TagTable({
   selectedRowKeys,
   onSelectChange,
   onView,
-  onEdit,
   onDelete,
 }: TagTableProps) {
   const columns = [
@@ -44,10 +43,30 @@ export default function TagTable({
       ),
     },
     {
+      title: 'Tenders',
+      dataIndex: 'tenderCount',
+      key: 'tenderCount',
+      width: 100,
+      align: 'center' as const,
+      sorter: (a: TagWithVendorCount, b: TagWithVendorCount) => 
+        a.tenderCount - b.tenderCount,
+      render: (count: number) => (
+        <Badge
+          count={count}
+          showZero
+          className={styles.tenderBadge}
+          style={{
+            backgroundColor: count > 0 ? '#722ed1' : '#d9d9d9',
+            fontWeight: 600,
+          }}
+        />
+      ),
+    },
+    {
       title: 'Vendors',
       dataIndex: 'vendorCount',
       key: 'vendorCount',
-      width: 120,
+      width: 100,
       align: 'center' as const,
       sorter: (a: TagWithVendorCount, b: TagWithVendorCount) => 
         a.vendorCount - b.vendorCount,
@@ -66,15 +85,15 @@ export default function TagTable({
     {
       title: 'Email Active',
       key: 'emailActive',
-      width: 120,
+      width: 110,
       align: 'center' as const,
       render: (_: unknown, record: TagWithVendorCount) => {
         if (record.vendorCount === 0) {
-          return <span style={{ color: '#d9d9d9' }}>-</span>;
+          return <span style={{ color: '#d9d9d9' }}>—</span>;
         }
         return (
           <span style={{ fontSize: 13 }}>
-            <span style={{ color: '#52c41a', fontWeight: 500 }}>
+            <span style={{ color: '#52c41a', fontWeight: 600 }}>
               {record.enabledMailCount}
             </span>
             <span style={{ color: '#8c8c8c' }}> / {record.vendorCount}</span>
@@ -86,7 +105,7 @@ export default function TagTable({
       title: 'Created',
       dataIndex: 'createdDate',
       key: 'createdDate',
-      width: 140,
+      width: 120,
       sorter: (a: TagWithVendorCount, b: TagWithVendorCount) =>
         new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime(),
       render: (date: string) => (
@@ -99,23 +118,22 @@ export default function TagTable({
         </span>
       ),
     },
-    // Status column hidden for now
     {
       title: 'Actions',
       key: 'actions',
-      width: 140,
+      width: 100,
+      align: 'center' as const,
       render: (_: unknown, record: TagWithVendorCount) => (
         <div className={styles.actionButtons}>
-          <Tooltip title={record.vendorCount > 0 ? 'View Vendors' : 'No vendors'}>
+          <Tooltip title={record.tenderCount > 0 ? 'View Tenders' : 'No tenders'}>
             <Button
               type="text"
               icon={<EyeOutlined />}
               className={styles.actionBtn}
               onClick={() => onView(record)}
-              disabled={record.vendorCount === 0}
+              disabled={record.tenderCount === 0}
             />
           </Tooltip>
-          {/* Edit action hidden for now */}
           <Tooltip title="Delete Tag">
             <Button
               type="text"
@@ -131,37 +149,43 @@ export default function TagTable({
   ];
 
   return (
-    <Table
-      rowSelection={{
-        selectedRowKeys,
-        onChange: onSelectChange,
-      }}
-      columns={columns}
-      dataSource={data}
-      loading={loading}
-      rowKey="id"
-      pagination={{
-        pageSize: 10,
-        showSizeChanger: true,
-        showTotal: (total, range) =>
-          `${range[0]}-${range[1]} of ${total} tags`,
-      }}
-      locale={{
-        emptyText: (
-          <Empty
-            className={styles.emptyState}
-            image={<InboxOutlined className={styles.emptyIcon} />}
-            description={
-              <div>
-                <div className={styles.emptyTitle}>No tags found</div>
-                <div className={styles.emptySubtitle}>
-                  Create your first tag to start organizing vendors
+    <div className={styles.tableContainer}>
+      <Table
+        rowSelection={{
+          selectedRowKeys,
+          onChange: onSelectChange,
+        }}
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        rowKey="id"
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50'],
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} tags`,
+          size: 'small',
+        }}
+        scroll={{ y: 'calc(100vh - 400px)' }}
+        size="middle"
+        locale={{
+          emptyText: (
+            <Empty
+              className={styles.emptyState}
+              image={<InboxOutlined className={styles.emptyIcon} />}
+              description={
+                <div>
+                  <div className={styles.emptyTitle}>No tags found</div>
+                  <div className={styles.emptySubtitle}>
+                    Create your first tag to start organizing vendors
+                  </div>
                 </div>
-              </div>
-            }
-          />
-        ),
-      }}
-    />
+              }
+            />
+          ),
+        }}
+      />
+    </div>
   );
 }

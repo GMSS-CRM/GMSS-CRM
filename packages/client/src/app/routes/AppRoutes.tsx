@@ -9,8 +9,8 @@ import DashboardPage from "../../features/dashboard";
 import { SecurityPage } from "../../features/security";
 import { VendorsPage } from "../../features/vendors";
 import VendorDetailsForm from "../../features/vendors/pages/details-form";
-import { TendersPage } from "../../features/tenders";
-import TenderDetailsForm from "../../features/tenders/pages/details-form";
+import { TenderWorkflowPage } from "../../features/tender-workflow";
+
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/main-layout";
 import NotFoundPage from "../../pages/NotFound";
@@ -45,9 +45,7 @@ export default function AppRoutes() {
         <Route path="/vendors" element={<VendorsPage />} />
         <Route path="/vendors/create" element={<VendorDetailsForm />} />
         <Route path="/vendors/:id" element={<VendorDetailsForm />} />
-        <Route path="/tenders" element={<TendersPage />} />
-        <Route path="/tenders/create" element={<TenderDetailsForm />} />
-        <Route path="/tenders/:id" element={<TenderDetailsForm />} />
+        <Route path="tender-workflow" element={<TenderWorkflowPage />} />
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/dashboard" />} />

@@ -1,4 +1,4 @@
-// Types matching exact backend schema
+// packages/client/src/features/tags/types/tagTypes.ts
 
 export interface Tag {
   id: string;
@@ -9,53 +9,45 @@ export interface Tag {
   updatedDate: string;
 }
 
-export interface VendorTag {
-  id: string;
-  vendorId: string;
-  tagId: string;
-  enableMail: boolean;
-  createdBy: string;
-  createdDate: string;
-  vendor: Vendor;
-  tag: Tag;
-}
-
-export interface Vendor {
-  id: string;
-  name: string;
-  email: string;
-  tags?: VendorTag[];
-}
-
 export interface TagWithVendorCount extends Tag {
   vendorCount: number;
   enabledMailCount: number;
-}
-
-// Input types matching backend
-export interface CreateTagInput {
-  name: string;
-}
-
-export interface UpdateTagInput {
-  name?: string;
-}
-
-export interface SearchTagInput {
-  search?: string;
-  limit?: number;
-  offset?: number;
-}
-
-// Frontend-specific types
-export interface TagTableRow extends TagWithVendorCount {
-  key: string;
+  tenderCount: number;
 }
 
 export interface TagVendorDisplay {
-  id: string;
+  id: string; // vendorTag ID
   vendorId: string;
   vendorName: string;
   vendorEmail: string;
   enableMail: boolean;
+}
+
+export interface TagTenderDisplay {
+  id: string;
+  tenderId: string;
+  tenderTitle: string;
+  tenderNumber: string;
+  status: 'active' | 'closed' | 'draft';
+  vendorCount: number;
+  enabledMailCount: number;
+  deadline?: string;
+}
+
+export interface TenderVendorDisplay {
+  id: string; // tenderVendor ID
+  vendorId: string;
+  vendorName: string;
+  vendorEmail: string;
+  vendorPhone?: string;
+  enableMail: boolean;
+  assignedDate: string;
+}
+
+export interface CreateTagPayload {
+  name: string;
+}
+
+export interface UpdateTagPayload {
+  name: string;
 }
