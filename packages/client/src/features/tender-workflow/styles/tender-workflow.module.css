@@ -89,31 +89,86 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 45vh;
+  gap: 10px;
+  max-height: min(46vh, 420px);
   overflow-y: auto;
+  padding-right: 2px;
+}
+
+.topBar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.topBar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #bfbfbf);
+  border-radius: 999px;
 }
 
 /* === Upload === */
-.uploadBtn {
-  height: 38px;
-  border-style: dashed !important;
-  color: var(--text-secondary, #64748b) !important;
+.uploadIntro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid var(--border-color, #e8ecf1);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.uploadIntroText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.uploadIntroTitle {
   font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #111827);
+}
+
+.uploadIntroHint {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+}
+
+.uploadBtn {
+  height: 34px;
+  font-size: 13px;
+  font-weight: 600;
+  padding-inline: 14px !important;
   border-radius: 8px !important;
+  box-shadow: 0 3px 10px var(--accent-light, rgba(22, 119, 255, 0.1));
 }
 
 .uploadBtn:hover {
-  color: var(--accent, #1677ff) !important;
-  border-color: var(--accent, #1677ff) !important;
+  box-shadow: 0 5px 14px var(--accent-light, rgba(22, 119, 255, 0.14));
 }
 
 .uploadZone {
-  position: relative;
   background: #fff;
   border: 1px solid var(--border-color, #e8ecf1);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
+}
+
+.uploadZoneHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 2px 12px;
+}
+
+.uploadZoneTitle {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  font-weight: 500;
+}
+
+.uploadDragger {
+  padding: 0 8px 10px;
 }
 
 .uploadZone :global(.ant-upload-wrapper) {
@@ -121,25 +176,30 @@
 }
 
 .uploadZone :global(.ant-upload-drag) {
-  border: none !important;
-  background: transparent !important;
-  padding: 20px 0;
+  border: 1px dashed var(--accent-light, rgba(22, 119, 255, 0.2)) !important;
+  background: var(--accent-lighter, rgba(22, 119, 255, 0.05)) !important;
+  border-radius: 8px !important;
+  padding: 14px 0 !important;
+}
+
+.uploadZone :global(.ant-upload-drag:hover) {
+  border-color: var(--accent, #1677ff) !important;
 }
 
 .draggerIcon {
-  font-size: 32px;
+  font-size: 26px;
   color: var(--accent, #1677ff);
 }
 
 .draggerText {
-  margin: 8px 0 0;
-  font-size: 14px;
+  margin: 6px 0 0;
+  font-size: 13px;
   color: var(--text-secondary, #64748b);
 }
 
 .draggerText span {
   color: var(--accent, #1677ff);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -150,20 +210,22 @@
 }
 
 .uploadClose {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
+  color: var(--text-tertiary, #94a3b8) !important;
+}
+
+.uploadClose:hover {
+  color: var(--text-primary, #111827) !important;
+  background: var(--bg-hover, #f8fafc) !important;
 }
 
 .uploadParsed {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 8px 14px;
+  background: var(--accent-lighter, rgba(22, 119, 255, 0.06));
+  border: 1px solid var(--accent-light, rgba(22, 119, 255, 0.2));
+  border-radius: 10px;
+  padding: 8px 12px;
   font-size: 13px;
 }
 
@@ -171,25 +233,41 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #166534;
-  font-weight: 500;
+  color: var(--accent-hover, #0052a3);
+  font-weight: 600;
+}
+
+.clearParsedBtn {
+  border-color: var(--border-color, #e8ecf1) !important;
+  color: var(--text-secondary, #64748b) !important;
+}
+
+.clearParsedBtn:hover {
+  border-color: var(--color-error, #ef4444) !important;
+  color: var(--color-error, #ef4444) !important;
+  background: rgba(239, 68, 68, 0.06) !important;
 }
 
 /* === Preview Table === */
 .previewWrap {
   background: #fff;
   border: 1px solid var(--border-color, #e8ecf1);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
 }
 
 .previewBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border-color, #e8ecf1);
-  background: var(--bg-muted, #f8fafc);
+  background: linear-gradient(
+    90deg,
+    var(--accent-lighter, rgba(22, 119, 255, 0.05)),
+    var(--bg-muted, #f8fafc)
+  );
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -203,19 +281,128 @@
   color: var(--text-primary, #111827);
 }
 
-.previewWrap :global(.ant-table-thead > tr > th) {
+.previewDiscardBtn {
+  border-color: var(--border-color, #e8ecf1) !important;
+  color: var(--text-secondary, #64748b) !important;
+}
+
+.previewDiscardBtn:hover {
+  border-color: var(--color-error, #ef4444) !important;
+  color: var(--color-error, #ef4444) !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
+.previewAddBtn {
+  border-radius: 6px !important;
+  font-weight: 600;
+}
+
+.previewAddBtn:not(:disabled) {
+  box-shadow: 0 4px 12px var(--accent-light, rgba(22, 119, 255, 0.14));
+}
+
+.previewAddBtn:disabled {
+  box-shadow: none !important;
+}
+
+.previewTable :global(.ant-table-thead > tr > th) {
   background: var(--bg-muted, #f8fafc);
   font-size: 12px;
   font-weight: 600;
   color: var(--text-secondary, #64748b);
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  padding: 8px 12px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-color, #e8ecf1);
 }
 
-.previewWrap :global(.ant-table-tbody > tr > td) {
-  padding: 8px 12px;
+.previewTable :global(.ant-table-tbody > tr > td) {
+  padding: 8px 10px;
   font-size: 13px;
+  border-bottom: 1px solid var(--border-light, #f1f5f9);
+}
+
+.previewTable :global(.ant-table-tbody > tr:nth-child(even) > td) {
+  background: rgba(15, 23, 42, 0.015);
+}
+
+.previewTable :global(.ant-table-tbody > tr:hover > td) {
+  background: var(--accent-lighter, rgba(22, 119, 255, 0.05)) !important;
+}
+
+.previewTable :global(.ant-table-row-selected > td) {
+  background: var(--accent-light, rgba(22, 119, 255, 0.1)) !important;
+}
+
+.previewTable :global(.ant-table-pagination) {
+  margin: 10px 12px 12px !important;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light, #f1f5f9);
+}
+
+.previewTable :global(.ant-pagination-total-text) {
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.previewTable :global(.ant-pagination-item),
+.previewTable :global(.ant-pagination-prev .ant-pagination-item-link),
+.previewTable :global(.ant-pagination-next .ant-pagination-item-link) {
+  border-radius: 6px;
+  min-width: 28px;
+  height: 28px;
+  line-height: 26px;
+}
+
+.previewDateText {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+}
+
+.previewStatusTag {
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  padding-inline: 8px;
+}
+
+.previewStatusPublished {
+  color: #166534 !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  border-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.previewStatusDefault {
+  color: var(--text-secondary, #64748b) !important;
+  background: var(--bg-muted, #f8fafc) !important;
+  border-color: var(--border-color, #e8ecf1) !important;
+}
+
+.previewDueTag {
+  border-radius: 999px;
+  min-width: 38px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.previewDueNormal {
+  color: var(--accent-hover, #0052a3) !important;
+  border-color: var(--accent-light, rgba(22, 119, 255, 0.2)) !important;
+  background: var(--accent-lighter, rgba(22, 119, 255, 0.08)) !important;
+}
+
+.previewDueWarning {
+  color: #9a3412 !important;
+  border-color: rgba(249, 115, 22, 0.2) !important;
+  background: rgba(249, 115, 22, 0.12) !important;
+}
+
+.previewDueCritical {
+  color: #b91c1c !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  background: rgba(239, 68, 68, 0.12) !important;
 }
 
 /* === Tabs (main workspace) === */
@@ -757,6 +944,24 @@
   .body {
     padding: 10px 12px;
     gap: 8px;
+  }
+
+  .topBar {
+    max-height: 52vh;
+  }
+
+  .uploadIntro {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .uploadBtn {
+    width: 100%;
+  }
+
+  .previewBar {
+    align-items: flex-start;
   }
 
   .rolePill {

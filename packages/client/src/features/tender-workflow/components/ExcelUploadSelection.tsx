@@ -27,16 +27,12 @@ export const ExcelUploadSection: React.FC<Props> = ({
   const [fileName, setFileName] = useState<string | null>(null);
 
   const handleFile = async (file: File) => {
-    // Validate file type
-    const valid =
-      file.name.endsWith(".xlsx") ||
-      file.name.endsWith(".xls");
+    const valid = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
     if (!valid) {
       message.error("Please upload Excel files (.xlsx or .xls) only");
       return false;
     }
-    
-    // Validate file size
+
     if (file.size / 1024 / 1024 > 10) {
       message.error("File must be under 10MB");
       return false;
@@ -44,36 +40,33 @@ export const ExcelUploadSection: React.FC<Props> = ({
 
     setUploading(true);
     setFileName(file.name);
-    
+
     try {
-      // Parse Excel file
       const parsedData = await parseTenderExcel(file);
-      
+
       if (parsedData.length === 0) {
         message.warning("No tender data found in the Excel file");
-        setUploading(false);
-        setShowDrop(false);
+        setFileName(null);
         return false;
       }
-      
-      // Pass parsed data to parent
+
       onDataParsed(parsedData);
       message.success(
         `Successfully parsed ${parsedData.length} tender${parsedData.length !== 1 ? "s" : ""} from ${file.name}`
       );
-      setUploading(false);
       setShowDrop(false);
     } catch (error) {
       console.error("Excel parsing error:", error);
       message.error(
-        error instanceof Error 
-          ? error.message 
+        error instanceof Error
+          ? error.message
           : "Failed to parse Excel file. Please check the format and try again."
       );
-      setUploading(false);
       setFileName(null);
+    } finally {
+      setUploading(false);
     }
-    
+
     return false;
   };
 
@@ -89,9 +82,10 @@ export const ExcelUploadSection: React.FC<Props> = ({
           onClick={() => {
             onClearData();
             setFileName(null);
+            setShowDrop(false);
           }}
-          danger
-          type="text"
+          className={s.clearParsedBtn}
+          type="default"
         >
           Clear
         </Button>
@@ -101,21 +95,41 @@ export const ExcelUploadSection: React.FC<Props> = ({
 
   if (!showDrop) {
     return (
-      <Button
-        className={s.uploadBtn}
-        icon={<UploadOutlined />}
-        block
-        onClick={() => setShowDrop(true)}
-        type="dashed"
-      >
-        Import tenders from Excel
-      </Button>
+      <div className={s.uploadIntro}>
+        <div className={s.uploadIntroText}>
+          <span className={s.uploadIntroTitle}>Import tender list</span>
+          <span className={s.uploadIntroHint}>Upload .xlsx/.xls file (max 10MB)</span>
+        </div>
+        <Button
+          className={s.uploadBtn}
+          icon={<UploadOutlined />}
+          onClick={() => setShowDrop(true)}
+          type="primary"
+        >
+          Upload Excel
+        </Button>
+      </div>
     );
   }
 
   return (
     <div className={s.uploadZone}>
+      <div className={s.uploadZoneHead}>
+        <span className={s.uploadZoneTitle}>
+          {fileName ? `Selected: ${fileName}` : "Drop Excel file to parse tenders"}
+        </span>
+        {!uploading && (
+          <Button
+            className={s.uploadClose}
+            icon={<CloseOutlined />}
+            type="text"
+            size="small"
+            onClick={() => setShowDrop(false)}
+          />
+        )}
+      </div>
       <Upload.Dragger
+        className={s.uploadDragger}
         accept=".xlsx,.xls"
         showUploadList={false}
         beforeUpload={(file) => handleFile(file as unknown as File)}
@@ -123,19 +137,10 @@ export const ExcelUploadSection: React.FC<Props> = ({
       >
         <InboxOutlined className={s.draggerIcon} />
         <p className={s.draggerText}>
-          {uploading ? "Parsing file…" : <>Drop Excel here or <span>browse</span></>}
+          {uploading ? "Parsing file..." : <>Drop Excel here or <span>browse</span></>}
         </p>
-        <p className={s.draggerHint}>.xlsx, .xls — max 10MB</p>
+        <p className={s.draggerHint}>.xlsx, .xls | max 10MB</p>
       </Upload.Dragger>
-      {!uploading && (
-        <Button
-          className={s.uploadClose}
-          icon={<CloseOutlined />}
-          type="text"
-          size="small"
-          onClick={() => setShowDrop(false)}
-        />
-      )}
     </div>
   );
 };
