@@ -16,7 +16,7 @@ interface Props {
   onClear: () => void;
 }
 
-const getDueTagClass = (days: number): string => {
+const getDueClass = (days: number) => {
   if (days <= 2) return `${s.previewDueTag} ${s.previewDueCritical}`;
   if (days <= 5) return `${s.previewDueTag} ${s.previewDueWarning}`;
   return `${s.previewDueTag} ${s.previewDueNormal}`;
@@ -29,101 +29,96 @@ export const TenderPreviewTable: React.FC<Props> = ({
   onAddToDraft,
   onClear,
 }) => {
+  if (!data.length) return null;
+
   const columns: ColumnsType<TenderWorkflowItem> = [
     {
-      title: "Tender Title",
+      title: "Title",
       dataIndex: "tenderTitle",
       ellipsis: true,
-      width: 320,
-      render: (title: string) => (
-        <Text strong ellipsis={{ tooltip: title }}>
-          {title}
+      width: 300,
+      render: (t: string) => (
+        <Text strong ellipsis={{ tooltip: t }} style={{ fontSize: 12 }}>
+          {t}
         </Text>
       ),
     },
     {
-      title: "Tender No",
+      title: "No.",
       dataIndex: "tenderNo",
-      width: 140,
-      render: (code: string) => <span className={s.refCode}>{code}</span>,
+      width: 130,
+      render: (c: string) => <span className={s.refCode}>{c}</span>,
     },
     {
       title: "Department",
       dataIndex: "department",
       ellipsis: true,
-      width: 220,
-      render: (department: string) => (
-        <Tooltip title={department}>
-          <Text ellipsis>{department}</Text>
+      width: 200,
+      render: (d: string) => (
+        <Tooltip title={d}>
+          <Text ellipsis style={{ fontSize: 12 }}>{d}</Text>
         </Tooltip>
       ),
     },
     {
       title: "Status",
       dataIndex: "statusFromExcel",
-      width: 120,
-      render: (status: string) => (
-        <Tag className={`${s.previewStatusTag} ${status === "Published" ? s.previewStatusPublished : s.previewStatusDefault}`}>
-          {status || "N/A"}
+      width: 100,
+      render: (st: string) => (
+        <Tag
+          className={`${s.previewStatusTag} ${st === "Published" ? s.previewStatusPublished : s.previewStatusDefault}`}
+        >
+          {st || "N/A"}
         </Tag>
       ),
     },
     {
       title: "Opening",
       dataIndex: "openingDateTime",
-      width: 150,
-      render: (value: string) => <span className={s.previewDateText}>{value || "-"}</span>,
+      width: 130,
+      render: (v: string) => <span className={s.previewDateText}>{v || "—"}</span>,
     },
     {
-      title: "Due Date/Time",
+      title: "Due",
       dataIndex: "dueDateTime",
-      width: 160,
-      render: (value: string) => <span className={s.previewDateText}>{value || "-"}</span>,
+      width: 130,
+      render: (v: string) => <span className={s.previewDateText}>{v || "—"}</span>,
     },
     {
       title: "Days",
       dataIndex: "dueDays",
-      width: 90,
-      align: "center" as const,
-      render: (days: number) => (
-        <Tag className={getDueTagClass(Number.isFinite(days) ? days : 999)}>
-          {Number.isFinite(days) ? days : "-"}
+      width: 70,
+      align: "center",
+      render: (d: number) => (
+        <Tag className={getDueClass(Number.isFinite(d) ? d : 999)}>
+          {Number.isFinite(d) ? d : "—"}
         </Tag>
       ),
     },
   ];
 
-  if (!data.length) return null;
-
   return (
     <div className={s.previewWrap}>
       <div className={s.previewBar}>
         <span className={s.previewInfo}>
-          <strong>{data.length}</strong> tender{data.length !== 1 ? "s" : ""} parsed
+          <strong>{data.length}</strong> parsed
           {selectedKeys.length > 0 && (
-            <>
-              {" "}| <strong>{selectedKeys.length}</strong> selected
-            </>
+            <> · <strong>{selectedKeys.length}</strong> selected</>
           )}
         </span>
-        <Space size="small">
-          <Button
-            size="small"
-            icon={<DeleteOutlined />}
-            onClick={onClear}
-            className={s.previewDiscardBtn}
-          >
+        <Space size={4}>
+          <Button size="small" icon={<DeleteOutlined />} onClick={onClear} className={s.previewDiscardBtn}>
             Discard
           </Button>
           <Button
             size="small"
             type="primary"
             icon={<PlusOutlined />}
-            disabled={selectedKeys.length === 0}
+            disabled={!selectedKeys.length}
             onClick={onAddToDraft}
             className={s.previewAddBtn}
           >
-            Add {selectedKeys.length > 0 ? `${selectedKeys.length} ` : ""}to Draft
+            Add {selectedKeys.length || ""} to Draft
           </Button>
         </Space>
       </div>
@@ -131,7 +126,7 @@ export const TenderPreviewTable: React.FC<Props> = ({
         className={s.previewTable}
         rowSelection={{
           selectedRowKeys: selectedKeys,
-          onChange: (keys) => onSelectionChange(keys),
+          onChange: onSelectionChange,
         }}
         columns={columns}
         dataSource={data}
@@ -141,10 +136,9 @@ export const TenderPreviewTable: React.FC<Props> = ({
           pageSize: 4,
           size: "small",
           showSizeChanger: false,
-          position: ["bottomRight"],
-          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
+          showTotal: (total, range) => `${range[0]}–${range[1]} of ${total}`,
         }}
-        scroll={{ x: 1080 }}
+        scroll={{ x: 960 }}
       />
     </div>
   );

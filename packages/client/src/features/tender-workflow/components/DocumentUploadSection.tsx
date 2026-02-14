@@ -20,20 +20,41 @@ interface Props {
   onUpload: (tenderId: string, docs: Omit<TenderDocument, "id">[]) => void;
 }
 
-const typeColor = (t: string) => (t === "TECHNICAL" ? "blue" : t === "FINANCIAL" ? "green" : "default");
+const typeColor = (t: string) =>
+  t === "TECHNICAL" ? "blue" : t === "FINANCIAL" ? "green" : "default";
+
+const ACCEPT = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
 
 export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpload }) => {
   const [pending, setPending] = useState<PendingDoc[]>([]);
   const [docType, setDocType] = useState<"TECHNICAL" | "FINANCIAL" | "OTHER">("TECHNICAL");
   const [uploading, setUploading] = useState(false);
 
-  const handleClose = () => { setPending([]); onClose(); };
+  const handleClose = () => {
+    setPending([]);
+    onClose();
+  };
 
   const addFile = (file: File) => {
-    const ok = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type);
-    if (!ok) { message.error("PDF or Word only"); return false; }
-    if (file.size / 1024 / 1024 > 10) { message.error("Max 10MB"); return false; }
-    const uf: UploadFile = { uid: `${Date.now()}-${file.name}`, name: file.name, size: file.size, type: file.type, status: "done" };
+    if (!ACCEPT.includes(file.type)) {
+      message.error("PDF or Word only");
+      return false;
+    }
+    if (file.size / 1024 / 1024 > 10) {
+      message.error("Max 10 MB");
+      return false;
+    }
+    const uf: UploadFile = {
+      uid: `${Date.now()}-${file.name}`,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      status: "done",
+    };
     setPending((p) => [...p, { file: uf, type: docType }]);
     return false;
   };
@@ -43,10 +64,13 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
     setUploading(true);
     await new Promise((r) => setTimeout(r, 1200));
     const docs: Omit<TenderDocument, "id">[] = pending.map((d) => ({
-      name: d.file.name, type: d.type, uploadedAt: new Date(), size: d.file.size,
+      name: d.file.name,
+      type: d.type,
+      uploadedAt: new Date(),
+      size: d.file.size,
     }));
     onUpload(tender.id, docs);
-    message.success(`${docs.length} document(s) uploaded`);
+    message.success(`${docs.length} document${docs.length !== 1 ? "s" : ""} uploaded`);
     setPending([]);
     setUploading(false);
     onClose();
@@ -59,11 +83,20 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
       title="Upload Documents"
       open={open}
       onCancel={handleClose}
-      width={540}
+      width={500}
       footer={[
-        <Button key="c" onClick={handleClose} disabled={uploading}>Cancel</Button>,
-        <Button key="u" type="primary" onClick={handleUpload} disabled={!pending.length} loading={uploading} icon={<UploadOutlined />}>
-          Upload {pending.length || ""} Document{pending.length !== 1 ? "s" : ""}
+        <Button key="c" onClick={handleClose} disabled={uploading}>
+          Cancel
+        </Button>,
+        <Button
+          key="u"
+          type="primary"
+          onClick={handleUpload}
+          disabled={!pending.length}
+          loading={uploading}
+          icon={<UploadOutlined />}
+        >
+          Upload ({pending.length})
         </Button>,
       ]}
     >
@@ -74,27 +107,34 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
             <span className={s.modalInfoValue}>{tender.name}</span>
           </div>
           <div className={s.modalInfoRow}>
-            <span className={s.modalInfoLabel}>Reference</span>
+            <span className={s.modalInfoLabel}>Ref</span>
             <span className={s.refCode}>{tender.referenceNumber}</span>
           </div>
         </div>
 
         <div>
           <div className={s.docTypeRow}>
-            <Text>Type:</Text>
-            <Select value={docType} onChange={setDocType} options={DOCUMENT_TYPES as any} style={{ width: 180 }} size="small" />
+            <Text style={{ fontSize: 12 }}>Type:</Text>
+            <Select
+              value={docType}
+              onChange={setDocType}
+              options={DOCUMENT_TYPES as any}
+              style={{ width: 160 }}
+              size="small"
+            />
           </div>
-
-          <div className={s.modalUpload} style={{ marginTop: 12 }}>
+          <div className={s.modalUpload} style={{ marginTop: 10 }}>
             <Upload.Dragger
               beforeUpload={(f) => addFile(f as unknown as File)}
               showUploadList={false}
               multiple
               accept=".pdf,.doc,.docx"
             >
-              <PlusOutlined style={{ fontSize: 24, color: "var(--accent, #1677ff)" }} />
-              <p className={s.draggerText}>Drop files or <span>browse</span></p>
-              <p className={s.draggerHint}>PDF, DOC, DOCX — max 10MB each</p>
+              <PlusOutlined style={{ fontSize: 20, color: "var(--tw-accent)" }} />
+              <p className={s.draggerText}>
+                Drop files or <span>browse</span>
+              </p>
+              <p className={s.draggerHint}>PDF, DOC, DOCX — max 10 MB</p>
             </Upload.Dragger>
           </div>
         </div>
@@ -109,13 +149,22 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
               renderItem={(d) => (
                 <List.Item
                   actions={[
-                    <Button key="d" type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => setPending((p) => p.filter((x) => x.file.uid !== d.file.uid))} />,
+                    <Button
+                      key="d"
+                      type="text"
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={() => setPending((p) => p.filter((x) => x.file.uid !== d.file.uid))}
+                    />,
                   ]}
                 >
-                  <Space>
+                  <Space size={6}>
                     <FileTextOutlined />
-                    <Text>{d.file.name}</Text>
-                    <Tag color={typeColor(d.type)}>{DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}</Tag>
+                    <Text style={{ fontSize: 12 }}>{d.file.name}</Text>
+                    <Tag color={typeColor(d.type)} style={{ fontSize: 10, margin: 0 }}>
+                      {DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}
+                    </Tag>
                   </Space>
                 </List.Item>
               )}
@@ -132,10 +181,12 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
               dataSource={tender.documents}
               renderItem={(d) => (
                 <List.Item>
-                  <Space>
+                  <Space size={6}>
                     <FileTextOutlined />
-                    <Text>{d.name}</Text>
-                    <Tag color={typeColor(d.type)}>{DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}</Tag>
+                    <Text style={{ fontSize: 12 }}>{d.name}</Text>
+                    <Tag color={typeColor(d.type)} style={{ fontSize: 10, margin: 0 }}>
+                      {DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}
+                    </Tag>
                   </Space>
                 </List.Item>
               )}

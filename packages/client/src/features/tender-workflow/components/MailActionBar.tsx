@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button, Modal, Alert, List, Checkbox, Tag, Typography } from "antd";
 import { SendOutlined, MailOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import type { Tender } from "../types/tender.types";
@@ -26,16 +26,15 @@ export const MailActionBar: React.FC<Props> = ({ tenders, onSendMail, onSendMail
     setShowConfirm(true);
   };
 
-  const handleSend = () => {
+  const handleSend = useCallback(() => {
     if (selectedIds.length === 1) onSendMail(selectedIds[0]);
     else onSendMailBulk(selectedIds);
     setShowConfirm(false);
     setSelectedIds([]);
-  };
+  }, [selectedIds, onSendMail, onSendMailBulk]);
 
-  const toggle = (id: string, checked: boolean) => {
+  const toggle = (id: string, checked: boolean) =>
     setSelectedIds((p) => (checked ? [...p, id] : p.filter((x) => x !== id)));
-  };
 
   return (
     <>
@@ -46,7 +45,9 @@ export const MailActionBar: React.FC<Props> = ({ tenders, onSendMail, onSendMail
             <span className={s.mailStatLabel}>Ready</span>
           </div>
           <div className={s.mailStat}>
-            <span className={s.mailStatValue}>{ready.reduce((a, t) => a + t.documents.length + 1, 0)}</span>
+            <span className={s.mailStatValue}>
+              {ready.reduce((a, t) => a + t.documents.length + 1, 0)}
+            </span>
             <span className={s.mailStatLabel}>Documents</span>
           </div>
           <div className={s.mailStat}>
@@ -55,41 +56,51 @@ export const MailActionBar: React.FC<Props> = ({ tenders, onSendMail, onSendMail
           </div>
         </div>
         <Button type="primary" icon={<SendOutlined />} onClick={openConfirm} className={s.sendAllBtn}>
-          Send Mail to Vendors
+          Send Mail
         </Button>
       </div>
 
       <Modal
-        title={<><MailOutlined /> Confirm Mail Dispatch</>}
+        title={<><MailOutlined /> Confirm Dispatch</>}
         open={showConfirm}
         onCancel={() => setShowConfirm(false)}
+        width={520}
         footer={[
           <Button key="c" onClick={() => setShowConfirm(false)}>Cancel</Button>,
-          <Button key="s" type="primary" icon={<SendOutlined />} onClick={handleSend} disabled={!selectedIds.length} className={s.sendAllBtn}>
-            Send to {selectedIds.length} Tender{selectedIds.length !== 1 ? "s" : ""}
+          <Button
+            key="s"
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={handleSend}
+            disabled={!selectedIds.length}
+            className={s.sendAllBtn}
+          >
+            Send ({selectedIds.length})
           </Button>,
         ]}
-        width={560}
       >
         <div className={s.mailConfirm}>
-          <Alert
-            message="Vendors matching tender tags will receive email with attached documents."
-            type="info"
-            showIcon
-          />
-
+          <Alert message="Matching vendors will receive email with documents." type="info" showIcon />
           <List
             className={s.mailList}
+            size="small"
             dataSource={ready}
             renderItem={(t) => (
               <List.Item>
-                <Checkbox checked={selectedIds.includes(t.id)} onChange={(e) => toggle(t.id, e.target.checked)}>
+                <Checkbox
+                  checked={selectedIds.includes(t.id)}
+                  onChange={(e) => toggle(t.id, e.target.checked)}
+                >
                   <div className={s.mailItemInfo}>
-                    <Text strong>{t.name}</Text>
-                    <Text type="secondary"><span className={s.refCode}>{t.referenceNumber}</span></Text>
+                    <Text strong style={{ fontSize: 12 }}>{t.name}</Text>
+                    <span className={s.refCode}>{t.referenceNumber}</span>
                     {t.tags.length > 0 && (
                       <div className={s.mailItemTags}>
-                        {t.tags.map((tag) => <Tag key={tag.id} color={tag.color}>{tag.name}</Tag>)}
+                        {t.tags.map((tag) => (
+                          <Tag key={tag.id} color={tag.color} style={{ fontSize: 10, margin: 0 }}>
+                            {tag.name}
+                          </Tag>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -97,16 +108,15 @@ export const MailActionBar: React.FC<Props> = ({ tenders, onSendMail, onSendMail
               </List.Item>
             )}
           />
-
           {selectedIds.length > 0 && (
             <div className={s.mailSummary}>
-              <CheckCircleOutlined style={{ color: "#16a34a", marginRight: 8 }} />
+              <CheckCircleOutlined style={{ marginRight: 6 }} />
               {selectedIds.length} tender{selectedIds.length !== 1 ? "s" : ""} · ~
               {selectedIds.reduce((sum, id) => {
                 const t = ready.find((x) => x.id === id);
                 return sum + (t?.tags.length || 0) * 15;
               }, 0)}{" "}
-              vendor notifications
+              vendors
             </div>
           )}
         </div>

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Drawer,
-  Button,
-  Space,
-  Select,
-  Tag,
-  Input,
-  Alert,
-} from "antd";
+import { Drawer, Button, Space, Select, Tag, Input, Alert } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -19,7 +11,6 @@ import type { Tender } from "../types/tender.types";
 import { AVAILABLE_TAGS } from "../types/tender.types";
 import s from "../styles/tender-workflow.module.css";
 
-
 interface Props {
   tender: Tender | null;
   open: boolean;
@@ -28,13 +19,18 @@ interface Props {
   onReject: (tenderId: string, reason: string) => void;
 }
 
-const fmtCurrency = (v: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(v);
-
 const fmtDate = (d?: Date) =>
-  d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }) : "—";
+  d
+    ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })
+    : "—";
 
-export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConfirm, onReject }) => {
+export const MdTaggingDrawer: React.FC<Props> = ({
+  tender,
+  open,
+  onClose,
+  onConfirm,
+  onReject,
+}) => {
   const [tags, setTags] = useState<string[]>([]);
   const [reason, setReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
@@ -75,7 +71,7 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
     <Drawer
       title="Review Tender"
       placement="right"
-      width={560}
+      width={520}
       open={open}
       onClose={onClose}
       footer={
@@ -83,7 +79,7 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
           {rejecting ? (
             <div className={s.rejectArea}>
               <Input.TextArea
-                placeholder="Reason for rejection…"
+                placeholder="Rejection reason…"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
@@ -92,7 +88,14 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
               />
               <div className={s.rejectActions}>
                 <Button onClick={() => setRejecting(false)}>Cancel</Button>
-                <Button danger type="primary" icon={<CloseCircleOutlined />} onClick={handleReject} loading={loading} disabled={!reason.trim()}>
+                <Button
+                  danger
+                  type="primary"
+                  icon={<CloseCircleOutlined />}
+                  onClick={handleReject}
+                  loading={loading}
+                  disabled={!reason.trim()}
+                >
                   Reject
                 </Button>
               </div>
@@ -100,8 +103,16 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
           ) : (
             <Space>
               <Button onClick={onClose}>Cancel</Button>
-              <Button danger icon={<CloseCircleOutlined />} onClick={() => setRejecting(true)}>Reject</Button>
-              <Button type="primary" icon={<CheckCircleOutlined />} onClick={handleConfirm} loading={loading} disabled={!tags.length}>
+              <Button danger icon={<CloseCircleOutlined />} onClick={() => setRejecting(true)}>
+                Reject
+              </Button>
+              <Button
+                type="primary"
+                icon={<CheckCircleOutlined />}
+                onClick={handleConfirm}
+                loading={loading}
+                disabled={!tags.length}
+              >
                 Confirm & Tag
               </Button>
             </Space>
@@ -110,29 +121,33 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
       }
     >
       <div className={s.drawerBody}>
-        {/* Overview */}
         <div className={s.section}>
           <div className={s.infoGrid}>
             <div className={s.infoItem}>
               <span className={s.infoLabel}>Reference</span>
-              <span className={s.infoValue}><span className={s.refCode}>{tender.referenceNumber}</span></span>
+              <span className={s.infoValue}>
+                <span className={s.refCode}>{tender.referenceNumber}</span>
+              </span>
             </div>
-            <div className={s.infoItem}>
+            {/* <div className={s.infoItem}>
               <span className={s.infoLabel}>Value</span>
               <span className={s.infoValue}>{fmtCurrency(tender.estimatedValue)}</span>
-            </div>
+            </div> */}
             <div className={s.infoItem}>
               <span className={s.infoLabel}>Department</span>
-              <span className={s.infoValue}><BankOutlined /> {tender.issuingDepartment}</span>
+              <span className={s.infoValue}>
+                <BankOutlined style={{ marginRight: 4 }} />
+                {tender.issuingDepartment}
+              </span>
             </div>
             <div className={s.infoItem}>
               <span className={s.infoLabel}>Status</span>
-              <span className={s.infoValue}><StatusBadge status={tender.status} /></span>
+              <StatusBadge status={tender.status} />
             </div>
-            <div className={s.infoItem}>
-              <span className={s.infoLabel}>Publish Date</span>
+            {/* <div className={s.infoItem}>
+              <span className={s.infoLabel}>Published</span>
               <span className={s.infoValue}>{fmtDate(tender.publishDate)}</span>
-            </div>
+            </div> */}
             <div className={s.infoItem}>
               <span className={s.infoLabel}>Deadline</span>
               <span className={s.infoValue}>{fmtDate(tender.submissionDeadline)}</span>
@@ -140,19 +155,16 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
           </div>
         </div>
 
-        {/* Name & Description */}
         <div className={s.section}>
           <h4 className={s.sectionTitle}>{tender.name}</h4>
-          <p className={s.descriptionText}>
-            {tender.description || "No description provided."}
-          </p>
+          <p className={s.descriptionText}>{tender.description || "No description provided."}</p>
         </div>
 
-        {/* Tag Selection */}
         <div className={s.section}>
-          <h4 className={s.sectionTitle}><TagsOutlined /> Assign Tags</h4>
-          <p className={s.tagHint}>Select tags to categorize this tender and match vendors.</p>
-
+          <h4 className={s.sectionTitle}>
+            <TagsOutlined /> Assign Tags
+          </h4>
+          <p className={s.tagHint}>Select tags to categorize and match vendors.</p>
           <Select
             mode="multiple"
             placeholder="Select tags…"
@@ -164,22 +176,30 @@ export const MdTaggingDrawer: React.FC<Props> = ({ tender, open, onClose, onConf
             showSearch
             allowClear
           />
-
           {tags.length > 0 && (
             <div className={s.tagChips}>
               {tags.map((id) => {
                 const tag = AVAILABLE_TAGS.find((t) => t.id === id);
                 return tag ? (
-                  <Tag key={id} color={tag.color} closable onClose={() => setTags((p) => p.filter((x) => x !== id))}>
+                  <Tag
+                    key={id}
+                    color={tag.color}
+                    closable
+                    onClose={() => setTags((p) => p.filter((x) => x !== id))}
+                  >
                     {tag.name}
                   </Tag>
                 ) : null;
               })}
             </div>
           )}
-
           {!tags.length && (
-            <Alert message="Select at least one tag to confirm." type="warning" showIcon style={{ marginTop: 12 }} />
+            <Alert
+              message="Select at least one tag to confirm."
+              type="warning"
+              showIcon
+              style={{ marginTop: 10 }}
+            />
           )}
         </div>
       </div>
