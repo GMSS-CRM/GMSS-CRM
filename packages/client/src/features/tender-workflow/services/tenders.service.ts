@@ -1,7 +1,33 @@
-import type { Tender, TenderFormData, TenderStatus } from '../types/tender.types';
+// Using a local mock type in this service - do not import application Tender types here
 
 // Mock data for tenders
-const mockTenders: Tender[] = [
+// Local mock tender shape (matches the mock data used here)
+type MockTender = {
+  id: string;
+  tenderId: string;
+  title: string;
+  referenceNumber: string;
+  issuingDepartment: string;
+  tenderType?: string;
+  description?: string;
+  estimatedValue?: number;
+  categories?: string[];
+  tags: string[];
+  allowedVendorTypes?: string[];
+  mandatoryDocuments?: string[];
+  minimumExperience?: number;
+  publishDate?: Date;
+  submissionStartDate?: Date;
+  submissionEndDate?: Date;
+  closingDate?: Date;
+  status: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  createdBy?: string;
+};
+
+// Mock data for tenders
+const mockTenders: MockTender[] = [
   {
     id: '1',
     tenderId: 'TND-0001',
@@ -112,12 +138,12 @@ const mockTenders: Tender[] = [
 ];
 
 // In-memory storage
-let tenders: Tender[] = [...mockTenders];
+let tenders: MockTender[] = [...mockTenders];
 let nextId = 6;
 
 export const tendersService = {
   // Get all tenders
-  getAllTenders: async (): Promise<Tender[]> => {
+  getAllTenders: async (): Promise<MockTender[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve([...tenders]);
@@ -126,7 +152,7 @@ export const tendersService = {
   },
 
   // Get tender by ID
-  getTenderById: async (id: string): Promise<Tender | null> => {
+  getTenderById: async (id: string): Promise<MockTender | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const tender = tenders.find((t) => t.id === id);
@@ -136,10 +162,10 @@ export const tendersService = {
   },
 
   // Create new tender
-  createTender: async (data: TenderFormData): Promise<Tender> => {
+  createTender: async (data: any): Promise<MockTender> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const newTender: Tender = {
+        const newTender: MockTender = {
           ...data,
           id: String(nextId),
           tenderId: `TND-${String(nextId).padStart(4, '0')}`,
@@ -154,7 +180,7 @@ export const tendersService = {
   },
 
   // Update tender
-  updateTender: async (id: string, data: Partial<TenderFormData>): Promise<Tender | null> => {
+  updateTender: async (id: string, data: Partial<any>): Promise<MockTender | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const index = tenders.findIndex((t) => t.id === id);
@@ -173,7 +199,7 @@ export const tendersService = {
   },
 
   // Update tender status
-  updateTenderStatus: async (id: string, status: TenderStatus): Promise<Tender | null> => {
+  updateTenderStatus: async (id: string, status: string): Promise<MockTender | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const index = tenders.findIndex((t) => t.id === id);
