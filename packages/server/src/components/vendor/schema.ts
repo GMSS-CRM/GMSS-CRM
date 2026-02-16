@@ -37,6 +37,8 @@ export const vendorTypeDefs = gql`
     msmeUdyamNumber: String
     cinNumber: String
     address: String
+    contactPersons:[CreateVendorContactPersonInput]
+    tags:[CreateTagInput]
   }
 
   input UpdateVendorInput {

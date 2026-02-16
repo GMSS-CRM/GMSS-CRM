@@ -9,14 +9,9 @@ import {
 import type { VendorTag } from './VendorTag';
 import type { VendorContactPerson } from './VendorContactPerson';
 import type { VendorDocument } from './VendorDocument';
+import { CompanyType } from '@gmss/types';
+export { CompanyType } from '@gmss/types';
 
-export enum CompanyType {
-  NEW = 'New',
-  INTERESTED = 'Interested',
-  NOT_INTERESTED = 'Not Interested',
-  FINAL = 'Final',
-  DELETED = 'Deleted',
-}
 
 @Entity({ name: 'vendor' })
 export class Vendor {
@@ -29,7 +24,7 @@ export class Vendor {
   @Column({ nullable: true })
   type?: string;
 
-  @Column({ type: 'enum', enum: CompanyType, default: CompanyType.NEW })
+  @Column({ type: 'enum', enum: CompanyType, default: CompanyType.Draft })
   status!: CompanyType;
 
   @Column({ nullable: true })

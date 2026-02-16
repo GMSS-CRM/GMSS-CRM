@@ -24,7 +24,7 @@ export class VendorService implements IVendorService {
     return this.vendorRepository.createVendor({
       name: input.name.trim(),
       type: input.type ?? undefined,
-      status: input.status ?? CompanyType.NEW,
+      status: input.status ?? CompanyType.Draft,
       gstNumber: input.gstNumber ?? undefined,
       panNumber: input.panNumber ?? undefined,
       msmeUdyamNumber: input.msmeUdyamNumber ?? undefined,

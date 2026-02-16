@@ -10,8 +10,6 @@ export const vendorContactPersonTypeDefs = gql`
     email: String!
     cc: String
     bcc: String
-    tags: [String!]
-    categories: [String!]
     createdBy: String!
     createdDate: String!
     updatedBy: String
@@ -19,26 +17,22 @@ export const vendorContactPersonTypeDefs = gql`
   }
 
   input CreateVendorContactPersonInput {
-    vendorId: ID!
     name: String!
     designation: String
     phoneNumber: String!
     email: String!
     cc: String
     bcc: String
-    tags: [String!]
-    categories: [String!]
   }
 
   input UpdateVendorContactPersonInput {
+    vendorId: ID!
     name: String
     designation: String
     phoneNumber: String
     email: String
     cc: String
     bcc: String
-    tags: [String!]
-    categories: [String!]
   }
 
   input SearchVendorContactPersonInput {
