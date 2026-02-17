@@ -1,111 +1,160 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
-import { IVendorService, IVendorRepository } from './types';
-import { CompanyType } from '../../entities/Vendor';
+import { IVendorRepository, IVendorService } from './types';
 import ErrorInfo from '../common/error-info';
+import { VendorStatus } from '../../entities/enums/VendorStatus';
 import { getCurrentEmail } from '../common/utils';
+import { VALID_VENDOR_TRANSITIONS } from './constants';
+import { VendorWorkflow } from '../../entities/VendorWorkflow';
+import { DataSource } from 'typeorm';
+import { Vendor } from '../../entities/Vendor';
+import { IVendorAgreementRepository } from '../vendor-agreement/types';
+import { SignatureStatus } from '../../entities/enums/SignatureStatus';
+
 
 @injectable()
 export class VendorService implements IVendorService {
-  constructor(@inject(TYPES.IVendorRepository) private readonly vendorRepository: IVendorRepository) {}
+  constructor(
+    @inject(TYPES.IVendorRepository)
+    private readonly vendorRepository: IVendorRepository,
+
+    @inject(TYPES.IVendorAgreementRepository)
+    private readonly agreementRepository: IVendorAgreementRepository,
+
+
+    @inject(TYPES.DbContext)
+    private readonly db: DataSource
+  ) { }
 
   async createVendor(input: any) {
-    if (!input.name || input.name.trim() === '') {
+    if (!input.name) {
       throw new Error(ErrorInfo.VENDOR_NAME_REQUIRED);
     }
 
-    const existingVendor = await this.vendorRepository.findByName(input.name);
-    if (existingVendor) {
+    const existing = await this.vendorRepository.findByName(
+      input.name
+    );
+
+    if (existing) {
       throw new Error(ErrorInfo.VENDOR_ALREADY_EXISTS);
     }
 
-    const email = getCurrentEmail();
-
     return this.vendorRepository.createVendor({
       name: input.name.trim(),
-      type: input.type ?? undefined,
-      status: input.status ?? CompanyType.NEW,
-      gstNumber: input.gstNumber ?? undefined,
-      panNumber: input.panNumber ?? undefined,
-      msmeUdyamNumber: input.msmeUdyamNumber ?? undefined,
-      cinNumber: input.cinNumber ?? undefined,
-      address: input.address ?? undefined,
-      createdBy: email,
-      updatedBy: email,
+      type: input.type,
+      isRailwayLinked: input.isRailwayLinked ?? false,
+      createdBy: getCurrentEmail(),
+      updatedBy: getCurrentEmail(),
     });
   }
 
   async updateVendor(id: string, input: any) {
-    const existingVendor = await this.vendorRepository.findById(id);
-    if (!existingVendor) {
-      throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
-    }
-
-    const updateData: any = { updatedBy: getCurrentEmail() };
-
-    if (input.name !== null && input.name !== undefined) {
-      const duplicate = await this.vendorRepository.findByName(input.name);
-      if (duplicate && duplicate.id !== id) {
-        throw new Error(ErrorInfo.VENDOR_ALREADY_EXISTS);
-      }
-      updateData.name = input.name.trim();
-    }
-
-    if (input.type !== null && input.type !== undefined) {
-      updateData.type = input.type;
-    }
-
-    if (input.status !== null && input.status !== undefined) {
-      updateData.status = input.status;
-    }
-
-    if (input.gstNumber !== null && input.gstNumber !== undefined) {
-      updateData.gstNumber = input.gstNumber || undefined;
-    }
-
-    if (input.panNumber !== null && input.panNumber !== undefined) {
-      updateData.panNumber = input.panNumber || undefined;
-    }
-
-    if (input.msmeUdyamNumber !== null && input.msmeUdyamNumber !== undefined) {
-      updateData.msmeUdyamNumber = input.msmeUdyamNumber || undefined;
-    }
-
-    if (input.cinNumber !== null && input.cinNumber !== undefined) {
-      updateData.cinNumber = input.cinNumber || undefined;
-    }
-
-    if (input.address !== null && input.address !== undefined) {
-      updateData.address = input.address || undefined;
-    }
-
-    return this.vendorRepository.updateVendor(id, updateData);
-  }
-
-  async deleteVendor(id: string) {
     const vendor = await this.vendorRepository.findById(id);
+
     if (!vendor) {
       throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
     }
-    return this.vendorRepository.deleteVendor(id);
+
+    return this.vendorRepository.updateVendor(id, {
+      ...input,
+      updatedBy: getCurrentEmail(),
+    });
+  }
+
+  async deleteVendor(id: string) {
+    return this.vendorRepository.softDeleteVendor(
+      id,
+      getCurrentEmail()
+    );
   }
 
   async deleteVendors(ids: string[]) {
-    if (!ids || ids.length === 0) {
-      throw new Error(ErrorInfo.NO_VENDORS_TO_DELETE);
-    }
-    return this.vendorRepository.deleteVendors(ids);
+    return Promise.all(
+      ids.map((id) =>
+        this.vendorRepository.softDeleteVendor(
+          id,
+          getCurrentEmail()
+        )
+      )
+    );
   }
+
+  async changeStatus(
+  vendorId: string,
+  newStatus: VendorStatus,
+  remarks?: string
+) {
+  const vendor = await this.vendorRepository.findById(
+    vendorId
+  );
+
+  if (!vendor) {
+    throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
+  }
+
+  const currentStatus = vendor.status;
+
+  if (currentStatus === newStatus) {
+    throw new Error(ErrorInfo.VENDOR_STATUS_SAME);
+  }
+
+  // 🔥 FINAL HARD GUARD
+  if (newStatus === VendorStatus.FINAL) {
+    const agreements =
+      await this.agreementRepository.findByVendorId(
+        vendorId
+      );
+
+    const signedAgreement = agreements.find(
+      (a) =>
+        a.signatureStatus === SignatureStatus.SIGNED
+    );
+
+    if (!signedAgreement) {
+      throw new Error(
+        ErrorInfo.VENDOR_FINAL_REQUIRES_SIGNED_AGREEMENT
+      );
+    }
+  }
+
+  const allowed =
+    VALID_VENDOR_TRANSITIONS[currentStatus] || [];
+
+  if (!allowed.includes(newStatus)) {
+    throw new Error(
+      `Invalid transition from ${currentStatus} to ${newStatus}`
+    );
+  }
+
+  return this.db.transaction(async (manager) => {
+    vendor.status = newStatus;
+    vendor.updatedBy = getCurrentEmail();
+
+    await manager.getRepository(Vendor).save(vendor);
+
+    const workflow = manager.create(
+      VendorWorkflow,
+      {
+        vendorId,
+        fromStatus: currentStatus,
+        toStatus: newStatus,
+        remarks,
+        changedBy: getCurrentEmail(),
+      }
+    );
+
+    await manager.save(workflow);
+
+    return vendor;
+  });
+}
+
 
   async getVendorById(id: string) {
     return this.vendorRepository.findById(id);
   }
 
-  async getVendorByName(name: string) {
-    return this.vendorRepository.findByName(name);
-  }
-
   async searchVendor(params: any) {
-    return this.vendorRepository.search(params as any);
+    return this.vendorRepository.search(params || {});
   }
 }

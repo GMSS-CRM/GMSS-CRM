@@ -17,7 +17,7 @@ export class VendorTagService implements IVendorTagService {
     }
 
     if (!input.tagId || !input.tagId.trim()) {
-      throw new Error('Tag ID is required');
+      throw new Error(ErrorInfo.TAG_ID_REQUIRED);
     }
 
     const createdBy = getCurrentEmail();

@@ -11,6 +11,14 @@ import { vendorContactPersonTypeDefs } from "../components/vendor-contact-person
 import { vendorDocumentTypeDefs } from "../components/vendor-document";
 import { tenderTypeDefs } from "../components/tender";
 import { tenderDocumentTypeDefs } from "../components/tender-document";
+import { vendorAgreementTypeDefs } from "../components/vendor-agreement";
+import { vendorApprovalTypeDefs } from "../components/vendor-approval";
+import { vendorCommissionTypeDefs } from "../components/vendor-commission";
+import { vendorFollowUpTypeDefs } from "../components/vendor-followup";
+import { vendorPaymentTypeDefs } from "../components/vendor-payment";
+import { vendorProposalTypeDefs } from "../components/vendor-proposal";
+import { vendorTenderTypeDefs } from "../components/vendor-tender";
+import { vendorWorkflowTypeDefs } from "../components/vendor-workflow";
 
 export const typeDefs = gql`
   scalar DateTime
@@ -32,4 +40,12 @@ export const mergedTypeDefs = [
   vendorDocumentTypeDefs,
   tenderTypeDefs,
   tenderDocumentTypeDefs,
+  vendorAgreementTypeDefs,
+  vendorApprovalTypeDefs,
+  vendorCommissionTypeDefs,
+  vendorFollowUpTypeDefs,
+  vendorPaymentTypeDefs,
+  vendorProposalTypeDefs,
+  vendorTenderTypeDefs,
+  vendorWorkflowTypeDefs,
 ];

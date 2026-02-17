@@ -28,6 +28,7 @@ export const ErrorInfo = {
   VENDOR_ALREADY_EXISTS: 'Vendor with this name already exists',
   VENDOR_NOT_FOUND: 'Vendor not found',
   NO_VENDORS_TO_DELETE: 'No vendors to delete',
+  VENDOR_FINAL_REQUIRES_SIGNED_AGREEMENT: 'Vendor cannot move to FINAL unless agreement is SIGNED',
 
   // Vendor Contact Person errors
   VENDOR_ID_REQUIRED: 'Vendor ID is required',
@@ -52,6 +53,39 @@ export const ErrorInfo = {
   TENDER_ID_REQUIRED: 'Tender ID is required',
   TENDER_DOCUMENT_NOT_FOUND: 'Tender document not found',
   NO_TENDER_DOCUMENTS_TO_DELETE: 'No tender documents to delete',
+
+  // Vendor Tag errors
+  TAG_ID_REQUIRED: 'Tag ID is required',
+
+  // Vendor Agreement errors
+  AGREEMENT_NOT_FOUND: 'Agreement not found',
+  AGREEMENT_VENDOR_ID_REQUIRED: 'VendorId is required for agreement',
+  ACCEPTED_PROPOSAL_REQUIRED: 'Agreement cannot be created unless proposal is ACCEPTED',
+  AGREEMENT_UPDATE_FAILED: 'Agreement not found after update',
+
+  // Vendor Approval errors
+  APPROVAL_NOT_FOUND: 'Approval not found',
+  APPROVAL_ALREADY_DECIDED: 'Approval already decided',
+  APPROVAL_ALREADY_EXISTS: 'Approval request already exists for this vendor',
+
+  // Vendor FollowUp errors
+  FOLLOWUP_NOT_FOUND: 'FollowUp not found',
+  FOLLOWUP_ALREADY_COMPLETED: 'FollowUp already completed',
+  FOLLOWUP_UPDATE_FAILED: 'FollowUp update failed',
+
+  // Vendor Proposal errors
+  PROPOSAL_NOT_FOUND: 'Proposal not found',
+  PROPOSAL_UPDATE_FAILED: 'Failed to update proposal',
+  PROPOSAL_ALREADY_EXISTS: 'A proposal already exists for this vendor',
+
+  // Vendor Tender errors
+  TENDER_PARTICIPATION_NOT_FOUND: 'Tender participation not found',
+  TENDER_PARTICIPATION_UPDATE_FAILED: 'Tender participation update failed',
+  VENDOR_ALREADY_PARTICIPATING: 'Vendor is already participating in this tender',
+
+  // Vendor Workflow errors
+  VENDOR_STATUS_SAME: 'Vendor already in this status',
+  VENDOR_WORKFLOW_UPDATE_FAILED: 'Failed to update vendor status workflow',
 };
 
 export default ErrorInfo;

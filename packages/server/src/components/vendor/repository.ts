@@ -1,12 +1,19 @@
 import { inject, injectable } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
 import { TYPES } from '../../inversify/types';
-import { Vendor, CompanyType } from '../../entities/Vendor';
+import { Vendor } from '../../entities/Vendor';
 import { IVendorRepository } from './types';
+import { VendorStatus } from '../../entities/enums/VendorStatus';
 
 @injectable()
-export class VendorRepository extends Repository<Vendor> implements IVendorRepository {
-  constructor(@inject(TYPES.DbContext) private readonly dbContext: DataSource) {
+export class VendorRepository
+  extends Repository<Vendor>
+  implements IVendorRepository
+{
+  constructor(
+    @inject(TYPES.DbContext)
+    private readonly dbContext: DataSource
+  ) {
     super(Vendor, dbContext.manager);
   }
 
@@ -16,66 +23,98 @@ export class VendorRepository extends Repository<Vendor> implements IVendorRepos
 
   findById(id: string) {
     return this.findOne({
-      where: { id },
-      relations: ['tags', 'tags.tag', 'contactPersons', 'documents'],
+      where: { id, isDeleted: false },
+      relations: [
+        'workflows',
+        'approvals',
+        'proposals',
+        'agreements',
+        'followUps',
+        'tenders',
+      ],
     });
   }
 
   findByName(name: string) {
     return this.findOne({
-      where: { name },
+      where: { name, isDeleted: false },
     });
   }
 
-  search(params: {
+  search(
+  params: {
     search?: string;
-    status?: CompanyType;
+    status?: VendorStatus;
     type?: string;
     limit?: number;
     offset?: number;
-  }) {
-    const query = this.createQueryBuilder('vendor');
+  } = {}
+) {
+  const query = this.createQueryBuilder('vendor')
+    .where('vendor.isDeleted = false');
 
-    if (params.search) {
-      query.where(
-        '(vendor.name ILIKE :search OR vendor.gstNumber ILIKE :search OR vendor.panNumber ILIKE :search)',
-        { search: `%${params.search}%` }
-      );
-    }
-
-    if (params.status) {
-      query.andWhere('vendor.status = :status', { status: params.status });
-    }
-
-    if (params.type) {
-      query.andWhere('vendor.type = :type', { type: params.type });
-    }
-
-    query.leftJoinAndSelect('vendor.tags', 'vendorTag');
-    query.leftJoinAndSelect('vendorTag.tag', 'tag');
-    query.leftJoinAndSelect('vendor.contactPersons', 'contactPersons');
-    query.leftJoinAndSelect('vendor.documents', 'documents');
-
-    if (params.limit) {
-      query.take(params.limit);
-    }
-
-    if (params.offset) {
-      query.skip(params.offset);
-    }
-
-    return query.getMany();
+  if (params.search) {
+    query.andWhere(
+      `(LOWER(vendor.name) LIKE LOWER(:search)
+        OR LOWER(vendor.gstNumber) LIKE LOWER(:search)
+        OR LOWER(vendor.panNumber) LIKE LOWER(:search))`,
+      { search: `%${params.search}%` }
+    );
   }
 
-  updateVendor(id: string, vendor: Partial<Vendor>) {
-    return this.update(id, vendor).then(() => this.findById(id));
+  if (params.status) {
+    query.andWhere('vendor.status = :status', {
+      status: params.status,
+    });
   }
 
-  deleteVendor(id: string) {
-    return this.delete(id).then(() => true);
+  if (params.type) {
+    query.andWhere('vendor.type = :type', {
+      type: params.type,
+    });
   }
 
-  deleteVendors(ids: string[]) {
-    return this.delete(ids).then(() => true);
+  if (params.limit) {
+    query.take(params.limit);
+  }
+
+  if (params.offset) {
+    query.skip(params.offset);
+  }
+
+  return query.getMany();
+}
+
+
+  async updateVendor(
+    id: string,
+    vendor: Partial<Vendor>
+  ): Promise<Vendor> {
+    await this.update(id, vendor);
+
+    const updated = await this.findById(id);
+
+    if (!updated) {
+      throw new Error('Failed to update vendor');
+    }
+
+    return updated;
+  }
+
+  async softDeleteVendor(
+    id: string,
+    deletedBy: string
+  ): Promise<boolean> {
+    const vendor = await this.findById(id);
+
+    if (!vendor) return false;
+
+    vendor.isDeleted = true;
+    vendor.deletedBy = deletedBy;
+    vendor.deletedDate = new Date();
+    vendor.status = VendorStatus.DELETED;
+
+    await this.save(vendor);
+    return true;
   }
 }

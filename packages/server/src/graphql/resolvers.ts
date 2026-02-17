@@ -8,6 +8,14 @@ import { vendorContactPersonResolvers } from "../components/vendor-contact-perso
 import { vendorDocumentResolvers } from "../components/vendor-document";
 import { tenderResolvers } from "../components/tender";
 import { tenderDocumentResolvers } from "../components/tender-document";
+import { vendorAgreementResolvers } from "../components/vendor-agreement";
+import { vendorApprovalResolvers } from "../components/vendor-approval";
+import { vendorCommissionResolvers } from "../components/vendor-commission";
+import { vendorFollowUpResolvers } from "../components/vendor-followup";
+import { vendorPaymentResolvers } from "../components/vendor-payment";
+import { vendorProposalResolvers } from "../components/vendor-proposal";
+import { vendorTenderResolvers } from "../components/vendor-tender";
+import { vendorWorkflowResolvers } from "../components/vendor-workflow";
 
 export const resolvers = [
   userResolvers,
@@ -20,4 +28,12 @@ export const resolvers = [
   vendorDocumentResolvers,
   tenderResolvers,
   tenderDocumentResolvers,
+  vendorAgreementResolvers,
+  vendorApprovalResolvers,
+  vendorCommissionResolvers,
+  vendorFollowUpResolvers,
+  vendorPaymentResolvers,
+  vendorProposalResolvers,
+  vendorTenderResolvers,
+  vendorWorkflowResolvers,
 ];

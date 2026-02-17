@@ -9,8 +9,7 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
+    "skipLibCheck": true
   },
     "references": [
       { "path": "../types" }
