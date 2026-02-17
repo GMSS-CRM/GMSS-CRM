@@ -13,7 +13,13 @@ import {
   VendorDocument, 
   Tender, 
   TenderDocument, 
-  TenderTag 
+  TenderTag,
+  VendorAgreement,
+  VendorApproval,
+  VendorFollowUp,
+  VendorProposal,
+  VendorTender,
+  VendorWorkflow
 } from "../entities";
 
 dotenv.config();
@@ -38,7 +44,13 @@ export const AppDataSource = new DataSource({
     VendorDocument, 
     Tender, 
     TenderDocument, 
-    TenderTag
+    TenderTag,
+    VendorAgreement,
+    VendorApproval,
+    VendorFollowUp,
+    VendorProposal,
+    VendorTender,
+    VendorWorkflow
   ],
 
   synchronize: true, // ❗ OK for now, disable later
