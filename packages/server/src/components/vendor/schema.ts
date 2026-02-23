@@ -1,72 +1,116 @@
 import { gql } from 'graphql-tag';
 
 export const vendorTypeDefs = gql`
+
   type Vendor {
-  id: ID!
-  name: String!
-  type: String
-  status: VendorStatus!
-  isRailwayLinked: Boolean!
-  gstNumber: String
-  panNumber: String
-  cinNumber: String
-  msmeUdyamNumber: String
-  address: String
+    id: ID!
+    name: String!
+    type: String
+    status: VendorStatus!
+    isRailwayLinked: Boolean!
+    gstNumber: String
+    panNumber: String
+    cinNumber: String
+    msmeUdyamNumber: String
+    address: String
 
-  tags: [VendorTag!]
-  contactPersons: [VendorContactPerson!]
-  documents: [VendorDocument!]
+    tags: [VendorTag!]
+    contactPersons: [VendorContactPerson!]
+    documents: [VendorDocument!]
 
-  workflows: [VendorWorkflow!]
-  approvals: [VendorApproval!]
-  proposals: [VendorProposal!]
-  agreements: [VendorAgreement!]
-  followUps: [VendorFollowUp!]
-  tenders: [VendorTender!]
+    workflows: [VendorWorkflow!]
+    approvals: [VendorApproval!]
+    proposals: [VendorProposal!]
+    agreements: [VendorAgreement!]
+    followUps: [VendorFollowUp!]
+    tenders: [VendorTender!]
 
-  createdDate: String!
-  updatedDate: String!
-}
+    createdDate: String!
+    updatedDate: String!
+  }
 
-input CreateVendorInput {
-  name: String!
-  type: String
-  isRailwayLinked: Boolean
-  gstNumber: String
-  panNumber: String
-  cinNumber: String
-  msmeUdyamNumber: String
-  address: String
-}
+  # ---------- Nested Contact Person ----------
 
-input UpdateVendorInput {
-  name: String
-  type: String
-  isRailwayLinked: Boolean
-  gstNumber: String
-  panNumber: String
-  cinNumber: String
-  msmeUdyamNumber: String
-  address: String
-}
+  input CreateVendorContactPersonInput {
+    name: String!
+    designation: String
+    phoneNumber: String!
+    email: String!
+    cc: String
+    bcc: String
+  }
 
-input ChangeVendorStatusInput {
-  vendorId: ID!
-  newStatus: VendorStatus!
-  remarks: String
-}
+  input UpdateVendorContactPersonInput {
+    id: ID
+    name: String
+    designation: String
+    phoneNumber: String
+    email: String
+    cc: String
+    bcc: String
+  }
 
-extend type Query {
-  getVendorById(id: ID!): Vendor
-  searchVendors(search: String, status: VendorStatus): [Vendor!]!
-}
+  # ---------- Nested Documents ----------
 
-extend type Mutation {
-  createVendor(input: CreateVendorInput!): Vendor!
-  uploadVendor(input: CreateVendorInput!): Vendor!
-  updateVendor(id: ID!, input: UpdateVendorInput!): Vendor!
-  deleteVendor(id: ID!): Boolean!
-  deleteVendors(ids: [ID!]!): Boolean!
-  changeVendorStatus(input: ChangeVendorStatusInput!): Vendor!
-}
+  input CreateVendorDocumentInput {
+    documentName: String!
+    documentUrl: String!
+    expiresOn: String
+  }
+
+  input UpdateVendorDocumentInput {
+    id: ID
+    documentName: String
+    documentUrl: String
+    expiresOn: String
+  }
+
+  # ---------- Vendor ----------
+
+  input CreateVendorInput {
+    name: String!
+    type: String
+    isRailwayLinked: Boolean
+    gstNumber: String
+    panNumber: String
+    cinNumber: String
+    msmeUdyamNumber: String
+    address: String
+
+    contactPersons: [CreateVendorContactPersonInput!]
+    documents: [CreateVendorDocumentInput!]
+  }
+
+  input UpdateVendorInput {
+    name: String
+    type: String
+    isRailwayLinked: Boolean
+    gstNumber: String
+    panNumber: String
+    cinNumber: String
+    msmeUdyamNumber: String
+    address: String
+
+    contactPersons: [UpdateVendorContactPersonInput!]
+    documents: [UpdateVendorDocumentInput!]
+  }
+
+  input ChangeVendorStatusInput {
+    vendorId: ID!
+    newStatus: VendorStatus!
+    remarks: String
+  }
+
+  extend type Query {
+    getVendorById(id: ID!): Vendor
+    searchVendors(search: String, status: VendorStatus): [Vendor!]!
+  }
+
+  extend type Mutation {
+    createVendor(input: CreateVendorInput!): Vendor!
+    updateVendor(id: ID!, input: UpdateVendorInput!): Vendor!
+    deleteVendor(id: ID!): Boolean!
+    deleteVendors(ids: [ID!]!): Boolean!
+    changeVendorStatus(input: ChangeVendorStatusInput!): Vendor!
+  }
 `;

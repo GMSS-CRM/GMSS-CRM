@@ -5,41 +5,57 @@ import { VendorDocument } from '../../entities/VendorDocument';
 import { IVendorDocumentRepository } from './types';
 
 @injectable()
-export class VendorDocumentRepository extends Repository<VendorDocument> implements IVendorDocumentRepository {
-  constructor(@inject(TYPES.DbContext) private readonly dbContext: DataSource) {
+export class VendorDocumentRepository
+  extends Repository<VendorDocument>
+  implements IVendorDocumentRepository
+{
+  constructor(
+    @inject(TYPES.DbContext)
+    private readonly dbContext: DataSource
+  ) {
     super(VendorDocument, dbContext.manager);
   }
 
-  createDocument(doc: Partial<VendorDocument>) {
-    return this.save(this.create(doc));
+  async createDocument(doc: Partial<VendorDocument>) {
+    const entity = this.create(doc);
+    return this.save(entity);
   }
 
-  findById(id: string) {
+  async findById(id: string) {
     return this.findOne({
       where: { id },
       relations: ['vendor'],
     });
   }
 
-  findByVendorId(vendorId: string) {
+  async findByVendorId(vendorId: string) {
     return this.find({
       where: { vendorId },
       relations: ['vendor'],
     });
   }
 
-  search(params: { vendorId?: string; search?: string; limit?: number; offset?: number }) {
-    const query = this.createQueryBuilder('document');
+  async search(params: {
+    vendorId?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }) {
+    const query = this.createQueryBuilder('document')
+      .leftJoinAndSelect('document.vendor', 'vendor');
 
     if (params.vendorId) {
-      query.where('document.vendorId = :vendorId', { vendorId: params.vendorId });
+      query.andWhere('document.vendorId = :vendorId', {
+        vendorId: params.vendorId,
+      });
     }
 
     if (params.search) {
-      query.andWhere('document.documentName ILIKE :search', { search: `%${params.search}%` });
+      query.andWhere(
+        'LOWER(document.documentName) LIKE LOWER(:search)',
+        { search: `%${params.search}%` }
+      );
     }
-
-    query.leftJoinAndSelect('document.vendor', 'vendor');
 
     if (params.limit) {
       query.take(params.limit);
@@ -52,15 +68,28 @@ export class VendorDocumentRepository extends Repository<VendorDocument> impleme
     return query.getMany();
   }
 
-  updateDocument(id: string, doc: Partial<VendorDocument>) {
-    return this.update(id, doc).then(() => this.findById(id));
+  async updateDocument(
+    id: string,
+    doc: Partial<VendorDocument>
+  ) {
+    const existing = await this.findOne({ where: { id } });
+
+    if (!existing) {
+      throw new Error('Vendor document not found');
+    }
+
+    Object.assign(existing, doc);
+
+    return this.save(existing);
   }
 
-  deleteDocument(id: string) {
-    return this.delete(id).then(() => true);
+  async deleteDocument(id: string) {
+    const result = await this.delete(id);
+    return result.affected ? true : false;
   }
 
-  deleteDocuments(ids: string[]) {
-    return this.delete(ids).then(() => true);
+  async deleteDocuments(ids: string[]) {
+    const result = await this.delete(ids);
+    return result.affected ? true : false;
   }
 }

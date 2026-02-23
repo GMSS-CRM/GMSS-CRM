@@ -31,6 +31,8 @@ export class VendorRepository
         'agreements',
         'followUps',
         'tenders',
+        'contactPersons',
+        'documents'
       ],
     });
   }
@@ -42,63 +44,47 @@ export class VendorRepository
   }
 
   search(
-  params: {
-    search?: string;
-    status?: VendorStatus;
-    type?: string;
-    limit?: number;
-    offset?: number;
-  } = {}
-) {
-  const query = this.createQueryBuilder('vendor')
-    .where('vendor.isDeleted = false');
+    params: {
+      search?: string;
+      status?: VendorStatus;
+      type?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ) {
+    const query = this.createQueryBuilder('vendor')
+      .where('vendor.isDeleted = false');
 
-  if (params.search) {
-    query.andWhere(
-      `(LOWER(vendor.name) LIKE LOWER(:search)
-        OR LOWER(vendor.gstNumber) LIKE LOWER(:search)
-        OR LOWER(vendor.panNumber) LIKE LOWER(:search))`,
-      { search: `%${params.search}%` }
-    );
-  }
-
-  if (params.status) {
-    query.andWhere('vendor.status = :status', {
-      status: params.status,
-    });
-  }
-
-  if (params.type) {
-    query.andWhere('vendor.type = :type', {
-      type: params.type,
-    });
-  }
-
-  if (params.limit) {
-    query.take(params.limit);
-  }
-
-  if (params.offset) {
-    query.skip(params.offset);
-  }
-
-  return query.getMany();
-}
-
-
-  async updateVendor(
-    id: string,
-    vendor: Partial<Vendor>
-  ): Promise<Vendor> {
-    await this.update(id, vendor);
-
-    const updated = await this.findById(id);
-
-    if (!updated) {
-      throw new Error('Failed to update vendor');
+    if (params.search) {
+      query.andWhere(
+        `(LOWER(vendor.name) LIKE LOWER(:search)
+          OR LOWER(vendor.gstNumber) LIKE LOWER(:search)
+          OR LOWER(vendor.panNumber) LIKE LOWER(:search))`,
+        { search: `%${params.search}%` }
+      );
     }
 
-    return updated;
+    if (params.status) {
+      query.andWhere('vendor.status = :status', {
+        status: params.status,
+      });
+    }
+
+    if (params.type) {
+      query.andWhere('vendor.type = :type', {
+        type: params.type,
+      });
+    }
+
+    if (params.limit) {
+      query.take(params.limit);
+    }
+
+    if (params.offset) {
+      query.skip(params.offset);
+    }
+
+    return query.getMany();
   }
 
   async softDeleteVendor(

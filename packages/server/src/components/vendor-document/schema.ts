@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 
 export const vendorDocumentTypeDefs = gql`
+
   type VendorDocument {
     id: ID!
     vendorId: ID!
@@ -13,14 +14,14 @@ export const vendorDocumentTypeDefs = gql`
     updatedDate: String!
   }
 
-  input CreateVendorDocumentInput {
+  input UploadVendorDocumentInput {
     vendorId: ID!
     documentName: String!
     documentUrl: String!
     expiresOn: String
   }
 
-  input UpdateVendorDocumentInput {
+  input UpdateVendorDocumentStandaloneInput {
     documentName: String
     documentUrl: String
     expiresOn: String
@@ -34,8 +35,8 @@ export const vendorDocumentTypeDefs = gql`
   }
 
   extend type Mutation {
-    createVendorDocument(input: CreateVendorDocumentInput!): VendorDocument!
-    updateVendorDocument(id: ID!, input: UpdateVendorDocumentInput!): VendorDocument!
+    uploadVendorDocument(input: UploadVendorDocumentInput!): VendorDocument!
+    updateVendorDocument(id: ID!, input: UpdateVendorDocumentStandaloneInput!): VendorDocument!
     deleteVendorDocument(id: ID!): Boolean!
     deleteVendorDocuments(ids: [ID!]!): Boolean!
   }

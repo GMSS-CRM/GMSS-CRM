@@ -13,6 +13,8 @@ import { VendorAgreement } from './VendorAgreement';
 import { VendorFollowUp } from './VendorFollowUp';
 import { VendorApproval } from './VendorApproval';
 import { VendorTender } from './VendorTender';
+import { VendorContactPerson } from './VendorContactPerson';
+import { VendorDocument } from './VendorDocument';
 
 @Entity({ name: 'vendor' })
 export class Vendor {
@@ -71,7 +73,7 @@ export class Vendor {
   @Column({ nullable: true })
   deletedDate?: Date;
 
-  
+
 
 
   /* RELATIONS */
@@ -93,4 +95,10 @@ export class Vendor {
 
   @OneToMany(() => VendorTender, (vendorTender) => vendorTender.vendor)
   tenders!: VendorTender[];
+
+  @OneToMany(() => VendorContactPerson, cp => cp.vendor, { cascade: false })
+  contactPersons!: VendorContactPerson[];
+
+  @OneToMany(() => VendorDocument, doc => doc.vendor, { cascade: false })
+  documents!: VendorDocument[];
 }

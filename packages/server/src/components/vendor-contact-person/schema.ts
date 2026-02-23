@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 
 export const vendorContactPersonTypeDefs = gql`
+
   type VendorContactPerson {
     id: ID!
     vendorId: ID!
@@ -16,7 +17,8 @@ export const vendorContactPersonTypeDefs = gql`
     updatedDate: String!
   }
 
-  input CreateVendorContactPersonInput {
+  input CreateVendorContactPersonStandaloneInput {
+    vendorId: ID!
     name: String!
     designation: String
     phoneNumber: String!
@@ -25,8 +27,7 @@ export const vendorContactPersonTypeDefs = gql`
     bcc: String
   }
 
-  input UpdateVendorContactPersonInput {
-    vendorId: ID!
+  input UpdateVendorContactPersonStandaloneInput {
     name: String
     designation: String
     phoneNumber: String
@@ -35,22 +36,15 @@ export const vendorContactPersonTypeDefs = gql`
     bcc: String
   }
 
-  input SearchVendorContactPersonInput {
-    vendorId: ID
-    search: String
-    limit: Int
-    offset: Int
-  }
-
   extend type Mutation {
-    createVendorContactPerson(input: CreateVendorContactPersonInput!): VendorContactPerson!
-    updateVendorContactPerson(id: ID!, input: UpdateVendorContactPersonInput!): VendorContactPerson!
+    createVendorContactPerson(input: CreateVendorContactPersonStandaloneInput!): VendorContactPerson!
+    updateVendorContactPerson(id: ID!, input: UpdateVendorContactPersonStandaloneInput!): VendorContactPerson!
     deleteVendorContactPerson(id: ID!): Boolean!
     deleteVendorContactPersons(ids: [ID!]!): Boolean!
   }
 
   extend type Query {
     getVendorContactPersonById(id: ID!): VendorContactPerson
-    searchVendorContactPersons(searchInput: SearchVendorContactPersonInput): [VendorContactPerson!]!
+    searchVendorContactPersons(search: String, vendorId: ID): [VendorContactPerson!]!
   }
 `;
