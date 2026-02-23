@@ -13,7 +13,7 @@ export interface IVendorRepository extends Repository<Vendor> {
     limit?: number;
     offset?: number;
   }): Promise<Vendor[]>;
-  updateVendor(id: string, vendor: Partial<Vendor>): Promise<Vendor>;
+  //updateVendor(id: string, vendor: Partial<Vendor>): Promise<Vendor>;
   softDeleteVendor(id: string, deletedBy: string): Promise<boolean>;
 }
 
