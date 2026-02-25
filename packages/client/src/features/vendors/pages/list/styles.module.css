@@ -10,9 +10,21 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 24px;
   flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .title {
@@ -30,6 +42,109 @@
   font-weight: 500;
 }
 
+/* ── Role Pill ── */
+.rolePill {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--bg-secondary, #f5f5f5);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 999px;
+  padding: 3px 4px;
+  height: 32px;
+}
+
+.roleOption {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 999px;
+  transition: all 150ms ease;
+  user-select: none;
+}
+
+.roleOption:hover {
+  color: var(--text-primary, #111827);
+}
+
+.roleActive {
+  color: var(--accent, #2563eb) !important;
+  background: rgba(37, 99, 235, 0.08);
+  font-weight: 600;
+}
+
+/* ── Pending Banner ── */
+.pendingBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(217, 119, 6, 0.07);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-primary, #111827);
+  flex-shrink: 0;
+}
+
+/* ── Resolved Banner ── */
+.resolvedBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(5, 150, 105, 0.06);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-primary, #111827);
+  flex-shrink: 0;
+}
+
+/* ── View Tabs ── */
+.viewTabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  flex-shrink: 0;
+}
+
+.viewTab {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+
+.viewTab:hover {
+  color: var(--text-primary, #111827);
+}
+
+.viewTabActive {
+  color: var(--accent, #2563eb);
+  border-bottom-color: var(--accent, #2563eb);
+  font-weight: 600;
+}
+
+/* ── Table ── */
 .tableContainer {
   flex: 1;
   overflow: hidden;
@@ -101,6 +216,16 @@
   font-size: 13px;
 }
 
+.remarkText {
+  color: var(--text-secondary, #6b7280);
+  font-size: 12px;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .table :global(.ant-pagination) {
   margin: 16px 0 0 0;
 }
@@ -136,95 +261,4 @@
 
 .table :global(.ant-pagination-disabled button) {
   color: var(--text-disabled);
-}
-
-/* Upload Vendors Styles */
-.uploadButton {
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-}
-
-.uploadButton:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(24, 144, 255, 0.05);
-}
-
-.uploadDropdown :global(.ant-dropdown-menu-item) {
-  padding: 0;
-}
-
-.uploadDropdown :global(.ant-dropdown-menu-item:hover) {
-  background: rgba(24, 144, 255, 0.05);
-}
-
-.uploadMenuItem {
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.uploadMenuItem:hover {
-  background: rgba(24, 144, 255, 0.05);
-}
-
-.uploadIcon {
-  color: #52c41a;
-  font-size: 16px;
-}
-
-.uploadText {
-  flex: 1;
-}
-
-.uploadTitle {
-  font-weight: 500;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.uploadDescription {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin: 2px 0 0 0;
-}
-
-.uploadModal {
-  .ant-modal-content {
-    background: var(--bg-panel);
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(24, 144, 255, 0.08);
-  }
-  .ant-modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .ant-upload-drag {
-    background: var(--bg-secondary);
-    border: 1px dashed var(--border-color);
-    border-radius: 8px;
-    padding: 32px 0;
-    transition: border-color 0.2s;
-  }
-  .ant-upload-drag:hover {
-    border-color: var(--accent);
-  }
-  .ant-upload-text {
-    color: var(--text-primary);
-    font-size: 15px;
-    font-weight: 500;
-  }
-  .ant-upload-hint {
-    color: var(--text-secondary);
-    font-size: 13px;
-  }
 }

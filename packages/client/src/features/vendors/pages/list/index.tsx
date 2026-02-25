@@ -1,248 +1,404 @@
-import { useMemo, useCallback, useState } from 'react';
-import { Table, Tag, Space, Tooltip, Modal, Upload, Button as AntButton, message } from 'antd';
-import { EditOutlined, EyeOutlined, UploadOutlined, FileExcelOutlined } from '@ant-design/icons';
+﻿import { useMemo, useCallback } from 'react';
+import { Table, Tag, Space, Tooltip, Badge } from 'antd';
+import {
+  EditOutlined,
+  PlusOutlined,
+  ClockCircleOutlined,
+  TeamOutlined,
+  UserOutlined,
+  CheckCircleOutlined,
+  EyeOutlined,
+} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import type { UploadProps } from 'antd';
-import type { Vendor } from '../../types';
+import type { Vendor, VendorMdRequest, UserRole } from '../../types';
 import Button from '../../../../components/button';
 import styles from './styles.module.css';
 
+export type ActiveView = 'all' | 'pending' | 'resolved';
+
 interface VendorListProps {
   vendors: Vendor[];
+  pendingRequests: VendorMdRequest[];
+  resolvedRequests: VendorMdRequest[];
   onView: (vendor: Vendor) => void;
+  onViewRequest: (request: VendorMdRequest, view: 'pending' | 'resolved') => void;
   onCreate: () => void;
-  onUpload?: (file: File) => void;
   loading?: boolean;
+  role: UserRole;
+  onRoleChange: (role: UserRole) => void;
+  activeView: ActiveView;
+  onViewChange: (v: ActiveView) => void;
+  onRefresh: () => void;
 }
 
-/**
- * Vendor List Page
- * Displays vendors in a table with view/edit actions
- */
 export default function VendorList({
   vendors,
+  pendingRequests,
+  resolvedRequests,
   onView,
+  onViewRequest,
   onCreate,
-  onUpload,
   loading = false,
+  role,
+  onRoleChange,
+  activeView,
+  onViewChange,
 }: VendorListProps) {
-  // Filter active (non-deleted) vendors
-  const activeVendors = useMemo(() => {
-    return vendors.filter((vendor) => !vendor.isDeleted);
+  const activeVendors = useMemo(() => vendors.filter((v) => !v.isDeleted), [vendors]);
+
+  // Map vendorId - Vendor for request tables
+  const vendorMap = useMemo(() => {
+    const m = new Map<string, Vendor>();
+    vendors.forEach((v) => m.set(v.id, v));
+    return m;
   }, [vendors]);
 
-  const handleView = useCallback(
-    (vendor: Vendor) => {
-      onView(vendor);
-    },
-    [onView]
-  );
-
-  const [uploadModalVisible, setUploadModalVisible] = useState(false);
-  const [fileList, setFileList] = useState<any[]>([]);
-
-  const handleUploadModalOpen = () => setUploadModalVisible(true);
-  const handleUploadModalClose = () => {
-    setUploadModalVisible(false);
-    setFileList([]);
-  };
-
-  const uploadProps: UploadProps = {
-    accept: '.xlsx,.xls',
-    multiple: false,
-    fileList,
-    showUploadList: {
-      showRemoveIcon: true,
-    },
-    beforeUpload: (file) => {
-      const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        file.type === 'application/vnd.ms-excel' ||
-        file.name.endsWith('.xlsx') ||
-        file.name.endsWith('.xls');
-      if (!isExcel) {
-        message.error('Please upload a valid Excel file (.xlsx or .xls)');
-        return Upload.LIST_IGNORE;
-      }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
-        message.error('File must be smaller than 10MB!');
-        return Upload.LIST_IGNORE;
-      }
-      setFileList([file]);
-      if (onUpload) onUpload(file);
-      return false;
-    },
-    onRemove: () => setFileList([]),
-    customRequest: () => {}, // Prevent auto upload
-  };
-
   const formatDate = useCallback((dateString: string): string => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-IN', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-    }).format(date);
+    }).format(new Date(dateString));
   }, []);
 
-  const getStatusColor = useCallback((status: string): string => {
+  const getStatusConfig = useCallback((status: string): { color: string; label: string } => {
     switch (status) {
-      case 'Approved':
-        return 'success';
-      case 'Submitted':
-        return 'processing';
-      case 'Rejected':
-        return 'error';
-      case 'Draft':
-        return 'default';
-      default:
-        return 'default';
+      case 'New':        return { color: 'blue',    label: 'New Company' };
+      case 'Interested': return { color: 'orange',  label: 'Interested'  };
+      case 'Final':      return { color: 'green',   label: 'Final'       };
+      default:           return { color: 'default', label: status        };
     }
   }, []);
 
-  const columns: ColumnsType<Vendor> = useMemo(
-    () => [
-      {
-        title: 'Vendor Name',
-        dataIndex: 'companyName',
-        key: 'companyName',
-        width: '25%',
-        render: (name: string) => (
+  //  All Vendors columns 
+  const allColumns: ColumnsType<Vendor> = useMemo(() => [
+    {
+      title: 'Company Name',
+      dataIndex: 'companyName',
+      key: 'companyName',
+      width: '28%',
+      render: (name: string, record: Vendor) => (
+        <div>
           <span className={styles.vendorName}>{name}</span>
-        ),
+          {record.isLinkedWithRailways && (
+            <Tag color="geekblue" style={{ marginLeft: 8, fontSize: 11 }}>Railways</Tag>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: 'Tags',
+      dataIndex: 'tags',
+      key: 'tags',
+      width: '10%',
+      align: 'center' as const,
+      render: (tags: string[]) => (
+        <span className={styles.tagsCount}>{tags.length > 0 ? tags.length : 'â€”'}</span>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: '14%',
+      render: (status: string) => {
+        const cfg = getStatusConfig(status);
+        return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
-      {
-        title: 'Vendor Type',
-        dataIndex: 'vendorType',
-        key: 'vendorType',
-        width: '15%',
-        render: (type: string) => (
-          <span className={styles.vendorType}>{type}</span>
-        ),
+    },
+    {
+      title: 'Created Date',
+      dataIndex: 'createdDate',
+      key: 'createdDate',
+      width: '16%',
+      render: (date: string) => <span className={styles.secondaryText}>{formatDate(date)}</span>,
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: '10%',
+      align: 'center' as const,
+      render: (_: unknown, record: Vendor) => (
+        <Space size="small">
+          <Tooltip title="Edit">
+            <Button
+              variant="ghost"
+              icon={<EditOutlined />}
+              onClick={(e) => { e.stopPropagation(); onView(record); }}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ], [formatDate, getStatusConfig, onView]);
+
+  //  Pending Requests columns 
+  // Employee = view-only (eye icon); MD = edit & resolve (edit icon)
+  const pendingColumns: ColumnsType<VendorMdRequest> = useMemo(() => [
+    {
+      title: 'Company Name',
+      key: 'companyName',
+      width: '22%',
+      render: (_: unknown, req: VendorMdRequest) => {
+        const v = vendorMap.get(req.vendorId);
+        return (
+          <div>
+            <span className={styles.vendorName}>{v?.companyName ?? req.vendorId}</span>
+            {v?.isLinkedWithRailways && (
+              <Tag color="geekblue" style={{ marginLeft: 8, fontSize: 11 }}>Railways</Tag>
+            )}
+          </div>
+        );
       },
-      {
-        title: 'Tags',
-        dataIndex: 'tags',
-        key: 'tags',
-        width: '10%',
-        align: 'center',
-        render: (tags: string[]) => (
-          <span className={styles.tagsCount}>
-            {tags.length > 0 ? tags.length : '—'}
-          </span>
-        ),
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      width: '12%',
+      render: (_: unknown, req: VendorMdRequest) => {
+        const v = vendorMap.get(req.vendorId);
+        if (!v) return 'â€”';
+        const cfg = getStatusConfig(v.status);
+        return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
-      {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
-        width: '12%',
-        render: (status: string) => (
-          <Tag color={getStatusColor(status)}>{status}</Tag>
-        ),
+    },
+    {
+      title: 'Employee Remark',
+      key: 'empRemark',
+      width: '30%',
+      render: (_: unknown, req: VendorMdRequest) => (
+        <span className={styles.remarkText}>{req.empRemark || 'â€”'}</span>
+      ),
+    },
+    {
+      title: 'Requested On',
+      key: 'requestedOn',
+      width: '14%',
+      render: (_: unknown, req: VendorMdRequest) => (
+        <span className={styles.secondaryText}>{formatDate(req.createdDate)}</span>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: '10%',
+      align: 'center' as const,
+      render: (_: unknown, req: VendorMdRequest) => (
+        <Space size="small">
+          <Tooltip title={role === 'MD' ? 'Edit & Resolve' : 'View'}>
+            <Button
+              variant="ghost"
+              icon={role === 'MD' ? <EditOutlined /> : <EyeOutlined />}
+              onClick={(e) => { e.stopPropagation(); onViewRequest(req, 'pending'); }}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ], [vendorMap, formatDate, getStatusConfig, onViewRequest, role]);
+
+  //  Resolved Requests columns (Employee only) 
+  const resolvedColumns: ColumnsType<VendorMdRequest> = useMemo(() => [
+    {
+      title: 'Company Name',
+      key: 'companyName',
+      width: '18%',
+      render: (_: unknown, req: VendorMdRequest) => {
+        const v = vendorMap.get(req.vendorId);
+        return <span className={styles.vendorName}>{v?.companyName ?? req.vendorId}</span>;
       },
-      {
-        title: 'Created Date',
-        dataIndex: 'createdDate',
-        key: 'createdDate',
-        width: '15%',
-        render: (date: string) => (
-          <span className={styles.secondaryText}>{formatDate(date)}</span>
-        ),
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      width: '11%',
+      render: (_: unknown, req: VendorMdRequest) => {
+        const v = vendorMap.get(req.vendorId);
+        if (!v) return 'â€”';
+        const cfg = getStatusConfig(v.status);
+        return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
-      {
-        title: 'Actions',
-        key: 'actions',
-        width: '12%',
-        align: 'center',
-        render: (_: unknown, record: Vendor) => (
-          <Space size="small">
-            <Tooltip title="View/Edit">
-              <Button
-                variant="ghost"
-                icon={<EyeOutlined />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleView(record);
-                }}
-              />
-            </Tooltip>
-          </Space>
-        ),
-      },
-    ],
-    [formatDate, getStatusColor, handleView]
-  );
+    },
+    {
+      title: 'Employee Remark',
+      key: 'empRemark',
+      width: '24%',
+      render: (_: unknown, req: VendorMdRequest) => (
+        <span className={styles.remarkText}>{req.empRemark || 'â€”'}</span>
+      ),
+    },
+    {
+      title: 'MD Remark',
+      key: 'mdRemark',
+      width: '24%',
+      render: (_: unknown, req: VendorMdRequest) => (
+        <span className={styles.remarkText}>{req.mdRemark || 'â€”'}</span>
+      ),
+    },
+    {
+      title: 'Resolved On',
+      key: 'resolvedOn',
+      width: '13%',
+      render: (_: unknown, req: VendorMdRequest) => (
+        <span className={styles.secondaryText}>
+          {req.resolvedDate ? formatDate(req.resolvedDate) : 'â€”'}
+        </span>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: '8%',
+      align: 'center' as const,
+      render: (_: unknown, req: VendorMdRequest) => (
+        <Tooltip title="View">
+          <Button
+            variant="ghost"
+            icon={<EyeOutlined />}
+            onClick={(e) => { e.stopPropagation(); onViewRequest(req, 'resolved'); }}
+          />
+        </Tooltip>
+      ),
+    },
+  ], [vendorMap, formatDate, getStatusConfig, onViewRequest]);
+
+  //  View tabs 
+  const viewTabs: { key: ActiveView; label: string; count?: number }[] = useMemo(() => {
+    const tabs: { key: ActiveView; label: string; count?: number }[] = [
+      { key: 'all',     label: 'All Vendors' },
+      { key: 'pending', label: 'Pending Requests', count: pendingRequests.length },
+    ];
+    if (role === 'EMPLOYEE') {
+      tabs.push({ key: 'resolved', label: 'Resolved', count: resolvedRequests.length });
+    }
+    return tabs;
+  }, [pendingRequests.length, resolvedRequests.length, role]);
 
   return (
     <div className={styles.container}>
+      {/*  Header  */}
       <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Vendors</h1>
-          <p className={styles.subtitle}>Manage registered vendors</p>
-        </div>
-        <Space>
-          <AntButton
-            type="default"
-            size="large"
-            icon={<UploadOutlined />}
-            onClick={handleUploadModalOpen}
-          >
-            Upload Vendors
-          </AntButton>
-          <Button
-            variant="primary"
-            size="large"
-            icon={<EditOutlined />}
-            onClick={onCreate}
-          >
-            Create Vendor
-          </Button>
-        </Space>
-      </div>
-      <Modal
-        open={uploadModalVisible}
-        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><UploadOutlined /> Upload Vendors</span>}
-        onCancel={handleUploadModalClose}
-        footer={null}
-        centered
-        className={styles.uploadModal}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            <b>Note:</b> Please select or drag & drop an Excel file (.xlsx or .xls) containing vendor data. Only one file can be uploaded at a time.
+        <div className={styles.headerLeft}>
+          <div>
+            <h1 className={styles.title}>Vendors</h1>
+            <p className={styles.subtitle}>Manage registered vendor companies</p>
           </div>
         </div>
-        <Upload.Dragger {...uploadProps} style={{ background: 'var(--bg-panel)' }}>
-          <p className="ant-upload-drag-icon">
-            <FileExcelOutlined style={{ fontSize: 32, color: '#52c41a' }} />
-          </p>
-          <p className="ant-upload-text" style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
-            Click or drag file to this area to upload
-          </p>
-          <p className="ant-upload-hint" style={{ color: 'var(--text-secondary)' }}>
-            Only Excel files (.xlsx, .xls) are supported. Max size: 10MB.
-          </p>
-        </Upload.Dragger>
-      </Modal>
+        <div className={styles.headerRight}>
+          <div className={styles.rolePill}>
+            <div
+              className={`${styles.roleOption} ${role === 'EMPLOYEE' ? styles.roleActive : ''}`}
+              onClick={() => { onRoleChange('EMPLOYEE'); onViewChange('all'); }}
+            >
+              <UserOutlined /> Employee
+            </div>
+            <div
+              className={`${styles.roleOption} ${role === 'MD' ? styles.roleActive : ''}`}
+              onClick={() => { onRoleChange('MD'); onViewChange('all'); }}
+            >
+              <TeamOutlined /> MD
+            </div>
+          </div>
+
+          {role === 'EMPLOYEE' && activeView === 'all' && (
+            <Button variant="primary" icon={<PlusOutlined />} onClick={onCreate}>
+              Create Vendor
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/*  View Tabs  */}
+      <div className={styles.viewTabs}>
+        {viewTabs.map((tab) => (
+          <button
+            key={tab.key}
+            className={`${styles.viewTab} ${activeView === tab.key ? styles.viewTabActive : ''}`}
+            onClick={() => onViewChange(tab.key)}
+          >
+            {tab.label}
+            {tab.count !== undefined && tab.count > 0 && (
+              <Badge
+                count={tab.count}
+                size="small"
+                style={{ marginLeft: 6 }}
+                color={tab.key === 'pending' ? '#d97706' : '#6b7280'}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/*  Context banners  */}
+      {activeView === 'pending' && (
+        <div className={styles.pendingBanner}>
+          <ClockCircleOutlined style={{ color: '#d97706' }} />
+          {role === 'MD' ? (
+            <span>
+              <strong>{pendingRequests.length}</strong> vendor{pendingRequests.length !== 1 ? 's' : ''} awaiting
+              your review. Click the edit icon to open, edit, and resolve.
+            </span>
+          ) : (
+            <span>
+              <strong>{pendingRequests.length}</strong> vendor{pendingRequests.length !== 1 ? 's' : ''} sent to
+              MD for review â€” view only until resolved.
+            </span>
+          )}
+        </div>
+      )}
+      {activeView === 'resolved' && (
+        <div className={styles.resolvedBanner}>
+          <CheckCircleOutlined style={{ color: '#059669' }} />
+          <span>
+            <strong>{resolvedRequests.length}</strong> resolved request{resolvedRequests.length !== 1 ? 's' : ''} â€” showing employee and MD remarks.
+          </span>
+        </div>
+      )}
+
+      {/*  Table  */}
       <div className={styles.tableContainer}>
-        <Table
-          columns={columns}
-          dataSource={activeVendors}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Total ${total} vendors`,
-            position: ['bottomCenter'],
-          }}
-          className={styles.table}
-          onRow={(record) => ({
-            onClick: () => handleView(record),
-            className: styles.tableRow,
-          })}
-        />
+        {activeView === 'all' && (
+          <Table
+            columns={allColumns}
+            dataSource={activeVendors}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 10, showSizeChanger: true, position: ['bottomCenter'],
+              showTotal: (t) => `Total ${t} vendor${t !== 1 ? 's' : ''}`,
+            }}
+            className={styles.table}
+            onRow={(record) => ({ onClick: () => onView(record), className: styles.tableRow })}
+          />
+        )}
+        {activeView === 'pending' && (
+          <Table
+            columns={pendingColumns}
+            dataSource={pendingRequests}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 10, showSizeChanger: true, position: ['bottomCenter'],
+              showTotal: (t) => `${t} pending request${t !== 1 ? 's' : ''}`,
+            }}
+            className={styles.table}
+            onRow={(req) => ({ onClick: () => onViewRequest(req, 'pending'), className: styles.tableRow })}
+          />
+        )}
+        {activeView === 'resolved' && role === 'EMPLOYEE' && (
+          <Table
+            columns={resolvedColumns}
+            dataSource={resolvedRequests}
+            rowKey="id"
+            loading={loading}
+            pagination={{
+              pageSize: 10, showSizeChanger: true, position: ['bottomCenter'],
+              showTotal: (t) => `${t} resolved request${t !== 1 ? 's' : ''}`,
+            }}
+            className={styles.table}
+            onRow={(req) => ({ onClick: () => onViewRequest(req, 'resolved'), className: styles.tableRow })}
+          />
+        )}
       </div>
     </div>
   );

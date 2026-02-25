@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Form,
   Input,
@@ -12,28 +12,46 @@ import {
   Row,
   Col,
   Card,
+  Switch,
+  Modal,
+  DatePicker,
 } from 'antd';
 import {
   ArrowLeftOutlined,
+  SaveOutlined,
   SendOutlined,
-  UploadOutlined,
+  CheckCircleOutlined,
   InfoCircleOutlined,
   FileTextOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  LockOutlined,
+  UploadOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import type { Vendor, VendorDocument, Tag as VendorTag } from '../../types';
+import { useRef } from 'react';
+import type {
+  Vendor,
+  VendorDocument,
+  VendorMdRequest,
+  Tag as VendorTag,
+  UserRole,
+  CompanyStatus,
+  CompanyType,
+} from '../../types';
 import Button from '../../../../components/button';
 import SubMenu from '../../../../components/sub-menu';
 import type { SubMenuItemConfig } from '../../../../components/sub-menu';
+import RemarkModal from '../../components/RemarkModal';
 import {
   fetchVendorById,
   createVendor,
   updateVendor,
+  deleteVendor,
   fetchTags,
   fetchVendorDocuments,
+  sendVendorToMd,
+  resolveMdRequest,
+  getActivePendingRequest,
 } from '../../services/vendors.service';
 import styles from './styles.module.css';
 
@@ -42,49 +60,57 @@ const { TextArea } = Input;
 type VendorSubMenuItem = 'basic' | 'documents';
 
 const VENDOR_MENU_ITEMS: SubMenuItemConfig[] = [
-  {
-    key: 'basic',
-    icon: <InfoCircleOutlined />,
-    label: 'Basic Info',
-  },
-  {
-    key: 'documents',
-    icon: <FileTextOutlined />,
-    label: 'Documents',
-  },
+  { key: 'basic', icon: <InfoCircleOutlined />, label: 'Basic Info' },
+  { key: 'documents', icon: <FileTextOutlined />, label: 'Documents' },
 ];
 
 export default function VendorDetailsForm() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const [form] = Form.useForm();
 
+  const role = (searchParams.get('role') as UserRole) ?? 'EMPLOYEE';
+  const isPendingView = searchParams.get('pending') === 'true';
+
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [tags, setTags] = useState<VendorTag[]>([]);
   const [documents, setDocuments] = useState<VendorDocument[]>([]);
+  const [pendingRequest, setPendingRequest] = useState<VendorMdRequest | null>(null);
   const [selectedSubMenu, setSelectedSubMenu] = useState<VendorSubMenuItem>('basic');
+
+  // Remark modals — only for Send to MD and Resolve
+  const [sendToMdRemarkOpen, setSendToMdRemarkOpen] = useState(false);
+  const [resolveRemarkOpen, setResolveRemarkOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const isEditMode = !!id;
 
-  // Load initial data
+  // Form is never read-only — both Employee and MD can edit
+  const isFormReadOnly = false;
+
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-
-        // Load tags
         const tagsData = await fetchTags();
         setTags(tagsData);
 
-        // Load vendor if editing
         if (id) {
-          const vendorData = await fetchVendorById(id);
+          const [vendorData, pendingReq] = await Promise.all([
+            fetchVendorById(id),
+            getActivePendingRequest(id),
+          ]);
           if (vendorData) {
             setVendor(vendorData);
+            setPendingRequest(pendingReq);
             form.setFieldsValue({
               companyName: vendorData.companyName,
-              vendorType: vendorData.vendorType,
+              isLinkedWithRailways: vendorData.isLinkedWithRailways,
+              companyType: vendorData.companyType,
+              status: vendorData.status,
               address: vendorData.address,
               contactPersons: vendorData.contactPersons,
               gstNumber: vendorData.gstNumber,
@@ -93,8 +119,6 @@ export default function VendorDetailsForm() {
               cinNumber: vendorData.cinNumber,
               tags: vendorData.tags,
             });
-
-            // Load documents
             const docsData = await fetchVendorDocuments(id);
             setDocuments(docsData);
           } else {
@@ -109,56 +133,118 @@ export default function VendorDetailsForm() {
         setLoading(false);
       }
     };
-
     loadData();
   }, [id, form, navigate]);
 
   const handleBack = useCallback(() => {
-    navigate('/vendors');
-  }, [navigate]);
+    navigate(`/vendors?role=${role}`);
+  }, [navigate, role]);
 
-  const buildVendorData = useCallback((values: any, status: 'Draft' | 'Submitted') => ({
-    companyName: values.companyName,
-    vendorType: values.vendorType,
-    address: values.address,
-    contactPersons: values.contactPersons,
-    gstNumber: values.gstNumber,
-    panNumber: values.panNumber,
-    msmeNumber: values.msmeNumber,
-    cinNumber: values.cinNumber,
-    tags: values.tags || [],
-    status,
-    createdBy: 'current-user', // TODO: Get from auth context
-  }), []);
-
-
-  const handleSubmitForApproval = useCallback(async () => {
+  // ── Save (direct — no remark required) ─────────────────────────────────
+  const handleSaveClick = useCallback(async () => {
     try {
       const values = await form.validateFields();
-      setLoading(true);
-
-      const vendorData = buildVendorData(values, 'Submitted');
+      setSaving(true);
+      const vendorData = {
+        companyName: values.companyName,
+        companyType: values.companyType as CompanyType,
+        isLinkedWithRailways: values.isLinkedWithRailways ?? false,
+        status: values.status as CompanyStatus,
+        address: values.address,
+        contactPersons: values.contactPersons ?? [],
+        gstNumber: values.gstNumber,
+        panNumber: values.panNumber,
+        msmeNumber: values.msmeNumber,
+        cinNumber: values.cinNumber,
+        tags: values.tags ?? [],
+        createdBy: 'emp001',
+      };
 
       if (isEditMode && vendor) {
         await updateVendor(vendor.id, vendorData);
-        message.success('Vendor submitted for approval');
+        message.success('Vendor saved successfully');
       } else {
         await createVendor(vendorData);
-        message.success('Vendor submitted for approval');
+        message.success('Vendor created successfully');
       }
-
-      navigate('/vendors');
-    } catch (error) {
-      if (error instanceof Error && 'errorFields' in error) {
-        message.warning('Please fill in all required fields');
-      } else {
-        message.error('Failed to submit vendor');
-        console.error(error);
-      }
+      navigate(`/vendors?role=${role}`);
+    } catch {
+      message.warning('Please fill in all required fields');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
-  }, [form, isEditMode, vendor, navigate, buildVendorData]);
+  }, [form, isEditMode, vendor, navigate, role]);
+
+  // ── Delete Vendor ──────────────────────────────────────────
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!vendor) return;
+    try {
+      setSaving(true);
+      await deleteVendor(vendor.id);
+      message.success('Vendor deleted successfully');
+      setDeleteConfirmOpen(false);
+      navigate(`/vendors?role=${role}`);
+    } catch (error) {
+      message.error('Failed to delete vendor');
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
+  }, [vendor, navigate, role]);
+
+  // ── Send to MD ────────────────────────────────────────────────────────────
+  const handleSendToMd = useCallback(async () => {
+    try {
+      await form.validateFields(['companyName']);
+      setSendToMdRemarkOpen(true);
+    } catch {
+      message.warning('Please enter the company name first');
+    }
+  }, [form]);
+
+  const handleSendToMdConfirm = useCallback(
+    async (remark: string) => {
+      if (!vendor) return;
+      try {
+        setSaving(true);
+        await sendVendorToMd(vendor.id, 'emp001', remark);
+        const req = await getActivePendingRequest(vendor.id);
+        setPendingRequest(req);
+        setSendToMdRemarkOpen(false);
+        message.success('Sent to MD for review. Vendor is now pending.');
+      } catch (error) {
+        message.error('Failed to send to MD');
+        console.error(error);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [vendor]
+  );
+
+  // ── MD Resolve ────────────────────────────────────────────────────────────
+  const handleResolve = useCallback(() => {
+    setResolveRemarkOpen(true);
+  }, []);
+
+  const handleResolveConfirm = useCallback(
+    async (remark: string) => {
+      if (!pendingRequest) return;
+      try {
+        setSaving(true);
+        await resolveMdRequest(pendingRequest.id, 'md001', remark);
+        message.success('Request resolved. Vendor updated.');
+        setResolveRemarkOpen(false);
+        navigate(`/vendors?role=${role}`);
+      } catch (error) {
+        message.error('Failed to resolve request');
+        console.error(error);
+      } finally {
+        setSaving(false);
+      }
+    },
+    [pendingRequest, navigate, role]
+  );
 
   const documentColumns: ColumnsType<VendorDocument> = [
     {
@@ -166,47 +252,32 @@ export default function VendorDetailsForm() {
       dataIndex: 'documentType',
       key: 'documentType',
       width: '25%',
-      render: (type: string) => (
-        <span style={{ fontWeight: 500 }}>{type}</span>
-      ),
+      render: (type: string) => <span style={{ fontWeight: 500 }}>{type}</span>,
     },
     {
       title: 'File',
       dataIndex: 'fileName',
       key: 'fileName',
       width: '25%',
-      render: (fileName: string | undefined) => (
+      render: (fileName: string | undefined) =>
         fileName ? (
-          <AntButton 
-            type="link" 
-            size="small" 
-            icon={<FileTextOutlined />}
-            style={{ padding: 0 }}
-          >
+          <AntButton type="link" size="small" icon={<FileTextOutlined />} style={{ padding: 0 }}>
             View
           </AntButton>
         ) : (
-          <AntButton 
-            type="link" 
-            size="small" 
-            icon={<UploadOutlined />}
-            style={{ padding: 0 }}
-          >
+          <AntButton type="link" size="small" icon={<UploadOutlined />} style={{ padding: 0 }}>
             Upload
           </AntButton>
-        )
-      ),
+        ),
     },
     {
-      title: 'Expired',
-      dataIndex: 'expired',
-      key: 'expired',
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
       width: '15%',
-      render: (_: any, record: VendorDocument) => {
-        if (record.expired) {
-          return <Tag color="error">Expired{record.expiryDate ? ` (${record.expiryDate})` : ''}</Tag>;
-        }
-        return <Tag color="success">Not Expired</Tag>;
+      render: (status: string) => {
+        const colorMap: Record<string, string> = { Verified: 'success', Pending: 'processing', Rejected: 'error' };
+        return <Tag color={colorMap[status] ?? 'default'}>{status}</Tag>;
       },
     },
     {
@@ -215,72 +286,121 @@ export default function VendorDetailsForm() {
       key: 'remarks',
       width: '35%',
       render: (remarks?: string) => (
-        <span style={{ color: remarks ? '#595959' : '#bfbfbf', fontSize: '13px' }}>
-          {remarks || '—'}
-        </span>
+        <span style={{ color: remarks ? '#595959' : '#bfbfbf', fontSize: 13 }}>{remarks || '—'}</span>
       ),
     },
   ];
 
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingState}>Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
+      {/* ── Header ── */}
       <div className={styles.header}>
-        <Space>
-          <Button
-            variant="ghost"
-            icon={<ArrowLeftOutlined />}
-            onClick={handleBack}
-          />
+        <Space align="center">
+          <Button variant="ghost" icon={<ArrowLeftOutlined />} onClick={handleBack} />
           <div>
             <Space size="middle" align="center">
               <h1 className={styles.title}>
                 {isEditMode ? 'Edit Vendor' : 'Create Vendor'}
               </h1>
               {isEditMode && vendor?.vendorCode && (
-                <Tag color="blue" style={{ fontSize: '13px', padding: '4px 12px' }}>
+                <Tag color="blue" style={{ fontSize: 13, padding: '4px 12px' }}>
                   {vendor.vendorCode}
                 </Tag>
               )}
-              {!isEditMode && (
-                <Tag color="default" style={{ fontSize: '12px', padding: '3px 10px' }}>
-                  Code: Will be generated after save
+              {pendingRequest && (
+                <Tag icon={<ClockCircleOutlined />} color="warning" style={{ fontSize: 12 }}>
+                  Pending MD Review
                 </Tag>
               )}
             </Space>
             <p className={styles.subtitle}>
-              {isEditMode
-                ? 'Update vendor information'
-                : 'Add a new vendor to the system'}
+              {isEditMode ? 'Update vendor information' : 'Register a new vendor company'}
             </p>
           </div>
         </Space>
-        {/* Show submit button only for Draft, Rejected, or new vendors */}
-        {(!vendor || vendor.status === 'Draft' || vendor.status === 'Rejected') && (
-          <Space>
+
+        <Space align="center">
+          {/* Delete button — edit mode only */}
+          {isEditMode && (
+            <AntButton
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => setDeleteConfirmOpen(true)}
+              loading={saving}
+            >
+              Delete
+            </AntButton>
+          )}
+
+          {/* Create mode */}
+          {!isEditMode && (
             <AntButton
               type="primary"
-              icon={<SendOutlined />}
-              onClick={handleSubmitForApproval}
-              loading={loading}
+              icon={<SaveOutlined />}
+              onClick={handleSaveClick}
+              loading={saving}
             >
-              {vendor?.status === 'Rejected' ? 'Resubmit for Approval' : 'Submit for Approval'}
+              Save Vendor
             </AntButton>
-          </Space>
-        )}
-        {/* Show read-only indicator for Submitted/Approved vendors */}
-        {vendor && (vendor.status === 'Submitted' || vendor.status === 'Approved') && (
-          <Tag 
-            icon={<LockOutlined />} 
-            color={vendor.status === 'Approved' ? 'success' : 'processing'}
-            style={{ fontSize: '13px', padding: '6px 14px' }}
-          >
-            {vendor.status === 'Approved' ? 'Approved - Read Only' : 'Under Review - Read Only'}
-          </Tag>
-        )}
+          )}
+
+          {/* Edit mode — EMPLOYEE */}
+          {isEditMode && role === 'EMPLOYEE' && (
+            <>
+              <AntButton
+                icon={<SaveOutlined />}
+                onClick={handleSaveClick}
+                loading={saving}
+              >
+                Save Changes
+              </AntButton>
+              <AntButton
+                type="primary"
+                icon={<SendOutlined />}
+                onClick={handleSendToMd}
+                loading={saving}
+              >
+                Send to MD
+              </AntButton>
+            </>
+          )}
+
+          {/* Edit mode — MD — always can save; also Resolve when in pending view */}
+          {isEditMode && role === 'MD' && (
+            <>
+              <AntButton
+                icon={<SaveOutlined />}
+                onClick={handleSaveClick}
+                loading={saving}
+              >
+                Save Changes
+              </AntButton>
+              {isPendingView && pendingRequest && (
+                <AntButton
+                  type="primary"
+                  icon={<CheckCircleOutlined />}
+                  onClick={handleResolve}
+                  loading={saving}
+                  style={{ background: '#059669', borderColor: '#059669' }}
+                >
+                  Resolve Request
+                </AntButton>
+              )}
+            </>
+          )}
+        </Space>
       </div>
 
       <div className={styles.content}>
-        {/* Left Sidebar - SubMenu */}
+        {/* Left Sidebar */}
         <div className={styles.sidebar}>
           <SubMenu
             title="Vendor Details"
@@ -290,73 +410,118 @@ export default function VendorDetailsForm() {
           />
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content */}
         <div className={styles.mainContent}>
           {selectedSubMenu === 'basic' && (
-            <BasicInfoSection form={form} tags={tags} vendor={vendor} />
+            <BasicInfoSection
+              form={form}
+              tags={tags}
+              vendor={vendor}
+              pendingRequest={pendingRequest}
+              isReadOnly={isFormReadOnly}
+              role={role}
+              isPendingView={isPendingView}
+            />
           )}
-
           {selectedSubMenu === 'documents' && (
             <DocumentsSection
               documents={documents}
               documentColumns={documentColumns}
               onAddDocument={(doc) => setDocuments((prev) => [...prev, doc])}
+              isReadOnly={isFormReadOnly}
+              vendorStatus={vendor?.status ?? form.getFieldValue('status') ?? 'New'}
             />
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        open={deleteConfirmOpen}
+        title="Delete Vendor"
+        onOk={handleDeleteConfirm}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        okText="Yes, Delete"
+        cancelText="Cancel"
+        okButtonProps={{ danger: true, loading: saving }}
+        centered
+      >
+        <p>Are you sure you want to delete <strong>{vendor?.companyName}</strong>? This action cannot be undone.</p>
+      </Modal>
+
+      {/* ── Remark Modals — Send to MD & Resolve only ── */}
+      <RemarkModal
+        open={sendToMdRemarkOpen}
+        title="Send to MD — Add Remark"
+        description="Provide context for the MD about why this vendor needs review or status change."
+        onConfirm={handleSendToMdConfirm}
+        onCancel={() => setSendToMdRemarkOpen(false)}
+        confirmLoading={saving}
+      />
+      <RemarkModal
+        open={resolveRemarkOpen}
+        title="Resolve Pending Request"
+        description="Add your remark as MD before resolving this request."
+        onConfirm={handleResolveConfirm}
+        onCancel={() => setResolveRemarkOpen(false)}
+        confirmLoading={saving}
+      />
     </div>
   );
 }
 
-// Basic Info Section Component
+// ─── Basic Info Section ───────────────────────────────────────────────────────
+
 interface BasicInfoSectionProps {
   form: any;
   tags: VendorTag[];
   vendor: Vendor | null;
+  pendingRequest: VendorMdRequest | null;
+  isReadOnly: boolean;
+  role: UserRole;
+  isPendingView: boolean;
 }
 
-function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
-  // Determine if form should be disabled based on status
-  const isFormDisabled = vendor?.status === 'Submitted' || vendor?.status === 'Approved';
-  const isRejected = vendor?.status === 'Rejected';
-
-  // Reusable handler for uppercase input fields
+function BasicInfoSection({ form, tags, vendor, pendingRequest, isReadOnly, role, isPendingView }: BasicInfoSectionProps) {
   const handleUppercaseInput = (fieldName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase();
-    form.setFieldValue(fieldName, value);
+    form.setFieldValue(fieldName, e.target.value.toUpperCase());
   };
 
   return (
     <div className={styles.section}>
-      {/* Status-based banners */}
-      {vendor?.status === 'Submitted' && (
+      {/* Pending banner for employee while their request is under review */}
+      {role === 'EMPLOYEE' && pendingRequest && (
+        <div className={`${styles.statusBanner} ${styles.statusBannerWarning}`}>
+          <ClockCircleOutlined style={{ fontSize: 16 }} />
+          <div className={styles.statusBannerContent}>
+            <div className={styles.statusBannerTitle}>Pending MD Review</div>
+            <div className={styles.statusBannerText}>
+              You sent this vendor to MD on{' '}
+              {new Date(pendingRequest.createdDate).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'short', year: 'numeric',
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pending banner for MD — shows employee remark */}
+      {role === 'MD' && isPendingView && pendingRequest && (
         <div className={`${styles.statusBanner} ${styles.statusBannerInfo}`}>
-          <InfoCircleOutlined style={{ fontSize: '16px' }} />
-          <span>
-            Under Review - This vendor is currently being reviewed by approvers. Form is read-only.
-          </span>
-        </div>
-      )}
-
-      {vendor?.status === 'Approved' && (
-        <div className={`${styles.statusBanner} ${styles.statusBannerSuccess}`}>
-          <CheckCircleOutlined style={{ fontSize: '16px' }} />
-          <span>
-            Approved - This vendor has been approved and is active in the system.
-          </span>
-        </div>
-      )}
-
-      {isRejected && (
-        <div className={`${styles.statusBanner} ${styles.statusBannerError}`}>
-          <ExclamationCircleOutlined style={{ fontSize: '16px', marginTop: '2px' }} />
+          <InfoCircleOutlined style={{ fontSize: 16 }} />
           <div className={styles.statusBannerContent}>
             <div className={styles.statusBannerTitle}>
-              Rejected - Action Required
+              Pending Request — Employee Remark
             </div>
             <div className={styles.statusBannerText}>
-              Please review the rejection comments in the Approval tab, make necessary changes, and resubmit.
+              <strong>From employee:</strong> {pendingRequest.empRemark || 'No remark provided'}
+            </div>
+            <div className={styles.statusBannerText} style={{ marginTop: 4, fontSize: 12, color: 'var(--text-muted, #9ca3af)' }}>
+              Requested on{' '}
+              {new Date(pendingRequest.createdDate).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'short', year: 'numeric',
+              })}
+              . Use the "Resolve Request" button in the header to act.
             </div>
           </div>
         </div>
@@ -368,15 +533,14 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
       </div>
 
       <Card className={styles.card}>
-        <Form form={form} layout="vertical" className={styles.form} disabled={isFormDisabled}>
+        <Form form={form} layout="vertical" className={styles.form} disabled={isReadOnly}>
           <Row gutter={24}>
+            {/* Row 1: Company Name + Company Status */}
             <Col span={12}>
               <Form.Item
                 label="Company Name"
                 name="companyName"
-                rules={[
-                  { required: true, message: 'Please enter company name' },
-                ]}
+                rules={[{ required: true, message: 'Please enter company name' }]}
               >
                 <Input placeholder="Enter company name" />
               </Form.Item>
@@ -384,25 +548,88 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
 
             <Col span={12}>
               <Form.Item
-                label="Vendor Type"
-                name="vendorType"
-                rules={[
-                  { required: true, message: 'Please select vendor type' },
-                ]}
+                label="Company Status"
+                name="status"
+                initialValue="New"
+                rules={[{ required: true, message: 'Please select a status' }]}
               >
-                <Select placeholder="Select vendor type">
+                <Select placeholder="Select status">
+                  <Select.Option value="New">New Company</Select.Option>
+                  <Select.Option value="Interested">Interested Company</Select.Option>
+                  <Select.Option value="Final">Final Company</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+
+            {/* Row 2: Company Type + Linked with Railways */}
+            <Col span={12}>
+              <Form.Item
+                label="Company Type"
+                name="companyType"
+                rules={[{ required: true, message: 'Please select company type' }]}
+              >
+                <Select placeholder="Select company type">
                   <Select.Option value="Vendor">Vendor</Select.Option>
                   <Select.Option value="Consultant">Consultant</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
 
-            {/* Business Identity Section */}
+            <Col span={12}>
+              <Form.Item
+                label="Linked with Railways?"
+                name="isLinkedWithRailways"
+                valuePropName="checked"
+                tooltip="Is this company a registered railway vendor or partner?"
+              >
+                <Switch
+                  checkedChildren="Yes"
+                  unCheckedChildren="No"
+                  disabled={isReadOnly}
+                />
+              </Form.Item>
+            </Col>
+
+            {/* Row 3: Tags */}
+            <Col span={24}>
+              <Form.Item label="Tags / Categories" name="tags">
+                <Select mode="multiple" placeholder="Select tags" allowClear>
+                  {tags.map((tag) => (
+                    <Select.Option key={tag.id} value={tag.id}>
+                      {tag.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            {/* Tags preview */}
+            <Col span={24}>
+              <Form.Item noStyle dependencies={['tags']}>
+                {() => {
+                  const selectedTags = form.getFieldValue('tags') || [];
+                  if (!selectedTags.length || !tags.length) return null;
+                  return (
+                    <div className={styles.tagsPreview}>
+                      <div className={styles.tagsPreviewLabel}>Selected Tags:</div>
+                      <div className={styles.selectedTags}>
+                        {selectedTags.map((tagId: string) => {
+                          const t = tags.find((x) => x.id === tagId);
+                          return t ? (
+                            <Tag key={t.id} color={t.color} className={styles.tag}>{t.name}</Tag>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  );
+                }}
+              </Form.Item>
+            </Col>
+
+            {/* 4. Business Identity */}
             <Col span={24}>
               <div className={styles.sectionDivider}>
-                <h3 className={styles.sectionDividerTitle}>
-                  Business Identity
-                </h3>
+                <h3 className={styles.sectionDividerTitle}>Business Identity</h3>
                 <p className={styles.sectionDividerSubtitle}>
                   Company registration and tax identification details
                 </p>
@@ -415,8 +642,8 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
                 name="gstNumber"
                 tooltip="Goods and Services Tax Identification Number (15 digits)"
               >
-                <Input 
-                  placeholder="e.g., 29ABCDE1234F1Z5" 
+                <Input
+                  placeholder="e.g., 29ABCDE1234F1Z5"
                   maxLength={15}
                   style={{ textTransform: 'uppercase' }}
                   onChange={handleUppercaseInput('gstNumber')}
@@ -430,8 +657,8 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
                 name="panNumber"
                 tooltip="Permanent Account Number (10 characters)"
               >
-                <Input 
-                  placeholder="e.g., ABCDE1234F" 
+                <Input
+                  placeholder="e.g., ABCDE1234F"
                   maxLength={10}
                   style={{ textTransform: 'uppercase' }}
                   onChange={handleUppercaseInput('panNumber')}
@@ -445,8 +672,8 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
                 name="msmeNumber"
                 tooltip="Micro, Small and Medium Enterprises registration number (Optional)"
               >
-                <Input 
-                  placeholder="e.g., UDYAM-KA-12-1234567" 
+                <Input
+                  placeholder="e.g., UDYAM-KA-12-1234567"
                   style={{ textTransform: 'uppercase' }}
                   onChange={handleUppercaseInput('msmeNumber')}
                 />
@@ -459,8 +686,8 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
                 name="cinNumber"
                 tooltip="Corporate Identity Number (21 characters, Optional)"
               >
-                <Input 
-                  placeholder="e.g., U72900KA2015PTC123456" 
+                <Input
+                  placeholder="e.g., U72900KA2015PTC123456"
                   maxLength={21}
                   style={{ textTransform: 'uppercase' }}
                   onChange={handleUppercaseInput('cinNumber')}
@@ -468,12 +695,16 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
               </Form.Item>
             </Col>
 
-            {/* Contact Information Section */}
+            <Col span={24}>
+              <Form.Item label="Address" name="address">
+                <TextArea placeholder="Enter complete address" rows={3} maxLength={500} />
+              </Form.Item>
+            </Col>
+
+            {/* 5. Contact Information */}
             <Col span={24}>
               <div className={styles.sectionDivider}>
-                <h3 className={styles.sectionDividerTitle}>
-                  Contact Information
-                </h3>
+                <h3 className={styles.sectionDividerTitle}>Contact Information</h3>
                 <p className={styles.sectionDividerSubtitle}>
                   Add one or more contact persons for this vendor
                 </p>
@@ -481,78 +712,37 @@ function BasicInfoSection({ form, tags, vendor }: BasicInfoSectionProps) {
             </Col>
 
             <Col span={24}>
-              <ContactPersonsSection form={form} disabled={isFormDisabled} />
-            </Col>
-
-            <Col span={12}>
-              <Form.Item label="Tags / Categories" name="tags">
-                <Select
-                  mode="multiple"
-                  placeholder="Select tags"
-                  allowClear
-                >
-                  {tags.map((tag) => (
-                    <Select.Option key={tag.id} value={tag.id}>
-                      {tag.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-
-            <Col span={24}>
-              <Form.Item label="Address" name="address">
-                <TextArea
-                  placeholder="Enter complete address"
-                  rows={3}
-                  maxLength={500}
-                />
-              </Form.Item>
+              <ContactPersonsSection form={form} disabled={isReadOnly} />
             </Col>
           </Row>
-
-          {form.getFieldValue('tags')?.length > 0 && tags.length > 0 && (
-            <div className={styles.tagsPreview}>
-              <div className={styles.tagsPreviewLabel}>Selected Tags:</div>
-              <div className={styles.selectedTags}>
-                {form.getFieldValue('tags')?.map((tagId: string) => {
-                  const tag = tags.find((t) => t.id === tagId);
-                  return tag ? (
-                    <Tag key={tag.id} color={tag.color} className={styles.tag}>
-                      {tag.name}
-                    </Tag>
-                  ) : null;
-                })}
-              </div>
-            </div>
-          )}
         </Form>
       </Card>
     </div>
   );
 }
 
-// Documents Section Component
-import { Modal, DatePicker, Switch } from 'antd';
-import { useRef } from 'react';
+// ─── Documents Section ────────────────────────────────────────────────────────
 
 interface DocumentsSectionProps {
   documents: VendorDocument[];
   documentColumns: ColumnsType<VendorDocument>;
   onAddDocument: (doc: VendorDocument) => void;
+  isReadOnly?: boolean;
+  vendorStatus?: string;
 }
 
-function DocumentsSection({ documents, documentColumns, onAddDocument }: DocumentsSectionProps) {
+function DocumentsSection({ documents, documentColumns, onAddDocument, isReadOnly, vendorStatus }: DocumentsSectionProps) {
+  const isNewCompany = vendorStatus === 'New';
+  const uploadDisabled = isReadOnly || isNewCompany;
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [docType, setDocType] = useState<string>('');
+  const [docType, setDocType] = useState('');
   const [expired, setExpired] = useState(false);
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [remarks, setRemarks] = useState('');
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleOpenModal = () => setUploadModalVisible(true);
   const handleCloseModal = () => {
     setUploadModalVisible(false);
     setFile(null);
@@ -560,12 +750,6 @@ function DocumentsSection({ documents, documentColumns, onAddDocument }: Documen
     setExpired(false);
     setExpiryDate(null);
     setRemarks('');
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
   };
 
   const handleUpload = () => {
@@ -583,8 +767,8 @@ function DocumentsSection({ documents, documentColumns, onAddDocument }: Documen
         status: 'Pending',
         remarks,
         uploadedDate: new Date().toISOString(),
-        uploadedBy: 'current-user',
-        ...(expired && expiryDate ? { expiryDate } : {}),
+        uploadedBy: 'emp001',
+        ...(expired && expiryDate ? { expired: true, expiryDate } : {}),
       };
       onAddDocument(newDoc);
       setUploading(false);
@@ -592,70 +776,66 @@ function DocumentsSection({ documents, documentColumns, onAddDocument }: Documen
       message.success('Document uploaded');
     }, 800);
   };
+
   return (
     <div className={styles.section}>
       <div className={styles.sectionHeader}>
         <div>
           <h2 className={styles.sectionTitle}>Compliance Documents</h2>
-          <p className={styles.sectionSubtitle}>
-            Upload and verify required business documents for compliance
-          </p>
+          <p className={styles.sectionSubtitle}>Upload and manage required business documents</p>
+          {isNewCompany && (
+            <p style={{ margin: '4px 0 0', fontSize: 12, color: '#d97706' }}>
+              Document upload is disabled for New Companies. Update status to Interested or Final to upload.
+            </p>
+          )}
         </div>
-        <AntButton
-          type="primary"
-          icon={<UploadOutlined />}
-          onClick={handleOpenModal}
-          style={{ display: 'flex', alignItems: 'center' }}
-        >
-          Upload Document
-        </AntButton>
+        {!uploadDisabled && (
+          <AntButton
+            type="primary"
+            icon={<UploadOutlined />}
+            onClick={() => setUploadModalVisible(true)}
+          >
+            Upload Document
+          </AntButton>
+        )}
       </div>
       <Card className={styles.card}>
-        <div style={{ marginBottom: '16px', padding: '12px', background: '#f0f5ff', borderRadius: '6px', border: '1px solid #adc6ff' }}>
-          <Space>
-            <InfoCircleOutlined style={{ color: '#1890ff' }} />
-            <span style={{ fontSize: '13px', color: '#1890ff' }}>
-              All documents are required for vendor approval. Upload valid certificates and supporting documents.
-            </span>
-          </Space>
-        </div>
         <Table
           columns={documentColumns}
           dataSource={documents}
-          rowKey={(record) => record.id}
+          rowKey="id"
           pagination={false}
           size="middle"
         />
       </Card>
       <Modal
         open={uploadModalVisible}
-        title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><UploadOutlined /> Upload Document</span>}
+        title={
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <UploadOutlined /> Upload Document
+          </span>
+        }
         onCancel={handleCloseModal}
         onOk={handleUpload}
-        okText={uploading ? 'Uploading...' : 'Upload'}
+        okText={uploading ? 'Uploading…' : 'Upload'}
         okButtonProps={{ loading: uploading }}
         cancelButtonProps={{ disabled: uploading }}
         centered
-        className={styles.uploadModal}
+        destroyOnHidden
       >
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>
-            <b>Note:</b> Please select a document file and fill all required fields. Only one document can be uploaded at a time.
-          </div>
-        </div>
         <input
           type="file"
           accept="application/pdf,image/*,.doc,.docx"
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: 16, display: 'block' }}
           ref={fileInputRef}
-          onChange={handleFileChange}
+          onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])}
           disabled={uploading}
         />
         <Input
           placeholder="Enter Document Type"
           value={docType}
-          onChange={e => setDocType(e.target.value as string)}
-          style={{ width: '100%', marginBottom: 16 }}
+          onChange={(e) => setDocType(e.target.value)}
+          style={{ marginBottom: 16 }}
           disabled={uploading}
         />
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16, gap: 12 }}>
@@ -664,8 +844,7 @@ function DocumentsSection({ documents, documentColumns, onAddDocument }: Documen
           {expired && (
             <DatePicker
               placeholder="Expiry Date"
-              onChange={(_, dateStr) => setExpiryDate(dateStr)}
-              style={{ marginLeft: 8 }}
+              onChange={(_, dateStr) => setExpiryDate(dateStr as string)}
               disabled={uploading}
             />
           )}
@@ -676,7 +855,6 @@ function DocumentsSection({ documents, documentColumns, onAddDocument }: Documen
           onChange={(e) => setRemarks(e.target.value)}
           rows={2}
           maxLength={200}
-          style={{ marginBottom: 0 }}
           disabled={uploading}
         />
       </Modal>
@@ -684,7 +862,8 @@ function DocumentsSection({ documents, documentColumns, onAddDocument }: Documen
   );
 }
 
-// Contact Persons Section Component
+// ─── Contact Persons Section ──────────────────────────────────────────────────
+
 interface ContactPersonsSectionProps {
   form: any;
   disabled: boolean;
@@ -693,26 +872,20 @@ interface ContactPersonsSectionProps {
 function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
   const [contactPersons, setContactPersons] = useState<any[]>([]);
 
-  // Initialize contact persons from form
   useEffect(() => {
-    const formContactPersons = form.getFieldValue('contactPersons') || [];
-    if (formContactPersons.length === 0) {
-      // Add at least one contact person by default
+    const existing = form.getFieldValue('contactPersons') || [];
+    if (existing.length === 0) {
       const defaultContact = {
         id: `cp_${Date.now()}`,
         name: '',
         designation: '',
         phone: '',
-        email: {
-          mailto: [],
-          cc: [],
-          bcc: [],
-        },
+        email: { mailto: [], cc: [], bcc: [] },
       };
       form.setFieldsValue({ contactPersons: [defaultContact] });
       setContactPersons([defaultContact]);
     } else {
-      setContactPersons(formContactPersons);
+      setContactPersons(existing);
     }
   }, [form]);
 
@@ -722,35 +895,29 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
       name: '',
       designation: '',
       phone: '',
-      email: {
-        mailto: [],
-        cc: [],
-        bcc: [],
-      },
+      email: { mailto: [], cc: [], bcc: [] },
     };
-    const updatedContacts = [...contactPersons, newContact];
-    setContactPersons(updatedContacts);
-    form.setFieldsValue({ contactPersons: updatedContacts });
+    const updated = [...contactPersons, newContact];
+    setContactPersons(updated);
+    form.setFieldsValue({ contactPersons: updated });
   };
 
   const removeContactPerson = (index: number) => {
-    if (contactPersons.length > 1) {
-      const updatedContacts = contactPersons.filter((_, i) => i !== index);
-      setContactPersons(updatedContacts);
-      form.setFieldsValue({ contactPersons: updatedContacts });
-    }
+    if (contactPersons.length <= 1) return;
+    const updated = contactPersons.filter((_, i) => i !== index);
+    setContactPersons(updated);
+    form.setFieldsValue({ contactPersons: updated });
   };
 
   const updateContactPerson = (index: number, field: string, value: any) => {
-    const updatedContacts = [...contactPersons];
+    const updated = [...contactPersons];
     if (field.startsWith('email.')) {
-      const emailField = field.split('.')[1];
-      updatedContacts[index].email[emailField] = value;
+      updated[index].email[field.split('.')[1]] = value;
     } else {
-      updatedContacts[index][field] = value;
+      updated[index][field] = value;
     }
-    setContactPersons(updatedContacts);
-    form.setFieldsValue({ contactPersons: updatedContacts });
+    setContactPersons(updated);
+    form.setFieldsValue({ contactPersons: updated });
   };
 
   return (
@@ -758,29 +925,17 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
       {contactPersons.map((contact, index) => (
         <div key={contact.id} className={styles.contactPersonCard}>
           <div className={styles.contactPersonHeader}>
-            <h4 className={styles.contactPersonTitle}>
-              Contact Person {index + 1}
-            </h4>
+            <h4 className={styles.contactPersonTitle}>Contact Person {index + 1}</h4>
             {!disabled && contactPersons.length > 1 && (
-              <div className={styles.contactPersonActions}>
-                <AntButton
-                  type="text"
-                  danger
-                  size="small"
-                  onClick={() => removeContactPerson(index)}
-                  className={styles.removeContactButton}
-                >
-                  Remove
-                </AntButton>
-              </div>
+              <AntButton type="text" danger size="small" onClick={() => removeContactPerson(index)}>
+                Remove
+              </AntButton>
             )}
           </div>
           <div className={styles.contactPersonContent}>
             <div className={styles.contactPersonFields}>
               <div className={styles.contactPersonField}>
-                <label className={styles.contactPersonLabel}>
-                  Name *
-                </label>
+                <label className={styles.contactPersonLabel}>Name *</label>
                 <Input
                   placeholder="Enter contact name"
                   value={contact.name}
@@ -789,9 +944,7 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
                 />
               </div>
               <div className={styles.contactPersonField}>
-                <label className={styles.contactPersonLabel}>
-                  Designation
-                </label>
+                <label className={styles.contactPersonLabel}>Designation</label>
                 <Input
                   placeholder="Enter designation"
                   value={contact.designation}
@@ -800,9 +953,7 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
                 />
               </div>
               <div className={styles.contactPersonField}>
-                <label className={styles.contactPersonLabel}>
-                  Phone
-                </label>
+                <label className={styles.contactPersonLabel}>Phone</label>
                 <Input
                   placeholder="Enter phone number"
                   value={contact.phone}
@@ -813,40 +964,34 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
             </div>
             <div className={styles.emailFields}>
               <div className={styles.contactPersonField}>
-                <label className={styles.contactPersonLabel}>
-                  Email To *
-                </label>
+                <label className={styles.contactPersonLabel}>Email To *</label>
                 <Select
                   mode="tags"
                   placeholder="Enter email addresses"
                   value={contact.email.mailto}
-                  onChange={(value) => updateContactPerson(index, 'email.mailto', value)}
+                  onChange={(v) => updateContactPerson(index, 'email.mailto', v)}
                   disabled={disabled}
                   style={{ width: '100%' }}
                 />
               </div>
               <div className={styles.contactPersonField}>
-                <label className={styles.contactPersonLabel}>
-                  CC
-                </label>
+                <label className={styles.contactPersonLabel}>CC</label>
                 <Select
                   mode="tags"
                   placeholder="Enter CC email addresses"
                   value={contact.email.cc}
-                  onChange={(value) => updateContactPerson(index, 'email.cc', value)}
+                  onChange={(v) => updateContactPerson(index, 'email.cc', v)}
                   disabled={disabled}
                   style={{ width: '100%' }}
                 />
               </div>
               <div className={styles.contactPersonField}>
-                <label className={styles.contactPersonLabel}>
-                  BCC
-                </label>
+                <label className={styles.contactPersonLabel}>BCC</label>
                 <Select
                   mode="tags"
                   placeholder="Enter BCC email addresses"
                   value={contact.email.bcc}
-                  onChange={(value) => updateContactPerson(index, 'email.bcc', value)}
+                  onChange={(v) => updateContactPerson(index, 'email.bcc', v)}
                   disabled={disabled}
                   style={{ width: '100%' }}
                 />
@@ -861,10 +1006,9 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
           type="dashed"
           onClick={addContactPerson}
           block
-          icon={<InfoCircleOutlined />}
           className={styles.addContactButton}
         >
-          Add Another Contact Person
+          + Add Another Contact Person
         </AntButton>
       )}
 
@@ -873,15 +1017,9 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
         rules={[
           {
             validator: (_, value) => {
-              if (!value || value.length === 0) {
-                return Promise.reject('At least one contact person is required');
-              }
-              const hasValidContact = value.some((contact: any) =>
-                contact.name && contact.email?.mailto?.length > 0
-              );
-              if (!hasValidContact) {
-                return Promise.reject('At least one contact person with name and email is required');
-              }
+              if (!value?.length) return Promise.reject('At least one contact person is required');
+              const valid = value.some((c: any) => c.name && c.email?.mailto?.length > 0);
+              if (!valid) return Promise.reject('At least one contact with name and email is required');
               return Promise.resolve();
             },
           },

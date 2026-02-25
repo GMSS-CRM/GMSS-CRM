@@ -259,6 +259,22 @@
   align-items: flex-start;
 }
 
+.statusBannerWarning {
+  background: rgba(217, 119, 6, 0.07);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  color: #92400e;
+}
+
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  gap: 10px;
+}
+
 .statusBannerContent {
   display: flex;
   flex-direction: column;
