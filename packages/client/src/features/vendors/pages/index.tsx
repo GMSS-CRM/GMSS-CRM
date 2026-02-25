@@ -2,29 +2,39 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { message } from 'antd';
 import VendorList from './list';
-import type { Vendor } from '../types';
-import { fetchVendors } from '../services/vendors.service';
+import type { ActiveView } from './list';
+import type { Vendor, UserRole, VendorMdRequest } from '../types';
+import {
+  fetchVendors,
+  fetchPendingMdRequests,
+  fetchResolvedMdRequests,
+} from '../services/vendors.service';
 
-/**
- * Main Vendors Page component
- * Manages vendor list and navigation
- */
 export default function VendorsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<VendorMdRequest[]>([]);
+  const [resolvedRequests, setResolvedRequests] = useState<VendorMdRequest[]>([]);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<UserRole>('EMPLOYEE');
+  const [activeView, setActiveView] = useState<ActiveView>('all');
 
-  // Determine if we're on the list page or details page
   const isListPage = location.pathname === '/vendors';
 
-  // Load vendors
   useEffect(() => {
-    const loadVendors = async () => {
+    if (!isListPage) return;
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await fetchVendors();
-        setVendors(data);
+        const [vendorData, pendingData, resolvedData] = await Promise.all([
+          fetchVendors(),
+          fetchPendingMdRequests(),
+          fetchResolvedMdRequests(),
+        ]);
+        setVendors(vendorData);
+        setPendingRequests(pendingData);
+        setResolvedRequests(resolvedData);
       } catch (error) {
         message.error('Failed to load vendors');
         console.error(error);
@@ -32,55 +42,69 @@ export default function VendorsPage() {
         setLoading(false);
       }
     };
-
-    if (isListPage) {
-      loadVendors();
-    }
+    loadData();
   }, [isListPage]);
 
   const handleView = useCallback(
     (vendor: Vendor) => {
-      navigate(`/vendors/${vendor.id}`);
+      // Employee in pending view → form opens read-only; MD in pending view → can edit + resolve
+      const isPending = activeView === 'pending';
+      navigate(`/vendors/${vendor.id}?role=${role}&pending=${isPending}`);
     },
-    [navigate]
+    [navigate, role, activeView]
+  );
+
+  // Navigate to vendor form from a request row
+  const handleViewRequest = useCallback(
+    (request: VendorMdRequest, view: 'pending' | 'resolved') => {
+      const isPending = view === 'pending';
+      navigate(`/vendors/${request.vendorId}?role=${role}&pending=${isPending}`);
+    },
+    [navigate, role]
   );
 
   const handleCreate = useCallback(() => {
-    navigate('/vendors/create');
-  }, [navigate]);
+    navigate(`/vendors/create?role=${role}`);
+  }, [navigate, role]);
 
-  const handleUpload = useCallback(async (file: File) => {
-    try {
-      // TODO: Implement Excel file processing
-      // For now, just show a success message
-      message.success(`File "${file.name}" uploaded successfully. Processing vendors...`);
-
-      // Here you would typically:
-      // 1. Parse the Excel file
-      // 2. Validate the data
-      // 3. Create vendor records
-      // 4. Refresh the vendor list
-
-      console.log('Uploaded file:', file);
-    } catch (error) {
-      message.error('Failed to upload vendors');
-      console.error(error);
-    }
+  const refreshData = useCallback(async () => {
+    const [vendorData, pendingData, resolvedData] = await Promise.all([
+      fetchVendors(),
+      fetchPendingMdRequests(),
+      fetchResolvedMdRequests(),
+    ]);
+    setVendors(vendorData);
+    setPendingRequests(pendingData);
+    setResolvedRequests(resolvedData);
   }, []);
 
-  // Render list or details based on route
+  const handleRoleChange = useCallback((newRole: UserRole) => {
+    setRole(newRole);
+    setActiveView('all');
+  }, []);
+
+  const handleViewChange = useCallback((v: ActiveView) => {
+    setActiveView(v);
+  }, []);
+
   if (isListPage) {
     return (
       <VendorList
         vendors={vendors}
+        pendingRequests={pendingRequests}
+        resolvedRequests={resolvedRequests}
         onView={handleView}
+        onViewRequest={handleViewRequest}
         onCreate={handleCreate}
-        onUpload={handleUpload}
         loading={loading}
+        role={role}
+        onRoleChange={handleRoleChange}
+        activeView={activeView}
+        onViewChange={handleViewChange}
+        onRefresh={refreshData}
       />
     );
   }
 
-  // Details form will be rendered by the nested route
   return null;
 }

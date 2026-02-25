@@ -1,4 +1,4 @@
-import type { Vendor, VendorDocument, Tag } from '../types';
+import type { Vendor, VendorDocument, Tag, VendorMdRequest, CompanyType } from '../types';
 
 /**
  * Vendors Service
@@ -16,13 +16,14 @@ export const MOCK_TAGS: Tag[] = [
   { id: '6', name: 'Industrial Machinery', color: 'cyan' },
 ];
 
-// Mock Vendors Data
+// Mock Vendors Data — using CompanyStatus: New | Interested | Final
 export const MOCK_VENDORS: Vendor[] = [
   {
     id: '1',
     vendorCode: 'VND-0001',
     companyName: 'TechCorp India Pvt Ltd',
-    vendorType: 'Vendor',
+    companyType: 'Vendor' as CompanyType,
+    isLinkedWithRailways: true,
     address: '123 MG Road, Bangalore, Karnataka 560001',
     contactPersons: [
       {
@@ -42,16 +43,17 @@ export const MOCK_VENDORS: Vendor[] = [
     msmeNumber: 'UDYAM-KA-12-1234567',
     cinNumber: 'U72900KA2015PTC123456',
     tags: ['1', '4'],
-    status: 'Approved',
+    status: 'Final',
     createdDate: new Date('2024-01-15').toISOString(),
-    createdBy: 'admin',
+    createdBy: 'emp001',
     isDeleted: false,
   },
   {
     id: '2',
     vendorCode: 'VND-0002',
     companyName: 'MedEquip Solutions',
-    vendorType: 'Consultant',
+    companyType: 'Consultant' as CompanyType,
+    isLinkedWithRailways: false,
     address: 'Plot 45, Industrial Area, Phase 2, Noida, UP 201301',
     contactPersons: [
       {
@@ -70,9 +72,9 @@ export const MOCK_VENDORS: Vendor[] = [
     panNumber: 'XYZAB5678G',
     msmeNumber: 'UDYAM-UP-09-2345678',
     tags: ['2', '5'],
-    status: 'Approved',
+    status: 'Interested',
     createdDate: new Date('2024-02-01').toISOString(),
-    createdBy: 'admin',
+    createdBy: 'emp001',
     updatedDate: new Date('2024-02-05').toISOString(),
     isDeleted: false,
   },
@@ -80,7 +82,8 @@ export const MOCK_VENDORS: Vendor[] = [
     id: '3',
     vendorCode: 'VND-0003',
     companyName: 'Global Trade Partners',
-    vendorType: 'Consultant',
+    companyType: 'Vendor' as CompanyType,
+    isLinkedWithRailways: true,
     address: '56 Nehru Place, New Delhi, Delhi 110019',
     contactPersons: [
       {
@@ -109,16 +112,17 @@ export const MOCK_VENDORS: Vendor[] = [
     gstNumber: '07PQRST9012H3Z4',
     panNumber: 'PQRST9012H',
     tags: ['1', '3', '6'],
-    status: 'Submitted',
+    status: 'New',
     createdDate: new Date('2024-03-10').toISOString(),
-    createdBy: 'user',
+    createdBy: 'emp002',
     isDeleted: false,
   },
   {
     id: '4',
     vendorCode: 'VND-0004',
     companyName: 'Pharma Distributors Inc',
-    vendorType: 'Consultant',
+    companyType: 'Consultant' as CompanyType,
+    isLinkedWithRailways: false,
     address: 'Tower B, Cyber City, Gurgaon, Haryana 122002',
     contactPersons: [
       {
@@ -136,16 +140,17 @@ export const MOCK_VENDORS: Vendor[] = [
     gstNumber: '06LMNOP3456I4Z9',
     panNumber: 'LMNOP3456I',
     tags: ['5'],
-    status: 'Draft',
+    status: 'New',
     createdDate: new Date('2024-03-20').toISOString(),
-    createdBy: 'user',
+    createdBy: 'emp002',
     isDeleted: false,
   },
   {
     id: '5',
     vendorCode: 'VND-0005',
     companyName: 'Industrial Systems OEM',
-    vendorType: 'Vendor',
+    companyType: 'Vendor' as CompanyType,
+    isLinkedWithRailways: true,
     address: 'MIDC Area, Pune, Maharashtra 411019',
     contactPersons: [
       {
@@ -164,15 +169,48 @@ export const MOCK_VENDORS: Vendor[] = [
     panNumber: 'FGHIJ6789K',
     cinNumber: 'U28910MH2018PLC234567',
     tags: ['6'],
-    status: 'Rejected',
+    status: 'Interested',
     createdDate: new Date('2024-02-15').toISOString(),
-    createdBy: 'user',
+    createdBy: 'emp001',
     updatedDate: new Date('2024-02-25').toISOString(),
     isDeleted: false,
   },
 ];
 
-// Mock Documents Data - Compliance-oriented structure
+// Mock MD Requests Data
+// IS_RESOLVED=false → pending (employee sent to MD, awaiting decision)
+// IS_RESOLVED=true  → resolved (MD has acted)
+export let MOCK_MD_REQUESTS: VendorMdRequest[] = [
+  {
+    id: 'mdr-1',
+    vendorId: '3',
+    empId: 'emp002',
+    empRemark: 'Customer visited HQ and showed strong interest. Requesting status change to Interested.',
+    isResolved: false,
+    createdDate: new Date('2024-03-25').toISOString(),
+  },
+  {
+    id: 'mdr-2',
+    vendorId: '5',
+    empId: 'emp001',
+    empRemark: 'All documents verified. Long-term relationship established. Propose to mark as Final.',
+    mdId: 'md001',
+    mdRemark: 'Reviewed and agreed. Status updated to Final by MD.',
+    isResolved: true,
+    createdDate: new Date('2024-02-20').toISOString(),
+    resolvedDate: new Date('2024-02-25').toISOString(),
+  },
+  {
+    id: 'mdr-3',
+    vendorId: '4',
+    empId: 'emp002',
+    empRemark: 'Initial meetings conducted. Company has shown genuine interest in collaboration.',
+    isResolved: false,
+    createdDate: new Date('2024-04-01').toISOString(),
+  },
+];
+
+// Mock Documents Data
 export const MOCK_DOCUMENTS: VendorDocument[] = [
   {
     id: '1',
@@ -182,9 +220,9 @@ export const MOCK_DOCUMENTS: VendorDocument[] = [
     status: 'Verified',
     remarks: 'Valid until Dec 2026',
     uploadedDate: new Date('2024-01-16').toISOString(),
-    uploadedBy: 'admin',
+    uploadedBy: 'emp001',
     verifiedDate: new Date('2024-01-17').toISOString(),
-    verifiedBy: 'approver@gmss.com',
+    verifiedBy: 'md001',
   },
   {
     id: '2',
@@ -193,169 +231,146 @@ export const MOCK_DOCUMENTS: VendorDocument[] = [
     fileName: 'TechCorp_PAN.pdf',
     status: 'Verified',
     uploadedDate: new Date('2024-01-16').toISOString(),
-    uploadedBy: 'admin',
+    uploadedBy: 'emp001',
     verifiedDate: new Date('2024-01-17').toISOString(),
-    verifiedBy: 'approver@gmss.com',
+    verifiedBy: 'md001',
   },
   {
     id: '3',
-    vendorId: '1',
-    documentType: 'MSME / UDYAM Certificate',
-    fileName: 'TechCorp_MSME.pdf',
-    status: 'Verified',
-    uploadedDate: new Date('2024-01-16').toISOString(),
-    uploadedBy: 'admin',
-    verifiedDate: new Date('2024-01-17').toISOString(),
-    verifiedBy: 'approver@gmss.com',
-  },
-  {
-    id: '4',
-    vendorId: '1',
-    documentType: 'Experience Certificate',
-    fileName: 'TechCorp_Experience.pdf',
-    status: 'Verified',
-    uploadedDate: new Date('2024-01-16').toISOString(),
-    uploadedBy: 'admin',
-    verifiedDate: new Date('2024-01-18').toISOString(),
-    verifiedBy: 'approver@gmss.com',
-  },
-  {
-    id: '5',
     vendorId: '2',
     documentType: 'GST Certificate',
     fileName: 'MedEquip_GST.pdf',
     status: 'Verified',
     uploadedDate: new Date('2024-02-02').toISOString(),
-    uploadedBy: 'user',
+    uploadedBy: 'emp001',
     verifiedDate: new Date('2024-02-03').toISOString(),
-    verifiedBy: 'approver@gmss.com',
+    verifiedBy: 'md001',
   },
   {
-    id: '6',
-    vendorId: '2',
-    documentType: 'PAN Card',
-    fileName: 'MedEquip_PAN.pdf',
-    status: 'Verified',
-    uploadedDate: new Date('2024-02-02').toISOString(),
-    uploadedBy: 'user',
-    verifiedDate: new Date('2024-02-03').toISOString(),
-    verifiedBy: 'approver@gmss.com',
-  },
-  {
-    id: '7',
+    id: '4',
     vendorId: '3',
     documentType: 'GST Certificate',
     fileName: 'GlobalTP_GST.pdf',
     status: 'Pending',
     uploadedDate: new Date('2024-03-11').toISOString(),
-    uploadedBy: 'user',
+    uploadedBy: 'emp002',
   },
   {
-    id: '8',
+    id: '5',
     vendorId: '3',
     documentType: 'PAN Card',
     fileName: 'GlobalTP_PAN.pdf',
     status: 'Pending',
     uploadedDate: new Date('2024-03-11').toISOString(),
-    uploadedBy: 'user',
-  },
-  {
-    id: '9',
-    vendorId: '5',
-    documentType: 'GST Certificate',
-    fileName: 'Industrial_GST.pdf',
-    status: 'Rejected',
-    remarks: 'Certificate expired. Please upload valid certificate.',
-    uploadedDate: new Date('2024-02-16').toISOString(),
-    uploadedBy: 'user',
-    verifiedDate: new Date('2024-02-20').toISOString(),
-    verifiedBy: 'approver@gmss.com',
+    uploadedBy: 'emp002',
   },
 ];
 
-/**
- * Fetch all vendors
- * @returns Promise<Vendor[]>
- */
+// ─── Vendor CRUD ────────────────────────────────────────────────────────────
+
 export const fetchVendors = async (): Promise<Vendor[]> => {
-  // TODO: Replace with actual API call
   return Promise.resolve(MOCK_VENDORS);
 };
 
-/**
- * Fetch vendor by ID
- * @param id - Vendor ID
- * @returns Promise<Vendor | null>
- */
 export const fetchVendorById = async (id: string): Promise<Vendor | null> => {
-  // TODO: Replace with actual API call
   const vendor = MOCK_VENDORS.find((v) => v.id === id);
   return Promise.resolve(vendor || null);
 };
 
-/**
- * Create a new vendor
- * @param vendor - Vendor data to create
- * @returns Promise<Vendor>
- */
 export const createVendor = async (
   vendor: Omit<Vendor, 'id' | 'createdDate' | 'isDeleted'>
 ): Promise<Vendor> => {
-  // TODO: Replace with actual API call
   const newVendor: Vendor = {
     ...vendor,
     id: `vendor-${Date.now()}`,
     createdDate: new Date().toISOString(),
     isDeleted: false,
   };
-
+  MOCK_VENDORS.push(newVendor);
   return Promise.resolve(newVendor);
 };
 
-/**
- * Update an existing vendor
- * @param id - Vendor ID
- * @param updates - Partial vendor data to update
- * @returns Promise<Vendor>
- */
 export const updateVendor = async (
   id: string,
   updates: Partial<Vendor>
 ): Promise<Vendor> => {
-  // TODO: Replace with actual API call
-  const vendor = MOCK_VENDORS.find((v) => v.id === id);
-  if (!vendor) {
-    throw new Error(`Vendor with id ${id} not found`);
-  }
-
+  const index = MOCK_VENDORS.findIndex((v) => v.id === id);
+  if (index === -1) throw new Error(`Vendor with id ${id} not found`);
   const updatedVendor: Vendor = {
-    ...vendor,
+    ...MOCK_VENDORS[index],
     ...updates,
     updatedDate: new Date().toISOString(),
   };
-
+  MOCK_VENDORS[index] = updatedVendor;
   return Promise.resolve(updatedVendor);
 };
 
+export const deleteVendor = async (id: string): Promise<void> => {
+  const index = MOCK_VENDORS.findIndex((v) => v.id === id);
+  if (index === -1) throw new Error(`Vendor with id ${id} not found`);
+  MOCK_VENDORS[index] = { ...MOCK_VENDORS[index], isDeleted: true };
+  return Promise.resolve();
+};
 
-/**
- * Fetch all tags
- * @returns Promise<Tag[]>
- */
 export const fetchTags = async (): Promise<Tag[]> => {
-  // TODO: Replace with actual API call
   return Promise.resolve(MOCK_TAGS);
 };
 
-/**
- * Fetch documents for a vendor
- * @param vendorId - Vendor ID
- * @returns Promise<VendorDocument[]>
- */
-export const fetchVendorDocuments = async (
-  vendorId: string
-): Promise<VendorDocument[]> => {
-  // TODO: Replace with actual API call
-  const documents = MOCK_DOCUMENTS.filter((doc) => doc.vendorId === vendorId);
-  return Promise.resolve(documents);
+export const fetchVendorDocuments = async (vendorId: string): Promise<VendorDocument[]> => {
+  return Promise.resolve(MOCK_DOCUMENTS.filter((doc) => doc.vendorId === vendorId));
+};
+
+// ─── MD Request functions ────────────────────────────────────────────────────
+
+/** Return all pending (unresolved) MD requests */
+export const fetchPendingMdRequests = async (): Promise<VendorMdRequest[]> => {
+  return Promise.resolve(MOCK_MD_REQUESTS.filter((r) => !r.isResolved));
+};
+
+/** Return all resolved MD requests */
+export const fetchResolvedMdRequests = async (): Promise<VendorMdRequest[]> => {
+  return Promise.resolve(MOCK_MD_REQUESTS.filter((r) => r.isResolved));
+};
+
+/** Employee sends vendor to MD → creates a pending request */
+export const sendVendorToMd = async (
+  vendorId: string,
+  empId: string,
+  empRemark: string
+): Promise<VendorMdRequest> => {
+  const request: VendorMdRequest = {
+    id: `mdr-${Date.now()}`,
+    vendorId,
+    empId,
+    empRemark,
+    isResolved: false,
+    createdDate: new Date().toISOString(),
+  };
+  MOCK_MD_REQUESTS.push(request);
+  return Promise.resolve(request);
+};
+
+/** MD resolves a pending request */
+export const resolveMdRequest = async (
+  requestId: string,
+  mdId: string,
+  mdRemark: string
+): Promise<VendorMdRequest> => {
+  const index = MOCK_MD_REQUESTS.findIndex((r) => r.id === requestId);
+  if (index === -1) throw new Error(`MD request ${requestId} not found`);
+  const resolved: VendorMdRequest = {
+    ...MOCK_MD_REQUESTS[index],
+    mdId,
+    mdRemark,
+    isResolved: true,
+    resolvedDate: new Date().toISOString(),
+  };
+  MOCK_MD_REQUESTS[index] = resolved;
+  return Promise.resolve(resolved);
+};
+
+/** Check if a vendor has an active (unresolved) pending request */
+export const getActivePendingRequest = async (vendorId: string): Promise<VendorMdRequest | null> => {
+  const req = MOCK_MD_REQUESTS.find((r) => r.vendorId === vendorId && !r.isResolved);
+  return Promise.resolve(req || null);
 };
