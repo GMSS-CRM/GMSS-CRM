@@ -2,7 +2,8 @@
 import type { 
   TagWithVendorCount, 
   TagTenderDisplay, 
-  TenderVendorDisplay 
+  TenderVendorDisplay,
+  TagVendorDisplay,
 } from '../types/tagTypes';
 
 // Dummy Tags
@@ -112,6 +113,7 @@ export const dummyTags: TagWithVendorCount[] = [
 ];
 
 // Dummy Tenders for Tags
+// Dummy tags-to-tenders mapping (keyed by tag id)
 export const dummyTagTenders: Record<string, TagTenderDisplay[]> = {
   '1': [ // Electronics
     {
@@ -518,3 +520,6 @@ export const getVendorsForTender = (tenderId: string): TenderVendorDisplay[] => 
 // Helper to simulate API delay
 export const simulateDelay = (ms: number = 500) =>
   new Promise(resolve => setTimeout(resolve, ms));
+
+/** Dummy vendor-per-tag lookup (empty until populated from real API) */
+export const dummyTagVendors: Record<string, TagVendorDisplay[]> = {};

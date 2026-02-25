@@ -110,7 +110,7 @@ export function useTagMutations(onSuccess?: () => void) {
     }
   }, [onSuccess]);
 
-  const updateTag = useCallback(async (id: string, input: UpdateTagInput) => {
+  const updateTag = useCallback(async (_id: string, _input: UpdateTagInput) => {
     setLoading(true);
     try {
       if (USE_DUMMY_DATA) {
@@ -129,7 +129,7 @@ export function useTagMutations(onSuccess?: () => void) {
     }
   }, [onSuccess]);
 
-  const deleteTag = useCallback(async (id: string, name: string) => {
+  const deleteTag = useCallback(async (_id: string, name: string) => {
     setLoading(true);
     try {
       if (USE_DUMMY_DATA) {
@@ -168,7 +168,7 @@ export function useTagMutations(onSuccess?: () => void) {
   }, [onSuccess]);
 
   const toggleVendorEmail = useCallback(async (
-    vendorTagId: string,
+    _vendorTagId: string,
     vendorName: string,
     enableMail: boolean
   ) => {

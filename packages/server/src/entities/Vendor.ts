@@ -11,11 +11,11 @@ import type { VendorContactPerson } from './VendorContactPerson';
 import type { VendorDocument } from './VendorDocument';
 
 export enum CompanyType {
-  NEW = 'New',
-  INTERESTED = 'Interested',
-  NOT_INTERESTED = 'Not Interested',
-  FINAL = 'Final',
-  DELETED = 'Deleted',
+  NEW = 'NEW',
+  INTERESTED = 'INTERESTED',
+  NOT_INTERESTED = 'NOT_INTERESTED',
+  FINAL = 'FINAL',
+  DELETED = 'DELETED',
 }
 
 @Entity({ name: 'vendor' })

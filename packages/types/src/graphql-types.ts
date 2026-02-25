@@ -22,6 +22,14 @@ export type AssignPermissionsInput = {
   roleId: Scalars['ID']['input'];
 };
 
+export enum CompanyType {
+  Deleted = 'Deleted',
+  Final = 'Final',
+  Interested = 'Interested',
+  New = 'New',
+  NotInterested = 'NotInterested'
+}
+
 export type CreateRoleInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
@@ -46,7 +54,7 @@ export type CreateUserInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
   lastName?: InputMaybe<Scalars['String']['input']>;
-  roleId: Scalars['ID']['input'];
+  roleId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type CreateVendorContactPersonInput = {
@@ -69,13 +77,20 @@ export type CreateVendorDocumentInput = {
 };
 
 export type CreateVendorInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
   cinNumber?: InputMaybe<Scalars['String']['input']>;
   gstNumber?: InputMaybe<Scalars['String']['input']>;
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   panNumber?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<CompanyType>;
-  type?: InputMaybe<VendorType>;
+  type?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateVendorTagInput = {
+  enableMail?: InputMaybe<Scalars['Boolean']['input']>;
+  tagId: Scalars['ID']['input'];
+  vendorId: Scalars['ID']['input'];
 };
 
 export type Mutation = {
@@ -89,6 +104,7 @@ export type Mutation = {
   createVendor: Vendor;
   createVendorContactPerson: VendorContactPerson;
   createVendorDocument: VendorDocument;
+  createVendorTag: VendorTag;
   deleteRole: Scalars['Boolean']['output'];
   deleteTag: Scalars['Boolean']['output'];
   deleteTags: Scalars['Boolean']['output'];
@@ -103,6 +119,7 @@ export type Mutation = {
   deleteVendorContactPersons: Scalars['Boolean']['output'];
   deleteVendorDocument: Scalars['Boolean']['output'];
   deleteVendorDocuments: Scalars['Boolean']['output'];
+  deleteVendorTag: Scalars['Boolean']['output'];
   deleteVendors: Scalars['Boolean']['output'];
   updateRole: Role;
   updateTag: Tag;
@@ -158,6 +175,11 @@ export type MutationCreateVendorContactPersonArgs = {
 
 export type MutationCreateVendorDocumentArgs = {
   input: CreateVendorDocumentInput;
+};
+
+
+export type MutationCreateVendorTagArgs = {
+  input: CreateVendorTagInput;
 };
 
 
@@ -228,6 +250,11 @@ export type MutationDeleteVendorDocumentArgs = {
 
 export type MutationDeleteVendorDocumentsArgs = {
   ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteVendorTagArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -311,6 +338,7 @@ export type Query = {
   getVendorById?: Maybe<Vendor>;
   getVendorContactPersonById?: Maybe<VendorContactPerson>;
   getVendorDocumentById?: Maybe<VendorDocument>;
+  getVendorsByTag: Array<Vendor>;
   searchRoles: Array<Role>;
   searchTags: Array<Tag>;
   searchTenderDocuments: Array<TenderDocument>;
@@ -364,6 +392,11 @@ export type QueryGetVendorContactPersonByIdArgs = {
 
 export type QueryGetVendorDocumentByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetVendorsByTagArgs = {
+  tagId: Scalars['ID']['input'];
 };
 
 
@@ -476,7 +509,7 @@ export type SearchVendorInput = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<CompanyType>;
-  type?: InputMaybe<VendorType>;
+  type?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type Tag = {
@@ -564,13 +597,14 @@ export type UpdateVendorDocumentInput = {
 };
 
 export type UpdateVendorInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
   cinNumber?: InputMaybe<Scalars['String']['input']>;
   gstNumber?: InputMaybe<Scalars['String']['input']>;
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   panNumber?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<CompanyType>;
-  type?: InputMaybe<VendorType>;
+  type?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
@@ -582,13 +616,14 @@ export type User = {
   id: Scalars['ID']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   role: Role;
-  roleId: Scalars['ID']['output'];
+  roleId?: Maybe<Scalars['ID']['output']>;
   updatedBy: Scalars['String']['output'];
   updatedDate: Scalars['String']['output'];
 };
 
 export type Vendor = {
   __typename?: 'Vendor';
+  address?: Maybe<Scalars['String']['output']>;
   cinNumber?: Maybe<Scalars['String']['output']>;
   contactPersons?: Maybe<Array<VendorContactPerson>>;
   createdBy: Scalars['String']['output'];
@@ -601,7 +636,7 @@ export type Vendor = {
   panNumber?: Maybe<Scalars['String']['output']>;
   status: CompanyType;
   tags?: Maybe<Array<VendorTag>>;
-  type: VendorType;
+  type?: Maybe<Scalars['String']['output']>;
   updatedBy?: Maybe<Scalars['String']['output']>;
   updatedDate: Scalars['String']['output'];
 };
@@ -637,25 +672,16 @@ export type VendorDocument = {
   vendorId: Scalars['ID']['output'];
 };
 
-export enum CompanyType {
-  Approved = 'Approved',
-  Draft = 'Draft',
-  Rejected = 'Rejected',
-  Submitted = 'Submitted'
-}
-
 export type VendorTag = {
   __typename?: 'VendorTag';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  enableMail: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   tag?: Maybe<Tag>;
   tagId: Scalars['ID']['output'];
   vendorId: Scalars['ID']['output'];
 };
-
-export enum VendorType {
-  Consultant = 'Consultant',
-  Vendor = 'Vendor'
-}
 
 
 
@@ -732,6 +758,7 @@ export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = 
 export type ResolversTypes = {
   AssignPermissionsInput: AssignPermissionsInput;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  CompanyType: CompanyType;
   CreateRoleInput: CreateRoleInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   CreateTagInput: CreateTagInput;
@@ -741,8 +768,9 @@ export type ResolversTypes = {
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
   CreateVendorDocumentInput: CreateVendorDocumentInput;
   CreateVendorInput: CreateVendorInput;
-  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  CreateVendorTagInput: CreateVendorTagInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Permission: Permission;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Role: ResolverTypeWrapper<Role>;
@@ -772,9 +800,7 @@ export type ResolversTypes = {
   Vendor: ResolverTypeWrapper<Vendor>;
   VendorContactPerson: ResolverTypeWrapper<VendorContactPerson>;
   VendorDocument: ResolverTypeWrapper<VendorDocument>;
-  CompanyType: CompanyType;
   VendorTag: ResolverTypeWrapper<VendorTag>;
-  VendorType: VendorType;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -790,8 +816,9 @@ export type ResolversParentTypes = {
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
   CreateVendorDocumentInput: CreateVendorDocumentInput;
   CreateVendorInput: CreateVendorInput;
-  Mutation: Record<PropertyKey, never>;
+  CreateVendorTagInput: CreateVendorTagInput;
   Boolean: Scalars['Boolean']['output'];
+  Mutation: Record<PropertyKey, never>;
   Query: Record<PropertyKey, never>;
   Role: Role;
   RolePermissionResult: RolePermissionResult;
@@ -833,6 +860,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationCreateVendorArgs, 'input'>>;
   createVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationCreateVendorContactPersonArgs, 'input'>>;
   createVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationCreateVendorDocumentArgs, 'input'>>;
+  createVendorTag?: Resolver<ResolversTypes['VendorTag'], ParentType, ContextType, RequireFields<MutationCreateVendorTagArgs, 'input'>>;
   deleteRole?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteRoleArgs, 'id'>>;
   deleteTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagArgs, 'id'>>;
   deleteTags?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagsArgs, 'ids'>>;
@@ -847,6 +875,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteVendorContactPersons?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorContactPersonsArgs, 'ids'>>;
   deleteVendorDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorDocumentArgs, 'id'>>;
   deleteVendorDocuments?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorDocumentsArgs, 'ids'>>;
+  deleteVendorTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorTagArgs, 'id'>>;
   deleteVendors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorsArgs, 'ids'>>;
   updateRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationUpdateRoleArgs, 'input'>>;
   updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id' | 'input'>>;
@@ -869,6 +898,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getVendorById?: Resolver<Maybe<ResolversTypes['Vendor']>, ParentType, ContextType, RequireFields<QueryGetVendorByIdArgs, 'id'>>;
   getVendorContactPersonById?: Resolver<Maybe<ResolversTypes['VendorContactPerson']>, ParentType, ContextType, RequireFields<QueryGetVendorContactPersonByIdArgs, 'id'>>;
   getVendorDocumentById?: Resolver<Maybe<ResolversTypes['VendorDocument']>, ParentType, ContextType, RequireFields<QueryGetVendorDocumentByIdArgs, 'id'>>;
+  getVendorsByTag?: Resolver<Array<ResolversTypes['Vendor']>, ParentType, ContextType, RequireFields<QueryGetVendorsByTagArgs, 'tagId'>>;
   searchRoles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType, Partial<QuerySearchRolesArgs>>;
   searchTags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType, Partial<QuerySearchTagsArgs>>;
   searchTenderDocuments?: Resolver<Array<ResolversTypes['TenderDocument']>, ParentType, ContextType, Partial<QuerySearchTenderDocumentsArgs>>;
@@ -942,12 +972,13 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
-  roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  roleId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   updatedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type VendorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Vendor'] = ResolversParentTypes['Vendor']> = {
+  address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   cinNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   contactPersons?: Resolver<Maybe<Array<ResolversTypes['VendorContactPerson']>>, ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -960,7 +991,7 @@ export type VendorResolvers<ContextType = any, ParentType extends ResolversParen
   panNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['CompanyType'], ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['VendorTag']>>, ParentType, ContextType>;
-  type?: Resolver<ResolversTypes['VendorType'], ParentType, ContextType>;
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
@@ -995,6 +1026,9 @@ export type VendorDocumentResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type VendorTagResolvers<ContextType = any, ParentType extends ResolversParentTypes['VendorTag'] = ResolversParentTypes['VendorTag']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  enableMail?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   tag?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType>;
   tagId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;

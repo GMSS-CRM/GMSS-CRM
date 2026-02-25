@@ -1,86 +1,91 @@
-import type { Role } from '../types';
+import { gql } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
+import type {
+  Role,
+  CreateRoleInput,
+  UpdateRoleInput,
+  SearchRoleInput,
+} from '@gmss/types';
 
-/**
- * Roles Service
- * API integration layer for role management operations
- * TODO: Integrate with GraphQL/REST API
- */
+// ─── Fragments ────────────────────────────────────────────────────────────────
 
-/**
- * Fetch all roles
- * @returns Promise<Role[]>
- */
-export const fetchRoles = async (): Promise<Role[]> => {
-  // TODO: Replace with actual API call
-  // Example: const { data } = await apolloClient.query({ query: GET_ROLES });
-  throw new Error('fetchRoles API not implemented');
-};
-
-/**
- * Create a new role
- * @param role - Role data to create
- * @returns Promise<Role>
- */
-export const createRole = async (role: Omit<Role, 'id' | 'createdDate' | 'isDeleted'>): Promise<Role> => {
-  // TODO: Replace with actual API call
-  // Example: const { data } = await apolloClient.mutate({ mutation: CREATE_ROLE, variables: { input: role } });
-  
-  const newRole: Role = {
-    ...role,
-    id: `new-${Date.now()}`,
-    createdDate: new Date().toISOString(),
-    isDeleted: false,
-    userCount: 0,
-  };
-  
-  return Promise.resolve(newRole);
-};
-
-/**
- * Update an existing role
- * @param id - Role ID
- * @param updates - Partial role data to update
- * @returns Promise<Role>
- */
-export const updateRole = async (_id: string, updates: Partial<Role>): Promise<Role> => {
-  // TODO: Replace with actual API call
-  // Example: const { data } = await apolloClient.mutate({ mutation: UPDATE_ROLE, variables: { id, input: updates } });
-  
-  const updatedRole: Role = {
-    ...updates as Role,
-    updatedDate: new Date().toISOString(),
-  };
-  
-  return Promise.resolve(updatedRole);
-};
-
-/**
- * Soft delete a role
- * @param id - Role ID
- * @returns Promise<void>
- */
-export const deleteRole = async (_id: string): Promise<void> => {
-  // TODO: Replace with actual API call
-  // Example: await apolloClient.mutate({ mutation: DELETE_ROLE, variables: { id } });
-  
-  return Promise.resolve();
-};
-
-/**
- * Check if a role can be deleted
- * @param role - Role to check
- * @returns boolean
- */
-export const canDeleteRole = (role: Role): boolean => {
-  // Cannot delete system roles
-  if (role.isSystemRole) {
-    return false;
+const ROLE_FIELDS = gql`
+  fragment RoleFields on Role {
+    id
+    name
+    description
+    createdBy
+    createdDate
+    updatedBy
+    updatedDate
   }
-  
-  // Cannot delete roles with assigned users
-  if (role.userCount && role.userCount > 0) {
-    return false;
+`;
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
+
+export const SEARCH_ROLES = gql`
+  ${ROLE_FIELDS}
+  query SearchRoles($searchInput: SearchRoleInput) {
+    searchRoles(searchInput: $searchInput) {
+      ...RoleFields
+    }
   }
-  
-  return true;
-};
+`;
+
+export const GET_ROLE_BY_ID = gql`
+  ${ROLE_FIELDS}
+  query GetRoleById($id: ID!) {
+    getRoleById(id: $id) {
+      ...RoleFields
+    }
+  }
+`;
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+export const CREATE_ROLE = gql`
+  ${ROLE_FIELDS}
+  mutation CreateRole($input: CreateRoleInput!) {
+    createRole(input: $input) {
+      ...RoleFields
+    }
+  }
+`;
+
+export const UPDATE_ROLE = gql`
+  ${ROLE_FIELDS}
+  mutation UpdateRole($input: UpdateRoleInput!) {
+    updateRole(input: $input) {
+      ...RoleFields
+    }
+  }
+`;
+
+export const DELETE_ROLE = gql`
+  mutation DeleteRole($id: ID!) {
+    deleteRole(id: $id)
+  }
+`;
+
+// ─── Hooks ────────────────────────────────────────────────────────────────────
+
+export const useSearchRoles = (searchInput?: SearchRoleInput) =>
+  useQuery<{ searchRoles: Role[] }>(SEARCH_ROLES, {
+    variables: { searchInput },
+    fetchPolicy: 'cache-and-network',
+  });
+
+export const useCreateRole = () =>
+  useMutation<{ createRole: Role }, { input: CreateRoleInput }>(CREATE_ROLE, {
+    refetchQueries: [{ query: SEARCH_ROLES }],
+  });
+
+export const useUpdateRole = () =>
+  useMutation<{ updateRole: Role }, { input: UpdateRoleInput }>(UPDATE_ROLE, {
+    refetchQueries: [{ query: SEARCH_ROLES }],
+  });
+
+export const useDeleteRole = () =>
+  useMutation<{ deleteRole: boolean }, { id: string }>(DELETE_ROLE, {
+    refetchQueries: [{ query: SEARCH_ROLES }],
+  });

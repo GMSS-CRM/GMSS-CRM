@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { message } from 'antd';
+import { message, Spin } from 'antd';
 import { UserOutlined, TeamOutlined, LockOutlined } from '@ant-design/icons';
 import SubMenu from '../../../components/sub-menu';
 import type { SubMenuItemConfig } from '../../../components/sub-menu';
@@ -7,234 +7,144 @@ import UsersList from './users/list';
 import UserDetailsForm from './users/details-form';
 import RolesPage from './roles';
 import PermissionsPage from './permissions';
-import type { User, Role } from '../types';
-import { createRole, updateRole, deleteRole } from '../services/roles.service';
+import type { Role } from '../types';
+import type { CreateUserInput, CreateRoleInput, UpdateRoleInput } from '@gmss/types';
+import {
+  useSearchUsers,
+  useCreateUser,
+  useUpdateUser,
+  useDeleteUser,
+} from '../services/users.service';
+import {
+  useSearchRoles,
+  useCreateRole,
+  useUpdateRole,
+  useDeleteRole,
+} from '../services/roles.service';
+import { createFirebaseUser } from '../../../app/config/firebase';
 import styles from './index.module.css';
 
 type SecuritySubMenuItem = 'users' | 'roles' | 'permissions';
 
 const SECURITY_MENU_ITEMS: SubMenuItemConfig[] = [
-  {
-    key: 'users',
-    icon: <UserOutlined />,
-    label: 'Users',
-  },
-  {
-    key: 'roles',
-    icon: <TeamOutlined />,
-    label: 'Roles',
-  },
-  {
-    key: 'permissions',
-    icon: <LockOutlined />,
-    label: 'Permissions',
-  },
+  { key: 'users',       icon: <UserOutlined />,   label: 'Users' },
+  { key: 'roles',       icon: <TeamOutlined />,   label: 'Roles' },
+  { key: 'permissions', icon: <LockOutlined />,   label: 'Permissions' },
 ];
 
-/**
- * Initial roles data - This is the master list of all roles
- * In production, this would be fetched from the API
- */
-const INITIAL_ROLES: Role[] = [
-  {
-    id: '1',
-    name: 'Member',
-    description: 'Basic team member access',
-    isActive: true,
-    isDeleted: false,
-    createdBy: 'system',
-    createdDate: new Date('2024-01-15').toISOString(),
-    userCount: 3,
-    isSystemRole: true,
-  },
-  {
-    id: '2',
-    name: 'Manager',
-    description: 'Team management access',
-    isActive: true,
-    isDeleted: false,
-    createdBy: 'admin',
-    createdDate: new Date('2024-01-20').toISOString(),
-    userCount: 2,
-    isSystemRole: false,
-  },
-  {
-    id: '3',
-    name: 'Director',
-    description: 'Department director access with full oversight capabilities',
-    isActive: true,
-    isDeleted: false,
-    createdBy: 'admin',
-    createdDate: new Date('2024-02-01').toISOString(),
-    userCount: 1,
-    isSystemRole: false,
-  },
-  {
-    id: '4',
-    name: 'System Administrator',
-    description: 'Full system access',
-    isActive: true,
-    isDeleted: false,
-    createdBy: 'system',
-    createdDate: new Date('2024-01-10').toISOString(),
-    userCount: 1,
-    isSystemRole: true,
-  },
-];
-
-const MOCK_USERS: User[] = [
-  { id: '1', firstName: 'Rajesh', lastName: 'Kumar', email: 'rkumar@gmss.com', role: '1', isActive: true },
-  { id: '2', firstName: 'Priya', lastName: 'Singh', email: 'psingh@gmss.com', role: '2', isActive: true },
-  { id: '3', firstName: 'Amit', lastName: 'Verma', email: 'averma@gmss.com', role: '5', isActive: true },
-  { id: '4', firstName: 'Neha', lastName: 'Patel', email: 'npatel@gmss.com', role: '4', isActive: true },
-  { id: '5', firstName: 'Vikram', lastName: 'Shrivastav', email: 'vshrivastav@gmss.com', role: '5', isActive: true },
-  { id: '6', firstName: 'Anjali', lastName: 'Sharma', email: 'asharma@gmss.com', role: '3', isActive: true },
-  { id: '7', firstName: 'Arjun', lastName: 'Nair', email: 'anair@gmss.com', role: '1', isActive: true },
-  { id: '8', firstName: 'Sneha', lastName: 'Gupta', email: 'sgupta@gmss.com', role: '2', isActive: false },
-  { id: '9', firstName: 'Rohit', lastName: 'Desai', email: 'rdesai@gmss.com', role: '1', isActive: true },
-  { id: '10', firstName: 'Divya', lastName: 'Rao', email: 'drao@gmss.com', role: '5', isActive: true },
-];
-
-/**
- * Main Security Page component
- * Manages both Users and Roles with shared state
- * Roles are the single source of truth used across the application
- */
 export default function SecurityPage() {
   const [selectedSubMenu, setSelectedSubMenu] = useState<SecuritySubMenuItem>('users');
-  
-  // Shared roles state - single source of truth
-  const [roles, setRoles] = useState<Role[]>(INITIAL_ROLES);
-  
-  // Users state
-  const [users, setUsers] = useState<User[]>(MOCK_USERS);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
-  
-  // Roles management state
+
+  // Roles modal state
   const [isRoleFormVisible, setIsRoleFormVisible] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isRoleEditMode, setIsRoleEditMode] = useState(false);
 
-  // Initialize roles - in production, fetch from API
-  useEffect(() => {
-    // TODO: Replace with actual API call
-    // const loadRoles = async () => {
-    //   try {
-    //     const fetchedRoles = await fetchRoles();
-    //     setRoles(fetchedRoles);
-    //   } catch (error) {
-    //     console.error('Failed to fetch roles:', error);
-    //     message.error('Failed to load roles');
-    //   }
-    // };
-    // loadRoles();
-  }, []);
+  // ─── Apollo queries ────────────────────────────────────────────────────────
+  const { data: usersData, loading: usersLoading } = useSearchUsers();
+  const { data: rolesData, loading: rolesLoading } = useSearchRoles();
 
-  // Auto-select first user on mount
+  const users = usersData?.searchUsers ?? [];
+  const roles = rolesData?.searchRoles ?? [];
+
+  // ─── Apollo mutations ──────────────────────────────────────────────────────
+  const [createUserMutation] = useCreateUser();
+  const [updateUserMutation] = useUpdateUser();
+  const [deleteUserMutation] = useDeleteUser();
+  const [createRoleMutation] = useCreateRole();
+  const [updateRoleMutation] = useUpdateRole();
+  const [deleteRoleMutation] = useDeleteRole();
+
+  // Auto-select first user
   useEffect(() => {
-    if (selectedSubMenu === 'users' && users.length > 0 && !selectedUserId) {
+    if (selectedSubMenu === 'users' && users.length > 0 && !selectedUserId && !isAddMode) {
       setSelectedUserId(users[0].id);
     }
-  }, [users, selectedUserId, selectedSubMenu]);
+  }, [users, selectedUserId, selectedSubMenu, isAddMode]);
 
-  // Users handlers
+  // ─── User handlers ─────────────────────────────────────────────────────────
   const handleUserSelect = useCallback((userId: string) => {
     setSelectedUserId(userId);
     setIsAddMode(false);
   }, []);
-
-  const handleSaveUser = useCallback((updatedUser: User) => {
-    setUsers((prevUsers) => {
-      const existingIndex = prevUsers.findIndex((u) => u.id === updatedUser.id);
-      let newUsers: User[];
-      
-      if (existingIndex >= 0) {
-        // Update existing user
-        const oldUser = prevUsers[existingIndex];
-        newUsers = [...prevUsers];
-        newUsers[existingIndex] = updatedUser;
-        
-        // Update role counts if role changed
-        if (oldUser.role !== updatedUser.role) {
-          setRoles((prevRoles) =>
-            prevRoles.map((r) => {
-              if (r.id === oldUser.role) {
-                return { ...r, userCount: (r.userCount || 0) - 1 };
-              }
-              if (r.id === updatedUser.role) {
-                return { ...r, userCount: (r.userCount || 0) + 1 };
-              }
-              return r;
-            })
-          );
-        }
-      } else {
-        // Add new user
-        newUsers = [...prevUsers, updatedUser];
-        
-        // Update role count for the new user's role
-        if (updatedUser.role) {
-          setRoles((prevRoles) =>
-            prevRoles.map((r) =>
-              r.id === updatedUser.role ? { ...r, userCount: (r.userCount || 0) + 1 } : r
-            )
-          );
-        }
-      }
-      
-      return newUsers;
-    });
-    message.success(isAddMode ? 'User added successfully' : 'User updated successfully');
-    setSelectedUserId(updatedUser.id);
-    setIsAddMode(false);
-  }, [isAddMode]);
-
-  const handleCancelEdit = useCallback(() => {
-    if (isAddMode) {
-      setIsAddMode(false);
-      // Auto-select first user if available
-      if (users.length > 0) {
-        setSelectedUserId(users[0].id);
-      }
-    } else {
-      // Reset by re-selecting (triggers form refresh)
-      if (selectedUserId) setSelectedUserId(selectedUserId);
-    }
-  }, [isAddMode, selectedUserId, users]);
 
   const handleAddUser = useCallback(() => {
     setIsAddMode(true);
     setSelectedUserId(null);
   }, []);
 
-  const handleDeleteUser = useCallback((userId: string) => {
-    const userToDelete = users.find(u => u.id === userId);
-    
-    setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
-    
-    // Update role count if user had a role
-    if (userToDelete?.role) {
-      setRoles((prevRoles) =>
-        prevRoles.map((r) =>
-          r.id === userToDelete.role ? { ...r, userCount: Math.max(0, (r.userCount || 0) - 1) } : r
-        )
-      );
-    }
-    
-    message.success('User deleted successfully');
-    setSelectedUserId(null);
+  const handleCancelEdit = useCallback(() => {
     setIsAddMode(false);
-    
-    // Auto-select first user if available
-    setTimeout(() => {
-      if (users.length > 1) {
-        setSelectedUserId(users.find((u) => u.id !== userId)?.id || null);
-      }
-    }, 0);
-  }, [users]);
+    if (!isAddMode && users.length > 0) {
+      setSelectedUserId(users[0].id);
+    }
+  }, [isAddMode, users]);
 
-  // Roles handlers
+  const handleSaveUser = useCallback(
+    async (data: CreateUserInput & { id?: string }) => {
+      const { id, firstName, lastName, email, roleId } = data;
+
+      try {
+        if (!id) {
+          // ── ADD MODE: Firebase first, then DB ──────────────────────────────
+          let firebaseUid: string | null = null;
+          try {
+            firebaseUid = await createFirebaseUser(email);
+          } catch (fbErr: any) {
+            const msg =
+              fbErr?.code === 'auth/email-already-in-use'
+                ? 'A Firebase account with that email already exists.'
+                : `Firebase account creation failed: ${fbErr?.message ?? fbErr}`;
+            message.error(msg);
+            return;
+          }
+
+          try {
+            const result = await createUserMutation({
+              variables: { input: { firstName, lastName, email, roleId } },
+            });
+            setSelectedUserId(result.data?.createUser.id ?? null);
+            setIsAddMode(false);
+            message.success('User created successfully. A password-reset email has been sent.');
+          } catch (dbErr: any) {
+            console.error('DB create failed after Firebase account was created:', dbErr);
+            message.error(
+              'User saved to Firebase but could not be saved to the database. Please contact support.'
+            );
+          }
+        } else {
+          // ── EDIT MODE: update DB only ──────────────────────────────────────
+          await updateUserMutation({
+            variables: { id, input: { firstName, lastName, roleId } },
+          });
+          message.success('User updated successfully');
+        }
+      } catch (err: any) {
+        console.error(err);
+        message.error(`Failed to save user: ${err?.message ?? err}`);
+      }
+    },
+    [createUserMutation, updateUserMutation]
+  );
+
+  const handleDeleteUser = useCallback(
+    async (userId: string) => {
+      try {
+        await deleteUserMutation({ variables: { id: userId } });
+        message.success('User deleted successfully');
+        setSelectedUserId(null);
+        setIsAddMode(false);
+      } catch (err: any) {
+        console.error(err);
+        message.error(`Failed to delete user: ${err?.message ?? err}`);
+      }
+    },
+    [deleteUserMutation]
+  );
+
+  // ─── Role handlers ─────────────────────────────────────────────────────────
   const handleCreateRole = useCallback(() => {
     setSelectedRole(null);
     setIsRoleEditMode(false);
@@ -247,50 +157,51 @@ export default function SecurityPage() {
     setIsRoleFormVisible(true);
   }, []);
 
-  const handleSaveRole = useCallback(async (roleData: Partial<Role>) => {
-    try {
-      if (isRoleEditMode && selectedRole) {
-        // Update existing role
-        const updatedRole = await updateRole(selectedRole.id, roleData);
-        setRoles((prevRoles) =>
-          prevRoles.map((r) => (r.id === selectedRole.id ? { ...r, ...roleData, updatedDate: updatedRole.updatedDate } : r))
-        );
-        message.success('Role updated successfully');
-      } else {
-        // Create new role
-        const newRole = await createRole(roleData as Omit<Role, 'id' | 'createdDate' | 'isDeleted'>);
-        setRoles((prevRoles) => [...prevRoles, newRole]);
-        message.success('Role created successfully');
+  const handleSaveRole = useCallback(
+    async (roleData: CreateRoleInput | UpdateRoleInput) => {
+      try {
+        if (isRoleEditMode && selectedRole) {
+          await updateRoleMutation({
+            variables: { input: roleData as UpdateRoleInput },
+          });
+          message.success('Role updated successfully');
+        } else {
+          await createRoleMutation({
+            variables: { input: roleData as CreateRoleInput },
+          });
+          message.success('Role created successfully');
+        }
+        setIsRoleFormVisible(false);
+        setSelectedRole(null);
+      } catch (err: any) {
+        console.error(err);
+        message.error(`Failed to save role: ${err?.message ?? err}`);
       }
-      setIsRoleFormVisible(false);
-      setSelectedRole(null);
-    } catch (error) {
-      console.error('Failed to save role:', error);
-      message.error('Failed to save role');
-    }
-  }, [isRoleEditMode, selectedRole]);
+    },
+    [isRoleEditMode, selectedRole, createRoleMutation, updateRoleMutation]
+  );
 
   const handleCancelRoleForm = useCallback(() => {
     setIsRoleFormVisible(false);
     setSelectedRole(null);
   }, []);
 
-  const handleDeleteRole = useCallback(async (roleId: string) => {
-    try {
-      await deleteRole(roleId);
-      setRoles((prevRoles) =>
-        prevRoles.map((r) =>
-          r.id === roleId ? { ...r, isDeleted: true } : r
-        )
-      );
-      message.success('Role deleted successfully');
-    } catch (error) {
-      console.error('Failed to delete role:', error);
-      message.error('Failed to delete role');
-    }
-  }, []);
+  const handleDeleteRole = useCallback(
+    async (roleId: string) => {
+      try {
+        await deleteRoleMutation({ variables: { id: roleId } });
+        message.success('Role deleted successfully');
+      } catch (err: any) {
+        console.error(err);
+        message.error(`Failed to delete role: ${err?.message ?? err}`);
+      }
+    },
+    [deleteRoleMutation]
+  );
 
-  const selectedUser = isAddMode ? null : users.find((u) => u.id === selectedUserId) || null;
+  // ─── Derived ───────────────────────────────────────────────────────────────
+  const selectedUser = isAddMode ? null : users.find((u) => u.id === selectedUserId) ?? null;
+  const isLoading = usersLoading || rolesLoading;
 
   return (
     <div className={styles.container}>
@@ -304,54 +215,64 @@ export default function SecurityPage() {
         />
       </div>
 
-      {/* Center: Users List */}
-      {selectedSubMenu === 'users' && (
-        <div className={styles.listSection}>
-          <UsersList
-            users={users}
-            selectedUserId={selectedUserId}
-            onUserSelect={handleUserSelect}
-            onAddUser={handleAddUser}
-          />
+      {isLoading && (
+        <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Spin size="large" />
         </div>
       )}
 
-      {/* Right: User Details Form */}
-      {selectedSubMenu === 'users' && (
-        <div className={styles.formSection}>
-          <UserDetailsForm
-            user={selectedUser}
-            onSave={handleSaveUser}
-            onCancel={handleCancelEdit}
-            onDelete={handleDeleteUser}
-            roles={roles.filter(r => !r.isDeleted && r.isActive)}
-            isAddMode={isAddMode}
-          />
-        </div>
-      )}
+      {!isLoading && (
+        <>
+          {/* Center: Users List */}
+          {selectedSubMenu === 'users' && (
+            <div className={styles.listSection}>
+              <UsersList
+                users={users}
+                selectedUserId={selectedUserId}
+                onUserSelect={handleUserSelect}
+                onAddUser={handleAddUser}
+              />
+            </div>
+          )}
 
-      {/* Roles Section */}
-      {selectedSubMenu === 'roles' && (
-        <div className={styles.rolesSection}>
-          <RolesPage
-            roles={roles}
-            onEdit={handleEditRole}
-            onCreate={handleCreateRole}
-            onDelete={handleDeleteRole}
-            onSave={handleSaveRole}
-            onCancel={handleCancelRoleForm}
-            visible={isRoleFormVisible}
-            selectedRole={selectedRole}
-            isEditMode={isRoleEditMode}
-          />
-        </div>
-      )}
+          {/* Right: User Details Form */}
+          {selectedSubMenu === 'users' && (
+            <div className={styles.formSection}>
+              <UserDetailsForm
+                user={selectedUser}
+                onSave={handleSaveUser}
+                onCancel={handleCancelEdit}
+                onDelete={handleDeleteUser}
+                roles={roles}
+                isAddMode={isAddMode}
+              />
+            </div>
+          )}
 
-      {/* Permissions Section */}
-      {selectedSubMenu === 'permissions' && (
-        <div className={styles.rolesSection}>
-          <PermissionsPage roles={roles} />
-        </div>
+          {/* Roles Section */}
+          {selectedSubMenu === 'roles' && (
+            <div className={styles.rolesSection}>
+              <RolesPage
+                roles={roles}
+                onEdit={handleEditRole}
+                onCreate={handleCreateRole}
+                onDelete={handleDeleteRole}
+                onSave={handleSaveRole}
+                onCancel={handleCancelRoleForm}
+                visible={isRoleFormVisible}
+                selectedRole={selectedRole}
+                isEditMode={isRoleEditMode}
+              />
+            </div>
+          )}
+
+          {/* Permissions Section */}
+          {selectedSubMenu === 'permissions' && (
+            <div className={styles.rolesSection}>
+              <PermissionsPage roles={roles} />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
