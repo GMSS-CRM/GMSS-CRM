@@ -20,7 +20,9 @@
       "@core/*": ["core/*"],
       "@features/*": ["features/*"],
       "@shared/*": ["shared/*"],
-      "@app/*": ["app/*"]
+      "@app/*": ["app/*"],
+      "@gmss/types": ["../../types/src"],
+      "@gmss/types/*": ["../../types/src/*"]
     },
 
     /* Linting */
