@@ -494,13 +494,12 @@ function BasicInfoSection({ form, tags, vendor, pendingRequest, isReadOnly, role
         <div className={`${styles.statusBanner} ${styles.statusBannerWarning}`}>
           <ClockCircleOutlined style={{ fontSize: 16 }} />
           <div className={styles.statusBannerContent}>
-            <div className={styles.statusBannerTitle}>Pending MD Review — Read Only</div>
+            <div className={styles.statusBannerTitle}>Pending MD Review</div>
             <div className={styles.statusBannerText}>
               You sent this vendor to MD on{' '}
               {new Date(pendingRequest.createdDate).toLocaleDateString('en-IN', {
                 day: 'numeric', month: 'short', year: 'numeric',
               })}
-              . Editing is disabled until the MD resolves the request.
             </div>
           </div>
         </div>
