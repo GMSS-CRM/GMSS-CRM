@@ -101,7 +101,7 @@ function UsersList({
                 avatar={
                   <Avatar 
                     firstName={user.firstName} 
-                    lastName={user.lastName}
+                    lastName={user.lastName ?? undefined}
                     size={36}
                   />
                 }

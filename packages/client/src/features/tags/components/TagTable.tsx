@@ -6,7 +6,6 @@ import {
   DeleteOutlined, 
   TagOutlined,
   InboxOutlined,
-  
 } from '@ant-design/icons';
 import type { TagWithVendorCount } from '../types/tagTypes';
 import styles from '../styles/tags.module.css';

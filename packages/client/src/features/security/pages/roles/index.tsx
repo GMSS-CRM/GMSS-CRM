@@ -3,6 +3,7 @@ import { Table, Tooltip, Space, Modal, Form, Input } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { Role } from '../../types';
+import type { CreateRoleInput, UpdateRoleInput } from '@gmss/types';
 import { showConfirmModal } from '../../../../components/confirm-modal';
 import Button from '../../../../components/button';
 import styles from './styles.module.css';
@@ -12,7 +13,7 @@ interface RolesPageProps {
   onEdit: (role: Role) => void;
   onCreate: () => void;
   onDelete: (roleId: string) => void;
-  onSave: (role: Partial<Role>) => void;
+  onSave: (role: CreateRoleInput | UpdateRoleInput) => void;
   onCancel: () => void;
   visible: boolean;
   selectedRole: Role | null;
@@ -37,10 +38,8 @@ export default function RolesPage({
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filter active (non-deleted) roles
-  const activeRoles = useMemo(() => {
-    return roles.filter(role => !role.isDeleted);
-  }, [roles]);
+  // All roles from the backend (no isDeleted/isActive filter needed)
+  const activeRoles = roles;
 
   const handleEdit = useCallback((role: Role) => {
     onEdit(role);
@@ -56,8 +55,10 @@ export default function RolesPage({
     });
   }, [onDelete]);
 
-  const formatDate = useCallback((dateString: string): string => {
+  const formatDate = useCallback((dateString: string | null | undefined): string => {
+    if (!dateString) return '—';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
@@ -65,23 +66,26 @@ export default function RolesPage({
     }).format(date);
   }, []);
 
-  // Handle modal form submission
   const handleSubmit = useCallback(async () => {
     try {
       setIsSubmitting(true);
       const values = await form.validateFields();
-      
-      const roleData: Partial<Role> = {
-        name: values.name.trim(),
-        description: values.description?.trim() || undefined,
-        isActive: true,
-      };
 
       if (isEditMode && selectedRole) {
-        roleData.id = selectedRole.id;
+        const input: UpdateRoleInput = {
+          id: selectedRole.id,
+          name: values.name.trim(),
+          description: values.description?.trim() || undefined,
+        };
+        onSave(input);
+      } else {
+        const input: CreateRoleInput = {
+          name: values.name.trim(),
+          description: values.description?.trim() || undefined,
+        };
+        onSave(input);
       }
 
-      onSave(roleData);
       form.resetFields();
     } catch (error) {
       console.error('Form validation failed:', error);

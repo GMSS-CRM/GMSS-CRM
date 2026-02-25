@@ -16,6 +16,14 @@ import { VendorTender } from './VendorTender';
 import { VendorContactPerson } from './VendorContactPerson';
 import { VendorDocument } from './VendorDocument';
 
+export enum CompanyType {
+  NEW = 'NEW',
+  INTERESTED = 'INTERESTED',
+  NOT_INTERESTED = 'NOT_INTERESTED',
+  FINAL = 'FINAL',
+  DELETED = 'DELETED',
+}
+
 @Entity({ name: 'vendor' })
 export class Vendor {
   @PrimaryGeneratedColumn('uuid')

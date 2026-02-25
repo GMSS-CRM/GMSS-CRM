@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { TYPES } from '../../inversify/types';
 import { User } from '../../entities/User';
 import {
@@ -36,8 +36,17 @@ export class UserRepository
   }
 
   search(params: { search?: string; limit?: number; offset?: number }) {
+    const searchTerm = params.search?.trim();
+    const where = searchTerm
+      ? [
+          { isDeleted: false, firstName: Like(`%${searchTerm}%`) },
+          { isDeleted: false, lastName: Like(`%${searchTerm}%`) },
+          { isDeleted: false, email: Like(`%${searchTerm}%`) },
+        ]
+      : { isDeleted: false };
+
     return this.find({
-      where: { isDeleted: false },
+      where,
       relations: ['role'],
       take: params.limit,
       skip: params.offset,

@@ -18,14 +18,12 @@ import {
 } from 'antd';
 import {
   ArrowLeftOutlined,
-  SaveOutlined,
   SendOutlined,
   CheckCircleOutlined,
   InfoCircleOutlined,
   FileTextOutlined,
   UploadOutlined,
   ClockCircleOutlined,
-  DeleteOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRef } from 'react';
@@ -39,6 +37,7 @@ import type {
   CompanyType,
 } from '../../types';
 import Button from '../../../../components/button';
+import FormActionsBar from '../../../../components/form-actions';
 import SubMenu from '../../../../components/sub-menu';
 import type { SubMenuItemConfig } from '../../../../components/sub-menu';
 import RemarkModal from '../../components/RemarkModal';
@@ -327,74 +326,27 @@ export default function VendorDetailsForm() {
           </div>
         </Space>
 
+        {/* Workflow actions remain in header */}
         <Space align="center">
-          {/* Delete button — edit mode only */}
-          {isEditMode && (
-            <AntButton
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => setDeleteConfirmOpen(true)}
-              loading={saving}
-            >
-              Delete
-            </AntButton>
-          )}
-
-          {/* Create mode */}
-          {!isEditMode && (
-            <AntButton
-              type="primary"
-              icon={<SaveOutlined />}
-              onClick={handleSaveClick}
-              loading={saving}
-            >
-              Save Vendor
-            </AntButton>
-          )}
-
-          {/* Edit mode — EMPLOYEE */}
           {isEditMode && role === 'EMPLOYEE' && (
-            <>
-              <AntButton
-                icon={<SaveOutlined />}
-                onClick={handleSaveClick}
-                loading={saving}
-              >
-                Save Changes
-              </AntButton>
-              <AntButton
-                type="primary"
-                icon={<SendOutlined />}
-                onClick={handleSendToMd}
-                loading={saving}
-              >
-                Send to MD
-              </AntButton>
-            </>
+            <Button
+              variant="primary"
+              icon={<SendOutlined />}
+              onClick={handleSendToMd}
+              loading={saving}
+            >
+              Send to MD
+            </Button>
           )}
-
-          {/* Edit mode — MD — always can save; also Resolve when in pending view */}
-          {isEditMode && role === 'MD' && (
-            <>
-              <AntButton
-                icon={<SaveOutlined />}
-                onClick={handleSaveClick}
-                loading={saving}
-              >
-                Save Changes
-              </AntButton>
-              {isPendingView && pendingRequest && (
-                <AntButton
-                  type="primary"
-                  icon={<CheckCircleOutlined />}
-                  onClick={handleResolve}
-                  loading={saving}
-                  style={{ background: '#059669', borderColor: '#059669' }}
-                >
-                  Resolve Request
-                </AntButton>
-              )}
-            </>
+          {isEditMode && role === 'MD' && isPendingView && pendingRequest && (
+            <Button
+              variant="primary"
+              icon={<CheckCircleOutlined />}
+              onClick={handleResolve}
+              loading={saving}
+            >
+              Resolve Request
+            </Button>
           )}
         </Space>
       </div>
@@ -434,6 +386,18 @@ export default function VendorDetailsForm() {
           )}
         </div>
       </div>
+
+      {/* Footer Actions — Delete / Back / Save (same layout as user form) */}
+      <FormActionsBar
+        onCancel={handleBack}
+        cancelLabel="Back"
+        cancelIcon={<ArrowLeftOutlined />}
+        onDelete={isEditMode ? () => setDeleteConfirmOpen(true) : undefined}
+        deleteLoading={saving}
+        onOk={handleSaveClick}
+        okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
+        okLoading={saving}
+      />
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -482,7 +446,7 @@ interface BasicInfoSectionProps {
   isPendingView: boolean;
 }
 
-function BasicInfoSection({ form, tags, vendor, pendingRequest, isReadOnly, role, isPendingView }: BasicInfoSectionProps) {
+function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPendingView }: BasicInfoSectionProps) {
   const handleUppercaseInput = (fieldName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     form.setFieldValue(fieldName, e.target.value.toUpperCase());
   };

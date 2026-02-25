@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import express from "express";
 import http from "http";
+import cors from "cors";
 import dotenv from "dotenv";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
@@ -25,6 +26,10 @@ export async function startApolloServer() {
   const httpServer = http.createServer(app);
 
   app.use(express.json());
+  app.use(cors({
+    origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
+    credentials: true,
+  }));
 
   // DB init
   try {

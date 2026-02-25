@@ -131,16 +131,27 @@ export type CreateVendorContactPersonInput = {
   phoneNumber: Scalars['String']['input'];
 };
 
+export type CreateVendorContactPersonStandaloneInput = {
+  bcc?: InputMaybe<Scalars['String']['input']>;
+  cc?: InputMaybe<Scalars['String']['input']>;
+  designation?: InputMaybe<Scalars['String']['input']>;
+  email: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  phoneNumber: Scalars['String']['input'];
+  vendorId: Scalars['ID']['input'];
+};
+
 export type CreateVendorDocumentInput = {
   documentName: Scalars['String']['input'];
   documentUrl: Scalars['String']['input'];
   expiresOn?: InputMaybe<Scalars['String']['input']>;
-  vendorId: Scalars['ID']['input'];
 };
 
 export type CreateVendorInput = {
   address?: InputMaybe<Scalars['String']['input']>;
   cinNumber?: InputMaybe<Scalars['String']['input']>;
+  contactPersons?: InputMaybe<Array<CreateVendorContactPersonInput>>;
+  documents?: InputMaybe<Array<CreateVendorDocumentInput>>;
   gstNumber?: InputMaybe<Scalars['String']['input']>;
   isRailwayLinked?: InputMaybe<Scalars['Boolean']['input']>;
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
@@ -181,7 +192,6 @@ export type Mutation = {
   createVendor: Vendor;
   createVendorAgreement: VendorAgreement;
   createVendorContactPerson: VendorContactPerson;
-  createVendorDocument: VendorDocument;
   createVendorFollowUp: VendorFollowUp;
   createVendorProposal: VendorProposal;
   createVendorTag: VendorTag;
@@ -215,7 +225,7 @@ export type Mutation = {
   updateVendorContactPerson: VendorContactPerson;
   updateVendorDocument: VendorDocument;
   updateVendorProposalStatus: VendorProposal;
-  uploadVendor: Vendor;
+  uploadVendorDocument: VendorDocument;
 };
 
 
@@ -270,12 +280,7 @@ export type MutationCreateVendorAgreementArgs = {
 
 
 export type MutationCreateVendorContactPersonArgs = {
-  input: CreateVendorContactPersonInput;
-};
-
-
-export type MutationCreateVendorDocumentArgs = {
-  input: CreateVendorDocumentInput;
+  input: CreateVendorContactPersonStandaloneInput;
 };
 
 
@@ -436,13 +441,13 @@ export type MutationUpdateVendorArgs = {
 
 export type MutationUpdateVendorContactPersonArgs = {
   id: Scalars['ID']['input'];
-  input: UpdateVendorContactPersonInput;
+  input: UpdateVendorContactPersonStandaloneInput;
 };
 
 
 export type MutationUpdateVendorDocumentArgs = {
   id: Scalars['ID']['input'];
-  input: UpdateVendorDocumentInput;
+  input: UpdateVendorDocumentStandaloneInput;
 };
 
 
@@ -451,8 +456,8 @@ export type MutationUpdateVendorProposalStatusArgs = {
 };
 
 
-export type MutationUploadVendorArgs = {
-  input: CreateVendorInput;
+export type MutationUploadVendorDocumentArgs = {
+  input: UploadVendorDocumentInput;
 };
 
 export type ParticipateInTenderInput = {
@@ -651,7 +656,8 @@ export type QuerySearchUsersArgs = {
 
 
 export type QuerySearchVendorContactPersonsArgs = {
-  searchInput?: InputMaybe<SearchVendorContactPersonInput>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  vendorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -714,13 +720,6 @@ export type SearchUserInput = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
   search?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type SearchVendorContactPersonInput = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
-  vendorId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type SearchVendorDocumentInput = {
@@ -833,12 +832,28 @@ export type UpdateVendorContactPersonInput = {
   cc?: InputMaybe<Scalars['String']['input']>;
   designation?: InputMaybe<Scalars['String']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   phoneNumber?: InputMaybe<Scalars['String']['input']>;
-  vendorId: Scalars['ID']['input'];
+};
+
+export type UpdateVendorContactPersonStandaloneInput = {
+  bcc?: InputMaybe<Scalars['String']['input']>;
+  cc?: InputMaybe<Scalars['String']['input']>;
+  designation?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  phoneNumber?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateVendorDocumentInput = {
+  documentName?: InputMaybe<Scalars['String']['input']>;
+  documentUrl?: InputMaybe<Scalars['String']['input']>;
+  expiresOn?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type UpdateVendorDocumentStandaloneInput = {
   documentName?: InputMaybe<Scalars['String']['input']>;
   documentUrl?: InputMaybe<Scalars['String']['input']>;
   expiresOn?: InputMaybe<Scalars['String']['input']>;
@@ -847,12 +862,21 @@ export type UpdateVendorDocumentInput = {
 export type UpdateVendorInput = {
   address?: InputMaybe<Scalars['String']['input']>;
   cinNumber?: InputMaybe<Scalars['String']['input']>;
+  contactPersons?: InputMaybe<Array<UpdateVendorContactPersonInput>>;
+  documents?: InputMaybe<Array<UpdateVendorDocumentInput>>;
   gstNumber?: InputMaybe<Scalars['String']['input']>;
   isRailwayLinked?: InputMaybe<Scalars['Boolean']['input']>;
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   panNumber?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UploadVendorDocumentInput = {
+  documentName: Scalars['String']['input'];
+  documentUrl: Scalars['String']['input'];
+  expiresOn?: InputMaybe<Scalars['String']['input']>;
+  vendorId: Scalars['ID']['input'];
 };
 
 export type User = {
@@ -1119,6 +1143,7 @@ export type ResolversTypes = {
   CreateTenderInput: CreateTenderInput;
   CreateUserInput: CreateUserInput;
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
+  CreateVendorContactPersonStandaloneInput: CreateVendorContactPersonStandaloneInput;
   CreateVendorDocumentInput: CreateVendorDocumentInput;
   CreateVendorInput: CreateVendorInput;
   CreateVendorTagInput: CreateVendorTagInput;
@@ -1140,7 +1165,6 @@ export type ResolversTypes = {
   SearchTenderDocumentInput: SearchTenderDocumentInput;
   SearchTenderInput: SearchTenderInput;
   SearchUserInput: SearchUserInput;
-  SearchVendorContactPersonInput: SearchVendorContactPersonInput;
   SearchVendorDocumentInput: SearchVendorDocumentInput;
   SignatureStatus: SignatureStatus;
   Tag: ResolverTypeWrapper<Tag>;
@@ -1157,8 +1181,11 @@ export type ResolversTypes = {
   UpdateTenderParticipationInput: UpdateTenderParticipationInput;
   UpdateUserInput: UpdateUserInput;
   UpdateVendorContactPersonInput: UpdateVendorContactPersonInput;
+  UpdateVendorContactPersonStandaloneInput: UpdateVendorContactPersonStandaloneInput;
   UpdateVendorDocumentInput: UpdateVendorDocumentInput;
+  UpdateVendorDocumentStandaloneInput: UpdateVendorDocumentStandaloneInput;
   UpdateVendorInput: UpdateVendorInput;
+  UploadVendorDocumentInput: UploadVendorDocumentInput;
   User: ResolverTypeWrapper<User>;
   Vendor: ResolverTypeWrapper<Vendor>;
   VendorAgreement: ResolverTypeWrapper<VendorAgreement>;
@@ -1194,6 +1221,7 @@ export type ResolversParentTypes = {
   CreateTenderInput: CreateTenderInput;
   CreateUserInput: CreateUserInput;
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
+  CreateVendorContactPersonStandaloneInput: CreateVendorContactPersonStandaloneInput;
   CreateVendorDocumentInput: CreateVendorDocumentInput;
   CreateVendorInput: CreateVendorInput;
   CreateVendorTagInput: CreateVendorTagInput;
@@ -1211,7 +1239,6 @@ export type ResolversParentTypes = {
   SearchTenderDocumentInput: SearchTenderDocumentInput;
   SearchTenderInput: SearchTenderInput;
   SearchUserInput: SearchUserInput;
-  SearchVendorContactPersonInput: SearchVendorContactPersonInput;
   SearchVendorDocumentInput: SearchVendorDocumentInput;
   Tag: Tag;
   Tender: Tender;
@@ -1226,8 +1253,11 @@ export type ResolversParentTypes = {
   UpdateTenderParticipationInput: UpdateTenderParticipationInput;
   UpdateUserInput: UpdateUserInput;
   UpdateVendorContactPersonInput: UpdateVendorContactPersonInput;
+  UpdateVendorContactPersonStandaloneInput: UpdateVendorContactPersonStandaloneInput;
   UpdateVendorDocumentInput: UpdateVendorDocumentInput;
+  UpdateVendorDocumentStandaloneInput: UpdateVendorDocumentStandaloneInput;
   UpdateVendorInput: UpdateVendorInput;
+  UploadVendorDocumentInput: UploadVendorDocumentInput;
   User: User;
   Vendor: Vendor;
   VendorAgreement: VendorAgreement;
@@ -1260,7 +1290,6 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationCreateVendorArgs, 'input'>>;
   createVendorAgreement?: Resolver<ResolversTypes['VendorAgreement'], ParentType, ContextType, RequireFields<MutationCreateVendorAgreementArgs, 'input'>>;
   createVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationCreateVendorContactPersonArgs, 'input'>>;
-  createVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationCreateVendorDocumentArgs, 'input'>>;
   createVendorFollowUp?: Resolver<ResolversTypes['VendorFollowUp'], ParentType, ContextType, RequireFields<MutationCreateVendorFollowUpArgs, 'input'>>;
   createVendorProposal?: Resolver<ResolversTypes['VendorProposal'], ParentType, ContextType, RequireFields<MutationCreateVendorProposalArgs, 'input'>>;
   createVendorTag?: Resolver<ResolversTypes['VendorTag'], ParentType, ContextType, RequireFields<MutationCreateVendorTagArgs, 'input'>>;
@@ -1294,7 +1323,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationUpdateVendorContactPersonArgs, 'id' | 'input'>>;
   updateVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationUpdateVendorDocumentArgs, 'id' | 'input'>>;
   updateVendorProposalStatus?: Resolver<ResolversTypes['VendorProposal'], ParentType, ContextType, RequireFields<MutationUpdateVendorProposalStatusArgs, 'input'>>;
-  uploadVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationUploadVendorArgs, 'input'>>;
+  uploadVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationUploadVendorDocumentArgs, 'input'>>;
 };
 
 export type PaymentScheduleItemResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentScheduleItem'] = ResolversParentTypes['PaymentScheduleItem']> = {

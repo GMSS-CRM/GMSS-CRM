@@ -5,7 +5,8 @@ import {
   dummyTagVendors, 
   simulateDelay 
 } from '../data/dummyData';
-import type { CreateTagPayload, TagVendorDisplay, TagWithVendorCount, UpdateTagPayload } from '../types/tagTypes';
+import type { CreateTagPayload, TagVendorDisplay, TagWithVendorCount, } from '../types/tagTypes';
+import type { UpdateTagInput } from '@gmss/types';
 
 
 // Flag to switch between dummy and real API
@@ -110,7 +111,7 @@ export function useTagMutations(onSuccess?: () => void) {
     }
   }, [onSuccess]);
 
-  const updateTag = useCallback(async (_id: string, _input: UpdateTagPayload) => {
+  const updateTag = useCallback(async (_id: string, _input: UpdateTagInput) => {
     setLoading(true);
     try {
       if (USE_DUMMY_DATA) {

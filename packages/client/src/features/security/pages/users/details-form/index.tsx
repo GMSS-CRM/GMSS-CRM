@@ -1,15 +1,18 @@
 import { useEffect, useState, useCallback, memo } from 'react';
-import { Form, Input, Select, Switch, Row, Col } from 'antd';
+import { Form, Input, Select, Row, Col } from 'antd';
 import { SaveOutlined, CloseOutlined, DeleteFilled } from '@ant-design/icons';
 import type { User, Role } from '../../../types';
+import type { CreateUserInput } from '@gmss/types';
 import { showConfirmModal } from '../../../../../components/confirm-modal';
 import Avatar from '../../../../../components/avatar';
 import Button from '../../../../../components/button';
 import styles from './styles.module.css';
 
+type SaveData = CreateUserInput & { id?: string };
+
 interface UserDetailsFormProps {
   user: User | null;
-  onSave: (updatedUser: User) => void;
+  onSave: (data: SaveData) => void;
   onCancel: () => void;
   onDelete?: (userId: string) => void;
   roles: Role[];
@@ -36,19 +39,13 @@ function UserDetailsForm({
     if (user) {
       form.setFieldsValue({
         firstName: user.firstName,
-        middleName: user.middleName || '',
         lastName: user.lastName || '',
         email: user.email,
-        role: user.role,
-        isActive: user.isActive,
+        roleId: user.roleId,
       });
       setIsDirty(false);
     } else if (isAddMode) {
-      // Clear form for add mode
       form.resetFields();
-      form.setFieldsValue({
-        isActive: true,
-      });
       setIsDirty(false);
     }
   }, [user, isAddMode, form]);
@@ -60,20 +57,16 @@ function UserDetailsForm({
   const handleSave = useCallback(async () => {
     try {
       const values = await form.validateFields();
-      
-      const updatedUser: User = {
-        id: user?.id || `new-${Date.now()}`,
+      onSave({
+        id: user?.id,
         firstName: values.firstName,
-        middleName: values.middleName,
-        lastName: values.lastName,
+        lastName: values.lastName || undefined,
         email: values.email,
-        role: values.role,
-        isActive: values.isActive ?? true,
-      };
-      onSave(updatedUser);
+        roleId: values.roleId,
+      });
       setIsDirty(false);
-    } catch (error) {
-      console.error('Form validation failed:', error);
+    } catch {
+      // validation errors shown inline
     }
   }, [form, user, onSave]);
 
@@ -83,14 +76,8 @@ function UserDetailsForm({
     onCancel();
   }, [form, onCancel]);
 
-  const handleActiveToggle = useCallback(() => {
-    form.setFieldValue('isActive', !form.getFieldValue('isActive'));
-    handleFieldChange();
-  }, [form, handleFieldChange]);
-
   const handleDelete = useCallback(() => {
     if (!user || !onDelete) return;
-    
     showConfirmModal({
       title: 'Delete User',
       content: `Are you sure you want to delete ${user.firstName}${user.lastName ? ' ' + user.lastName : ''}?`,
@@ -112,7 +99,7 @@ function UserDetailsForm({
 
   return (
     <div className={styles.container}>
-      {/* Header with Avatar and Status */}
+      {/* Header with Avatar */}
       <div className={styles.header}>
         <Row gutter={16} align="middle" justify="space-between" wrap={false}>
           <Col flex="auto" style={{ minWidth: 0 }}>
@@ -120,34 +107,24 @@ function UserDetailsForm({
               {isNewUser ? (
                 <div className={styles.newUserAvatar}>+</div>
               ) : (
-                <Avatar 
-                  firstName={user!.firstName} 
-                  lastName={user!.lastName}
+                <Avatar
+                  firstName={user!.firstName}
+                  lastName={user!.lastName ?? undefined}
                   size={44}
                 />
               )}
               <div style={{ minWidth: 0 }}>
                 <div className={styles.headerName}>
-                  {isNewUser ? 'New User' : `${user!.firstName}${user!.lastName ? ' ' + user!.lastName : ''}`}
+                  {isNewUser
+                    ? 'New User'
+                    : `${user!.firstName}${user!.lastName ? ' ' + user!.lastName : ''}`}
                 </div>
-                <div className={styles.headerEmail}>{isNewUser ? 'Enter user details' : user!.email}</div>
+                <div className={styles.headerEmail}>
+                  {isNewUser ? 'Enter user details' : user!.email}
+                </div>
               </div>
             </div>
           </Col>
-          {!isNewUser && (
-            <Col flex="none">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div className={`${styles.statusText} ${form.getFieldValue('isActive') ? styles.active : ''}`}>
-                  {form.getFieldValue('isActive') ? 'Active' : 'Inactive'}
-                </div>
-                <Switch 
-                  checked={form.getFieldValue('isActive')} 
-                  onChange={handleActiveToggle}
-                  size="small"
-                />
-              </div>
-            </Col>
-          )}
         </Row>
       </div>
 
@@ -160,67 +137,52 @@ function UserDetailsForm({
           requiredMark={false}
           onValuesChange={handleFieldChange}
         >
-        {/* User Details Section */}
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>User Details</div>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label={<>First Name<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
-                name="firstName"
-                rules={[{ required: true, message: 'First name is required' }]}
-              >
-                <Input placeholder="Enter first name" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Middle Name"
-                name="middleName"
-              >
-                <Input placeholder="Enter middle name (optional)" />
-              </Form.Item>
-            </Col>
-          </Row>
+          {/* User Details Section */}
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>User Details</div>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label={<>First Name<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
+                  name="firstName"
+                  rules={[{ required: true, message: 'First name is required' }]}
+                >
+                  <Input placeholder="Enter first name" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="Last Name" name="lastName">
+                  <Input placeholder="Enter last name (optional)" />
+                </Form.Item>
+              </Col>
+            </Row>
 
-          <Form.Item
-            label="Last Name"
-            name="lastName"
-          >
-            <Input placeholder="Enter last name (optional)" />
-          </Form.Item>
+            <Form.Item
+              label={<>Email Address<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
+              name="email"
+              rules={[{ required: true, type: 'email', message: 'Valid email is required' }]}
+            >
+              <Input placeholder="user@example.com" disabled={!isNewUser} />
+            </Form.Item>
+          </div>
 
-          <Form.Item
-            label={<>Email Address<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
-            name="email"
-            rules={[{ required: true, type: 'email', message: 'Valid email is required' }]}
-          >
-            <Input placeholder="user@example.com" disabled={!isNewUser} />
-          </Form.Item>
-        </div>
-
-        {/* User Role Section */}
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>User Role</div>
-          <Form.Item
-            label="Role"
-            name="role"
-          >
-            <Select
-              placeholder="Select role (optional)"
-              allowClear
-              options={roles.map((role) => ({
-                label: role.name,
-                value: role.id,
-              }))}
-              optionLabelProp="label"
-            />
-          </Form.Item>
-        </div>
-
-        <Form.Item name="isActive" hidden>
-          <Input type="hidden" />
-        </Form.Item>
+          {/* User Role Section */}
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>User Role</div>
+            <Form.Item
+              label={<>Role<span style={{ color: '#ff4d4f', marginLeft: 4 }}>*</span></>}
+              name="roleId"
+              rules={[{ required: true, message: 'Role is required' }]}
+            >
+              <Select
+                placeholder="Select role"
+                options={roles.map((role) => ({
+                  label: role.name,
+                  value: role.id,
+                }))}
+              />
+            </Form.Item>
+          </div>
         </Form>
       </div>
 

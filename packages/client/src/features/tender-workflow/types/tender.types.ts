@@ -45,6 +45,9 @@ export interface Tender {
   mailSentAt?: Date;
 }
 
+/** Input type for creating / updating a Tender (excludes auto-generated fields) */
+export type TenderFormData = Omit<Tender, 'id' | 'createdAt' | 'updatedAt'>;
+
 export interface ExcelTenderRow {
   key: string;
   name: string;

@@ -26,5 +26,5 @@ export interface IUserService {
   deleteUsers(ids: string[]): Promise<boolean>;
   getUserById(id: string): Promise<User | null>;
   getUserByEmail(email: string): Promise<User | null>;
-  searchUser(params: SearchUserInput): Promise<User[]>;
+  searchUser(params?: SearchUserInput): Promise<User[]>;
 }

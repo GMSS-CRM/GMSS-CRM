@@ -1,7 +1,7 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp, deleteApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAaLz2fpoBti1wvz9ZGILRHXCSZQFbVSEU",
   authDomain: "gmss--crm.firebaseapp.com",
   projectId: "gmss--crm",
@@ -43,4 +43,41 @@ export const getActionCodeSettings = () => {
     url: actionUrl,
     handleCodeInApp: false, // Web app, not mobile
   };
+};
+
+/**
+ * Creates a Firebase account for a new dashboard user without affecting the
+ * currently signed-in admin session.
+ *
+ * Strategy: initialise a *secondary* Firebase app, create the account there,
+ * send a password-reset email so the new user can set their own password, then
+ * tear down the secondary app.
+ *
+ * @returns the Firebase UID of the created user
+ * @throws if account creation or email dispatch fails
+ */
+export const createFirebaseUser = async (email: string): Promise<string> => {
+  // Random 16-char password — the user will set their own via the reset email
+  const tempPassword =
+    Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2).toUpperCase();
+
+  const secondaryApp = initializeApp(firebaseConfig, `UserCreation_${Date.now()}`);
+  const secondaryAuth = getAuth(secondaryApp);
+
+  try {
+    const credential = await createUserWithEmailAndPassword(secondaryAuth, email, tempPassword);
+    const uid = credential.user.uid;
+
+    // Send password-reset email so the new user can choose their own password
+    try {
+      await sendPasswordResetEmail(secondaryAuth, email);
+    } catch (emailErr) {
+      console.warn('Password-reset email could not be sent:', emailErr);
+      // Non-fatal — account still created
+    }
+
+    return uid;
+  } finally {
+    await deleteApp(secondaryApp);
+  }
 };

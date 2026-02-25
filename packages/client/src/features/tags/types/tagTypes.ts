@@ -51,3 +51,9 @@ export interface CreateTagPayload {
 export interface UpdateTagPayload {
   name: string;
 }
+
+/** Alias used by hooks (mirrors CreateTagPayload) */
+export type CreateTagInput = CreateTagPayload;
+
+/** Alias used by hooks (mirrors UpdateTagPayload) */
+export type UpdateTagInput = UpdateTagPayload;

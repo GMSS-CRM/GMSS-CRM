@@ -1,69 +1,44 @@
-import type { Permission, RolePermission } from '../types';
+import { gql } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
+import type { AssignPermissionsInput, Permission, RolePermissionResult } from '@gmss/types';
+import { SEARCH_ROLES } from './roles.service';
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
+
+export const GET_PERMISSIONS_BY_ROLE_ID = gql`
+  query GetPermissionsByRoleId($roleId: ID!) {
+    getPermissionsByRoleId(roleId: $roleId)
+  }
+`;
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+export const ASSIGN_PERMISSIONS = gql`
+  mutation AssignPermissions($input: AssignPermissionsInput!) {
+    assignPermissions(input: $input) {
+      id
+      roleId
+      permissions
+      createdBy
+      createdDate
+    }
+  }
+`;
+
+// ─── Hooks ────────────────────────────────────────────────────────────────────
 
 /**
- * Permissions Service
- * API integration layer for permission management operations
- * TODO: Integrate with GraphQL/REST API
+ * Lazy query — call `loadPermissions({ variables: { roleId } })` to trigger.
+ * Returns `data.getPermissionsByRoleId` as `Permission[]` (enum strings).
  */
+export const useGetPermissionsByRoleId = () =>
+  useLazyQuery<{ getPermissionsByRoleId: Permission[] }, { roleId: string }>(
+    GET_PERMISSIONS_BY_ROLE_ID,
+    { fetchPolicy: 'network-only' }
+  );
 
-/**
- * Fetch all permissions
- * @returns Promise<Permission[]>
- */
-export const fetchPermissions = async (): Promise<Permission[]> => {
-  // TODO: Replace with actual API call
-  // Example: const { data } = await apolloClient.query({ query: GET_PERMISSIONS });
-  throw new Error('fetchPermissions API not implemented');
-};
-
-/**
- * Fetch permissions assigned to a specific role
- * @param roleId - Role ID
- * @returns Promise<Permission[]>
- */
-export const fetchRolePermissions = async (_roleId: string): Promise<Permission[]> => {
-  // TODO: Replace with actual API call
-  // Example: const { data } = await apolloClient.query({ query: GET_ROLE_PERMISSIONS, variables: { roleId } });
-  throw new Error('fetchRolePermissions API not implemented');
-};
-
-/**
- * Assign permissions to a role
- * @param roleId - Role ID
- * @param permissionIds - Array of permission IDs to assign
- * @returns Promise<void>
- */
-export const assignPermissionsToRole = async (
-  _roleId: string,
-  _permissionIds: string[]
-): Promise<void> => {
-  // TODO: Replace with actual API call
-  // Example: await apolloClient.mutate({ mutation: ASSIGN_PERMISSIONS, variables: { roleId, permissionIds } });
-  return Promise.resolve();
-};
-
-/**
- * Remove permissions from a role
- * @param roleId - Role ID
- * @param permissionIds - Array of permission IDs to remove
- * @returns Promise<void>
- */
-export const removePermissionsFromRole = async (
-  _roleId: string,
-  _permissionIds: string[]
-): Promise<void> => {
-  // TODO: Replace with actual API call
-  // Example: await apolloClient.mutate({ mutation: REMOVE_PERMISSIONS, variables: { roleId, permissionIds } });
-  return Promise.resolve();
-};
-
-/**
- * Get role-permission mappings for a specific role
- * @param roleId - Role ID
- * @returns Promise<RolePermission[]>
- */
-export const getRolePermissionMappings = async (_roleId: string): Promise<RolePermission[]> => {
-  // TODO: Replace with actual API call
-  // Example: const { data } = await apolloClient.query({ query: GET_ROLE_PERMISSION_MAPPINGS, variables: { roleId } });
-  throw new Error('getRolePermissionMappings API not implemented');
-};
+export const useAssignPermissions = () =>
+  useMutation<{ assignPermissions: RolePermissionResult }, { input: AssignPermissionsInput }>(
+    ASSIGN_PERMISSIONS,
+    { refetchQueries: [{ query: SEARCH_ROLES }] }
+  );
