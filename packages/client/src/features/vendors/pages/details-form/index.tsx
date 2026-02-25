@@ -42,16 +42,18 @@ import SubMenu from '../../../../components/sub-menu';
 import type { SubMenuItemConfig } from '../../../../components/sub-menu';
 import RemarkModal from '../../components/RemarkModal';
 import {
-  fetchVendorById,
-  createVendor,
-  updateVendor,
-  deleteVendor,
-  fetchTags,
-  fetchVendorDocuments,
-  sendVendorToMd,
-  resolveMdRequest,
-  getActivePendingRequest,
+  useGetVendorById,
+  useSearchVendorDocuments,
+  useGetActivePendingRequest,
+  useCreateVendor,
+  useUpdateVendor,
+  useDeleteVendor,
+  useCreateMdRequest,
+  useResolveMdRequest,
+  useUploadVendorDocument,
 } from '../../services/vendors.service';
+import { useSearchTags } from '../../../tags/services/tags.service';
+import { uploadFileToS3, useGenerateUploadUrl } from '../../../tender-workflow/services/upload.service';
 import styles from './styles.module.css';
 
 const { TextArea } = Input;
@@ -72,79 +74,68 @@ export default function VendorDetailsForm() {
   const role = (searchParams.get('role') as UserRole) ?? 'EMPLOYEE';
   const isPendingView = searchParams.get('pending') === 'true';
 
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [tags, setTags] = useState<VendorTag[]>([]);
-  const [documents, setDocuments] = useState<VendorDocument[]>([]);
-  const [pendingRequest, setPendingRequest] = useState<VendorMdRequest | null>(null);
   const [selectedSubMenu, setSelectedSubMenu] = useState<VendorSubMenuItem>('basic');
 
-  // Remark modals — only for Send to MD and Resolve
+  // Remark modals
   const [sendToMdRemarkOpen, setSendToMdRemarkOpen] = useState(false);
   const [resolveRemarkOpen, setResolveRemarkOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const isEditMode = !!id;
-
-  // Form is never read-only — both Employee and MD can edit
   const isFormReadOnly = false;
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const tagsData = await fetchTags();
-        setTags(tagsData);
+  // ── Apollo hooks ──────────────────────────────────────────────────────────
+  const { vendor, rawStatus, loading: vendorLoading } = useGetVendorById(id);
+  const { documents, refetch: refetchDocs } = useSearchVendorDocuments(id);
+  const { request: pendingRequest, refetch: refetchPending } = useGetActivePendingRequest(id);
+  const { data: tagsData } = useSearchTags();
+  const tagOptions = tagsData?.searchTags ?? [];
+  const { createVendor } = useCreateVendor();
+  const { updateVendor } = useUpdateVendor();
+  const { deleteVendor } = useDeleteVendor();
+  const { createMdRequest } = useCreateMdRequest();
+  const { resolveMdRequest } = useResolveMdRequest();
 
-        if (id) {
-          const [vendorData, pendingReq] = await Promise.all([
-            fetchVendorById(id),
-            getActivePendingRequest(id),
-          ]);
-          if (vendorData) {
-            setVendor(vendorData);
-            setPendingRequest(pendingReq);
-            form.setFieldsValue({
-              companyName: vendorData.companyName,
-              isLinkedWithRailways: vendorData.isLinkedWithRailways,
-              companyType: vendorData.companyType,
-              status: vendorData.status,
-              address: vendorData.address,
-              contactPersons: vendorData.contactPersons,
-              gstNumber: vendorData.gstNumber,
-              panNumber: vendorData.panNumber,
-              msmeNumber: vendorData.msmeNumber,
-              cinNumber: vendorData.cinNumber,
-              tags: vendorData.tags,
-            });
-            const docsData = await fetchVendorDocuments(id);
-            setDocuments(docsData);
-          } else {
-            message.error('Vendor not found');
-            navigate('/vendors');
-          }
-        }
-      } catch (error) {
-        message.error('Failed to load data');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, [id, form, navigate]);
+  const loading = vendorLoading;
+
+  // Populate form when vendor loads
+  useEffect(() => {
+    if (vendor) {
+      form.setFieldsValue({
+        companyName: vendor.companyName,
+        isLinkedWithRailways: vendor.isLinkedWithRailways,
+        companyType: vendor.companyType,
+        status: vendor.status,
+        address: vendor.address,
+        contactPersons: vendor.contactPersons,
+        gstNumber: vendor.gstNumber,
+        panNumber: vendor.panNumber,
+        msmeNumber: vendor.msmeNumber,
+        cinNumber: vendor.cinNumber,
+        tags: vendor.tags,
+      });
+    }
+  }, [vendor, form]);
+
+  // Notify if vendor not found in edit mode (after load completes)
+  useEffect(() => {
+    if (isEditMode && !vendorLoading && !vendor) {
+      message.error('Vendor not found');
+      navigate('/vendors');
+    }
+  }, [isEditMode, vendorLoading, vendor, navigate]);
 
   const handleBack = useCallback(() => {
     navigate(`/vendors?role=${role}`);
   }, [navigate, role]);
 
-  // ── Save (direct — no remark required) ─────────────────────────────────
+  // ── Save ──────────────────────────────────────────────────────────────────
   const handleSaveClick = useCallback(async () => {
     try {
       const values = await form.validateFields();
       setSaving(true);
-      const vendorData = {
+      const payload = {
         companyName: values.companyName,
         companyType: values.companyType as CompanyType,
         isLinkedWithRailways: values.isLinkedWithRailways ?? false,
@@ -156,14 +147,13 @@ export default function VendorDetailsForm() {
         msmeNumber: values.msmeNumber,
         cinNumber: values.cinNumber,
         tags: values.tags ?? [],
-        createdBy: 'emp001',
       };
 
       if (isEditMode && vendor) {
-        await updateVendor(vendor.id, vendorData);
+        await updateVendor(vendor.id, payload, rawStatus ?? 'NEW');
         message.success('Vendor saved successfully');
       } else {
-        await createVendor(vendorData);
+        await createVendor(payload);
         message.success('Vendor created successfully');
       }
       navigate(`/vendors?role=${role}`);
@@ -172,9 +162,9 @@ export default function VendorDetailsForm() {
     } finally {
       setSaving(false);
     }
-  }, [form, isEditMode, vendor, navigate, role]);
+  }, [form, isEditMode, vendor, rawStatus, updateVendor, createVendor, navigate, role]);
 
-  // ── Delete Vendor ──────────────────────────────────────────
+  // ── Delete ────────────────────────────────────────────────────────────────
   const handleDeleteConfirm = useCallback(async () => {
     if (!vendor) return;
     try {
@@ -189,7 +179,7 @@ export default function VendorDetailsForm() {
     } finally {
       setSaving(false);
     }
-  }, [vendor, navigate, role]);
+  }, [vendor, deleteVendor, navigate, role]);
 
   // ── Send to MD ────────────────────────────────────────────────────────────
   const handleSendToMd = useCallback(async () => {
@@ -206,19 +196,18 @@ export default function VendorDetailsForm() {
       if (!vendor) return;
       try {
         setSaving(true);
-        await sendVendorToMd(vendor.id, 'emp001', remark);
-        const req = await getActivePendingRequest(vendor.id);
-        setPendingRequest(req);
+        await createMdRequest(vendor.id, remark);
+        await refetchPending();
         setSendToMdRemarkOpen(false);
-        message.success('Sent to MD for review. Vendor is now pending.');
-      } catch (error) {
-        message.error('Failed to send to MD');
+        message.success('Sent to MD for review.');
+      } catch (error: any) {
+        message.error(error?.message ?? 'Failed to send to MD');
         console.error(error);
       } finally {
         setSaving(false);
       }
     },
-    [vendor]
+    [vendor, createMdRequest, refetchPending]
   );
 
   // ── MD Resolve ────────────────────────────────────────────────────────────
@@ -231,18 +220,18 @@ export default function VendorDetailsForm() {
       if (!pendingRequest) return;
       try {
         setSaving(true);
-        await resolveMdRequest(pendingRequest.id, 'md001', remark);
+        await resolveMdRequest(pendingRequest.id, remark, true);
         message.success('Request resolved. Vendor updated.');
         setResolveRemarkOpen(false);
         navigate(`/vendors?role=${role}`);
-      } catch (error) {
-        message.error('Failed to resolve request');
+      } catch (error: any) {
+        message.error(error?.message ?? 'Failed to resolve request');
         console.error(error);
       } finally {
         setSaving(false);
       }
     },
-    [pendingRequest, navigate, role]
+    [pendingRequest, resolveMdRequest, navigate, role]
   );
 
   const documentColumns: ColumnsType<VendorDocument> = [
@@ -367,7 +356,7 @@ export default function VendorDetailsForm() {
           {selectedSubMenu === 'basic' && (
             <BasicInfoSection
               form={form}
-              tags={tags}
+              tags={tagOptions}
               vendor={vendor}
               pendingRequest={pendingRequest}
               isReadOnly={isFormReadOnly}
@@ -377,9 +366,10 @@ export default function VendorDetailsForm() {
           )}
           {selectedSubMenu === 'documents' && (
             <DocumentsSection
+              vendorId={id}
               documents={documents}
               documentColumns={documentColumns}
-              onAddDocument={(doc) => setDocuments((prev) => [...prev, doc])}
+              onUploadSuccess={refetchDocs}
               isReadOnly={isFormReadOnly}
               vendorStatus={vendor?.status ?? form.getFieldValue('status') ?? 'New'}
             />
@@ -688,14 +678,17 @@ function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPend
 // ─── Documents Section ────────────────────────────────────────────────────────
 
 interface DocumentsSectionProps {
+  vendorId: string | undefined;
   documents: VendorDocument[];
   documentColumns: ColumnsType<VendorDocument>;
-  onAddDocument: (doc: VendorDocument) => void;
+  onUploadSuccess: () => void;
   isReadOnly?: boolean;
   vendorStatus?: string;
 }
 
-function DocumentsSection({ documents, documentColumns, onAddDocument, isReadOnly, vendorStatus }: DocumentsSectionProps) {
+function DocumentsSection({ vendorId, documents, documentColumns, onUploadSuccess, isReadOnly, vendorStatus }: DocumentsSectionProps) {
+  const { uploadVendorDocument } = useUploadVendorDocument();
+  const [generateUploadUrl] = useGenerateUploadUrl();
   const isNewCompany = vendorStatus === 'New';
   const uploadDisabled = isReadOnly || isNewCompany;
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
@@ -716,29 +709,33 @@ function DocumentsSection({ documents, documentColumns, onAddDocument, isReadOnl
     setRemarks('');
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file || !docType.trim()) {
       message.error('Please select a file and enter document type.');
       return;
     }
+    if (!vendorId) {
+      message.error('Vendor must be saved before uploading documents.');
+      return;
+    }
     setUploading(true);
-    setTimeout(() => {
-      const newDoc: VendorDocument = {
-        id: `doc-${Date.now()}`,
-        vendorId: '',
-        documentType: docType,
-        fileName: file.name,
-        status: 'Pending',
-        remarks,
-        uploadedDate: new Date().toISOString(),
-        uploadedBy: 'emp001',
-        ...(expired && expiryDate ? { expired: true, expiryDate } : {}),
-      };
-      onAddDocument(newDoc);
-      setUploading(false);
+    try {
+      const { publicUrl } = await uploadFileToS3(file, 'vendor-documents', generateUploadUrl);
+      await uploadVendorDocument(
+        vendorId,
+        docType,
+        publicUrl,
+        expired && expiryDate ? expiryDate : undefined
+      );
+      onUploadSuccess();
       handleCloseModal();
-      message.success('Document uploaded');
-    }, 800);
+      message.success('Document uploaded successfully.');
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to upload document. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (

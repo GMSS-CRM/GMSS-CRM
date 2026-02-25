@@ -15,3 +15,4 @@ export * from "./VendorFollowUp";
 export * from "./VendorProposal";
 export * from "./VendorTender";
 export * from "./VendorWorkflow";
+export * from "./VendorMdRequest";

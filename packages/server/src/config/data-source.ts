@@ -19,7 +19,8 @@ import {
   VendorFollowUp,
   VendorProposal,
   VendorTender,
-  VendorWorkflow
+  VendorWorkflow,
+  VendorMdRequest
 } from "../entities";
 
 dotenv.config();
@@ -50,7 +51,8 @@ export const AppDataSource = new DataSource({
     VendorFollowUp,
     VendorProposal,
     VendorTender,
-    VendorWorkflow
+    VendorWorkflow,
+    VendorMdRequest
   ],
 
   synchronize: true, // ❗ OK for now, disable later

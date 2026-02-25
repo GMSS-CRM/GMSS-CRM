@@ -37,4 +37,9 @@ export class VendorTagRepository extends Repository<VendorTag> implements IVendo
       .getMany()
       .then((results) => results.map((vt) => vt.vendor));
   }
+
+  async updateEnableMail(id: string, enableMail: boolean) {
+    await this.update(id, { enableMail });
+    return this.findById(id);
+  }
 }

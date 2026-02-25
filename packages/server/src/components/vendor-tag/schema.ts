@@ -24,5 +24,6 @@ export const vendorTagTypeDefs = gql`
   extend type Mutation {
     createVendorTag(input: CreateVendorTagInput!): VendorTag!
     deleteVendorTag(id: ID!): Boolean!
+    updateVendorTagEmail(id: ID!, enableMail: Boolean!): VendorTag!
   }
 `;

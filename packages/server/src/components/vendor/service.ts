@@ -4,7 +4,6 @@ import { IVendorRepository, IVendorService } from './types';
 import ErrorInfo from '../common/error-info';
 import { VendorStatus } from '../../entities/enums/VendorStatus';
 import { getCurrentEmail } from '../common/utils';
-import { VALID_VENDOR_TRANSITIONS } from './constants';
 import { VendorWorkflow } from '../../entities/VendorWorkflow';
 import { DataSource } from 'typeorm';
 import { Vendor } from '../../entities/Vendor';
@@ -299,14 +298,14 @@ export class VendorService implements IVendorService {
       }
     }
 
-    const allowed =
-      VALID_VENDOR_TRANSITIONS[currentStatus] || [];
+    // const allowed =
+    //   VALID_VENDOR_TRANSITIONS[currentStatus] || [];
 
-    if (!allowed.includes(newStatus)) {
-      throw new Error(
-        `Invalid transition from ${currentStatus} to ${newStatus}`
-      );
-    }
+    // if (!allowed.includes(newStatus)) {
+    //   throw new Error(
+    //     `Invalid transition from ${currentStatus} to ${newStatus}`
+    //   );
+    // }
 
     return this.db.transaction(async (manager) => {
       vendor.status = newStatus;

@@ -102,6 +102,6 @@ export class VendorContactPersonService implements IVendorContactPersonService {
   }
 
   async searchContactPerson(params: any) {
-    return this.contactPersonRepository.search(params);
+    return this.contactPersonRepository.search(params || {});
   }
 }

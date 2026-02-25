@@ -70,6 +70,22 @@ export class TagService implements ITagService {
   }
 
   async searchTag(params: any) {
-    return this.tagRepository.search(params as any);
+    return this.tagRepository.search(params || {});
+  }
+
+  async getVendorCount(tagId: string) {
+    return this.tagRepository.getVendorCount(tagId);
+  }
+
+  async getEnabledMailCount(tagId: string) {
+    return this.tagRepository.getEnabledMailCount(tagId);
+  }
+
+  async getTenderCount(tagId: string) {
+    return this.tagRepository.getTenderCount(tagId);
+  }
+
+  async getTendersByTag(tagId: string) {
+    return this.tagRepository.findTendersByTagId(tagId);
   }
 }

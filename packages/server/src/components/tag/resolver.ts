@@ -8,9 +8,16 @@ const getService = () => {
 };
 
 export const tagResolvers = {
+  Tag: {
+    vendorCount: (parent: any) => getService().getVendorCount(parent.id),
+    enabledMailCount: (parent: any) => getService().getEnabledMailCount(parent.id),
+    tenderCount: (parent: any) => getService().getTenderCount(parent.id),
+  },
+
   Query: {
     getTagById: (_: unknown, { id }: any) => getService().getTagById(id),
     searchTags: (_: unknown, { searchInput }: any) => getService().searchTag(searchInput as any),
+    getTendersByTag: (_: unknown, { tagId }: any) => getService().getTendersByTag(tagId),
   },
 
   Mutation: {

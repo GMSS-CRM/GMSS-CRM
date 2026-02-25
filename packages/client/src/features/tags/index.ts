@@ -12,8 +12,11 @@ export { default as TagStatsCards } from './components/TagStatsCards';
 export { default as TagSearchBar } from './components/TagSearchBar';
 export { default as VendorEmailToggle } from './components/VendorEmailToggle';
 
+// Services
+export * from './services/tags.service';
+
+// Hooks
+export * from './hooks/useTagData';
+
 // Types
 export * from './types/tagTypes';
-
-// Data (for development)
-export * from './data/dummyData';

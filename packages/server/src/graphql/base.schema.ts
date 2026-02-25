@@ -20,6 +20,7 @@ export const baseTypeDefs = gql`
     NEW
     INTERESTED
     NOT_INTERESTED
+    PENDING_MD_APPROVAL
     APPROVED
     FINAL
     DELETED
@@ -40,7 +41,7 @@ export const baseTypeDefs = gql`
   enum SignatureStatus {
     PENDING
     SIGNED
-    REJECTED
+    EXPIRED
   }
 
   enum ApprovalStatus {
@@ -52,40 +53,50 @@ export const baseTypeDefs = gql`
   enum ProposalStatus {
     DRAFT
     SENT
+    PENDING_RESPONSE
     ACCEPTED
     REJECTED
   }
 
   enum FollowUpType {
-    EMAIL
-    CALL
-    MEETING
-    OTHER
+    PROPOSAL
+    AGREEMENT
+    DOCUMENT
+    RENEWAL
+    PAYMENT
   }
 
   enum PaymentFrequency {
     MONTHLY
     QUARTERLY
-    SEMI_ANNUAL
-    ANNUAL
+    YEARLY
   }
 
   enum CommissionType {
     PERCENTAGE
     FIXED
-    TIERED
   }
 
   enum CommissionStructure {
-    SIMPLE
-    TIERED
-    HYBRID
+    SPLIT_50_50
+    FULL_ON_PAYMENT
   }
 
   enum TenderParticipationStatus {
+    PENDING
     PARTICIPATED
-    QUOTED
-    WON
-    LOST
+    REJECTED
+  }
+
+  enum TenderStatus {
+    DRAFT
+    PENDING_MD_TAGGING
+    MD_TAGGED
+    REJECTED
+    NIT_UPLOADED
+    NIT_VERIFIED
+    DOCS_UPLOADED
+    READY_TO_MAIL
+    MAIL_SENT
   }
 `;

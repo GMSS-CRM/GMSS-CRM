@@ -2,25 +2,59 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { Key } from "react";
+import { message } from "antd";
 import type {
-  Tender,
+  Tender as GqlTender,
+  TenderStatus as GqlTenderStatus,
+} from "@gmss/types";
+import type {
   TenderStatus,
   UserRole,
   TenderWorkflowItem,
-  TenderTag,
   TenderDocument,
-  TenderWorkflowState,
 } from "../types/tender.types";
-import {  STATUS_TRANSITIONS,
+import {
+  STATUS_TRANSITIONS,
   ROLE_CAN_SET_STATUS,
-  AVAILABLE_TAGS,
   USER_TABS,
-  MD_TABS,} from "../types/tender.types";
+  MD_TABS,
+} from "../types/tender.types";
+import {
+  useSearchTenders,
+  useCreateTender,
+  useDeleteTender,
+  useDeleteTenders,
+  useChangeTenderStatus,
+} from "../services/tenders.service";
 
-// Utility functions
-const generateId = (): string => {
-  return `tender-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-};
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Map a GraphQL Tender to the local Tender shape used by UI components. */
+const toLocalTender = (t: GqlTender): import("../types/tender.types").Tender => ({
+  id: t.id,
+  name: t.name,
+  referenceNumber: t.referenceNumber ?? "",
+  issuingDepartment: t.issuingDepartment ?? "",
+  description: t.description ?? undefined,
+  status: t.status as unknown as TenderStatus,
+  tags: (t.tags ?? []).map((tt) => ({
+    id: tt.tagId,
+    name: tt.tag?.name ?? "",
+    color: "blue", // color not stored on server; default used for display
+  })),
+  documents: (t.documents ?? []).map((d) => ({
+    id: d.id,
+    name: d.documentName,
+    type: "OTHER" as const,
+    uploadedAt: new Date(d.createdDate),
+    url: d.documentUrl,
+  })),
+  createdAt: new Date(t.createdDate),
+  updatedAt: new Date(t.updatedDate),
+  submissionDeadline: t.submissionDeadline ? new Date(t.submissionDeadline) : undefined,
+  rejectionReason: t.rejectionReason ?? undefined,
+  mailSentAt: t.mailSentAt ? new Date(t.mailSentAt) : undefined,
+});
 
 const generateRefNumber = (): string => {
   const prefix = "TND";
@@ -31,12 +65,48 @@ const generateRefNumber = (): string => {
   return `${prefix}-${year}-${random}`;
 };
 
-// Initial state - no dummy data
-const createInitialTenders = (): Tender[] => [];
+/** Parse date strings from Excel (format: "08/01/2026 11:00") */
+const parseDateString = (dateStr: string): string | undefined => {
+  try {
+    const [datePart, timePart] = dateStr.split(" ");
+    if (!datePart) return undefined;
+    const [day, month, year] = datePart.split("/");
+    if (!day || !month || !year) return undefined;
+    const [hours = "0", minutes = "0"] = (timePart || "").split(":");
+    const d = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hours),
+      parseInt(minutes),
+    );
+    return d.toISOString();
+  } catch {
+    return undefined;
+  }
+};
+
+// ─── Local UI state (not persisted) ───────────────────────────────────────────
+
+interface LocalUIState {
+  previewData: TenderWorkflowItem[];
+  selectedPreviewKeys: Key[];
+  activeDrawerTender: import("../types/tender.types").Tender | null;
+  isDrawerOpen: boolean;
+}
+
+// ─── Public return type ───────────────────────────────────────────────────────
 
 export interface UseTenderWorkflowReturn {
   // State
-  state: TenderWorkflowState;
+  state: {
+    tenders: import("../types/tender.types").Tender[];
+    previewData: TenderWorkflowItem[];
+    selectedPreviewKeys: Key[];
+    isLoading: boolean;
+    activeDrawerTender: import("../types/tender.types").Tender | null;
+    isDrawerOpen: boolean;
+  };
   role: UserRole;
   activeTab: string;
 
@@ -56,7 +126,7 @@ export interface UseTenderWorkflowReturn {
   resubmitRejected: (id: string) => void;
 
   // MD operations
-  openTaggingDrawer: (tender: Tender) => void;
+  openTaggingDrawer: (tender: import("../types/tender.types").Tender) => void;
   closeTaggingDrawer: () => void;
   mdConfirm: (tenderId: string, tagIds: string[]) => void;
   mdReject: (tenderId: string, reason: string) => void;
@@ -73,45 +143,54 @@ export interface UseTenderWorkflowReturn {
 
   // Validation helpers
   validateTransition: (currentStatus: TenderStatus, nextStatus: TenderStatus, userRole: UserRole) => boolean;
-  canPerformAction: (action: string, tender: Tender) => boolean;
+  canPerformAction: (action: string, tender: import("../types/tender.types").Tender) => boolean;
 
   // Data accessors
-  getTendersByTab: (tabKey: string) => Tender[];
+  getTendersByTab: (tabKey: string) => import("../types/tender.types").Tender[];
   getTabCounts: () => Record<string, number>;
-  getAvailableTags: () => TenderTag[];
   getCurrentTabs: () => typeof USER_TABS;
 }
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useTenderWorkflow(): UseTenderWorkflowReturn {
   const [role, setRole] = useState<UserRole>("USER");
   const [activeTab, setActiveTab] = useState<string>("draft");
-  
-  const [state, setState] = useState<TenderWorkflowState>({
-    tenders: createInitialTenders(),
+
+  const [ui, setUi] = useState<LocalUIState>({
     previewData: [],
     selectedPreviewKeys: [],
-    isLoading: false,
     activeDrawerTender: null,
     isDrawerOpen: false,
   });
 
-  // Validate status transition
+  // ─── GraphQL ────────────────────────────────────────────────────────────────
+
+  const { data, loading, refetch } = useSearchTenders();
+  const [createTenderMut] = useCreateTender();
+  const [deleteTenderMut] = useDeleteTender();
+  const [_deleteTendersMut] = useDeleteTenders();
+  const [changeStatusMut] = useChangeTenderStatus();
+
+  // Map GQL tenders → local shape
+  const tenders = useMemo(
+    () => (data?.searchTenders ?? []).map(toLocalTender),
+    [data],
+  );
+
+  // ─── Validation ─────────────────────────────────────────────────────────────
+
   const validateTransition = useCallback(
     (currentStatus: TenderStatus, nextStatus: TenderStatus, userRole: UserRole): boolean => {
       const allowedNextStatuses = STATUS_TRANSITIONS[currentStatus];
       const roleCanSetStatuses = ROLE_CAN_SET_STATUS[userRole];
-
-      const isValidTransition = allowedNextStatuses.includes(nextStatus);
-      const roleCanSet = roleCanSetStatuses.includes(nextStatus);
-
-      return isValidTransition && roleCanSet;
+      return allowedNextStatuses.includes(nextStatus) && roleCanSetStatuses.includes(nextStatus);
     },
-    []
+    [],
   );
 
-  // Check if user can perform specific action
   const canPerformAction = useCallback(
-    (action: string, tender: Tender): boolean => {
+    (action: string, tender: import("../types/tender.types").Tender): boolean => {
       switch (action) {
         case "delete":
           return tender.status === "DRAFT" && role === "USER";
@@ -136,274 +215,223 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
           return false;
       }
     },
-    [role]
+    [role],
   );
 
-  // Helper to update a single tender
-  const updateTender = useCallback((tenderId: string, updates: Partial<Tender>) => {
-    setState((prev) => ({
-      ...prev,
-      tenders: prev.tenders.map((t) =>
-        t.id === tenderId ? { ...t, ...updates, updatedAt: new Date() } : t
-      ),
-    }));
-  }, []);
+  // ─── Mutation helpers (fire-and-forget with refetch) ────────────────────────
 
-  // Excel operations
-  const parseExcelData = useCallback((data: TenderWorkflowItem[]) => {
-    setState((prev) => ({
-      ...prev,
-      previewData: data,
-      selectedPreviewKeys: [],
-    }));
+  const changeStatus = useCallback(
+    async (tenderId: string, status: TenderStatus, extra?: { rejectionReason?: string; tagIds?: string[] }) => {
+      try {
+        await changeStatusMut({
+          variables: {
+            input: {
+              tenderId,
+              status: status as unknown as GqlTenderStatus,
+              rejectionReason: extra?.rejectionReason,
+              tagIds: extra?.tagIds,
+            },
+          },
+        });
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Status change failed";
+        message.error(msg);
+      }
+    },
+    [changeStatusMut],
+  );
+
+  // ─── Excel operations ──────────────────────────────────────────────────────
+
+  const parseExcelData = useCallback((items: TenderWorkflowItem[]) => {
+    setUi((prev) => ({ ...prev, previewData: items, selectedPreviewKeys: [] }));
   }, []);
 
   const clearPreviewData = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      previewData: [],
-      selectedPreviewKeys: [],
-    }));
+    setUi((prev) => ({ ...prev, previewData: [], selectedPreviewKeys: [] }));
   }, []);
 
   const setSelectedPreviewKeys = useCallback((keys: Key[]) => {
-    setState((prev) => ({
-      ...prev,
-      selectedPreviewKeys: keys,
-    }));
+    setUi((prev) => ({ ...prev, selectedPreviewKeys: keys }));
   }, []);
 
   const addSelectedToDraft = useCallback(() => {
-    setState((prev) => {
-      const selectedRows = prev.previewData.filter((row) =>
-        prev.selectedPreviewKeys.includes(row.id)
-      );
+    const selectedRows = ui.previewData.filter((row) =>
+      ui.selectedPreviewKeys.includes(row.id),
+    );
 
-      const newTenders: Tender[] = selectedRows.map((row) => ({
-        id: generateId(),
-        name: row.tenderTitle,
-        referenceNumber: row.tenderNo || generateRefNumber(),
-        issuingDepartment: row.department,
-        // Do not carry over Excel 'Status' into app logic — keep internal workflow status only.
-        description: `Opening: ${row.openingDateTime} | Due: ${row.dueDateTime} (${row.dueDays} days)`,
-        status: "DRAFT" as TenderStatus,
-        tags: [],
-        documents: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        submissionDeadline: row.dueDateTime !== "NOT OPENED" && row.dueDateTime 
-          ? parseDateString(row.dueDateTime) 
-          : undefined,
-      }));
+    // Create each tender via GraphQL
+    const promises = selectedRows.map((row) =>
+      createTenderMut({
+        variables: {
+          input: {
+            name: row.tenderTitle,
+            referenceNumber: row.tenderNo || generateRefNumber(),
+            issuingDepartment: row.department,
+            description: `Opening: ${row.openingDateTime} | Due: ${row.dueDateTime} (${row.dueDays} days)`,
+            submissionDeadline:
+              row.dueDateTime !== "NOT OPENED" && row.dueDateTime
+                ? parseDateString(row.dueDateTime)
+                : undefined,
+          },
+        },
+      }).catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Create failed";
+        message.error(msg);
+      }),
+    );
 
-      return {
-        ...prev,
-        tenders: [...prev.tenders, ...newTenders],
-        previewData: [],
-        selectedPreviewKeys: [],
-      };
+    void Promise.all(promises).then(() => {
+      void refetch();
     });
-  }, []);
 
-  // Helper function to parse date strings from Excel (format: "08/01/2026 11:00")
-  const parseDateString = (dateStr: string): Date | undefined => {
-    try {
-      const [datePart, timePart] = dateStr.split(" ");
-      if (!datePart) return undefined;
-      
-      const [day, month, year] = datePart.split("/");
-      if (!day || !month || !year) return undefined;
-      
-      const [hours = "0", minutes = "0"] = (timePart || "").split(":");
-      
-      return new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hours),
-        parseInt(minutes)
+    setUi((prev) => ({ ...prev, previewData: [], selectedPreviewKeys: [] }));
+  }, [ui.previewData, ui.selectedPreviewKeys, createTenderMut, refetch]);
+
+  // ─── Tender CRUD ───────────────────────────────────────────────────────────
+
+  const deleteTender = useCallback(
+    (id: string) => {
+      void deleteTenderMut({ variables: { id } }).catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Delete failed";
+        message.error(msg);
+      });
+    },
+    [deleteTenderMut],
+  );
+
+  const sendToMd = useCallback(
+    (ids: string[]) => {
+      const promises = ids.map((id) =>
+        changeStatus(id, "PENDING_MD_TAGGING"),
       );
-    } catch {
-      return undefined;
-    }
-  };
+      void Promise.all(promises);
+    },
+    [changeStatus],
+  );
 
-  // Tender CRUD operations
-  const deleteTender = useCallback((id: string) => {
-    setState((prev) => ({
-      ...prev,
-      tenders: prev.tenders.filter((t) => t.id !== id),
-    }));
-  }, []);
+  const resubmitRejected = useCallback(
+    (id: string) => {
+      void changeStatus(id, "PENDING_MD_TAGGING");
+    },
+    [changeStatus],
+  );
 
-  const sendToMd = useCallback((ids: string[]) => {
-    setState((prev) => ({
-      ...prev,
-      tenders: prev.tenders.map((t) =>
-        ids.includes(t.id) && t.status === "DRAFT"
-          ? { ...t, status: "PENDING_MD_TAGGING" as TenderStatus, updatedAt: new Date() }
-          : t
-      ),
-    }));
-  }, []);
+  // ─── MD operations ─────────────────────────────────────────────────────────
 
-  const resubmitRejected = useCallback((id: string) => {
-    updateTender(id, {
-      status: "PENDING_MD_TAGGING",
-      rejectionReason: undefined,
-    });
-  }, [updateTender]);
-
-  // MD operations
-  const openTaggingDrawer = useCallback((tender: Tender) => {
-    setState((prev) => ({
-      ...prev,
-      activeDrawerTender: tender,
-      isDrawerOpen: true,
-    }));
+  const openTaggingDrawer = useCallback((tender: import("../types/tender.types").Tender) => {
+    setUi((prev) => ({ ...prev, activeDrawerTender: tender, isDrawerOpen: true }));
   }, []);
 
   const closeTaggingDrawer = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      activeDrawerTender: null,
-      isDrawerOpen: false,
-    }));
+    setUi((prev) => ({ ...prev, activeDrawerTender: null, isDrawerOpen: false }));
   }, []);
 
   const mdConfirm = useCallback(
     (tenderId: string, tagIds: string[]) => {
-      const selectedTags = AVAILABLE_TAGS.filter((t) => tagIds.includes(t.id));
-      updateTender(tenderId, {
-        status: "MD_TAGGED",
-        tags: selectedTags,
-        rejectionReason: undefined,
-      });
+      void changeStatus(tenderId, "MD_TAGGED", { tagIds });
       closeTaggingDrawer();
     },
-    [updateTender, closeTaggingDrawer]
+    [changeStatus, closeTaggingDrawer],
   );
 
   const mdReject = useCallback(
     (tenderId: string, reason: string) => {
-      updateTender(tenderId, {
-        status: "REJECTED",
-        rejectionReason: reason,
-      });
+      void changeStatus(tenderId, "REJECTED", { rejectionReason: reason });
       closeTaggingDrawer();
     },
-    [updateTender, closeTaggingDrawer]
+    [changeStatus, closeTaggingDrawer],
   );
 
   const verifyNit = useCallback(
     (tenderId: string) => {
-      updateTender(tenderId, {
-        status: "NIT_VERIFIED",
-      });
+      void changeStatus(tenderId, "NIT_VERIFIED");
     },
-    [updateTender]
+    [changeStatus],
   );
 
-  // Document operations
+  // ─── Document operations (status change only — actual upload is S3/Step 6) ─
+
   const uploadNit = useCallback(
-    (tenderId: string, document: Omit<TenderDocument, "id">) => {
-      const nitDoc: TenderDocument = {
-        ...document,
-        id: `nit-${Date.now()}`,
-        type: "NIT",
-      };
-      updateTender(tenderId, {
-        status: "NIT_UPLOADED",
-        nitDocument: nitDoc,
-      });
+    (tenderId: string, _document: Omit<TenderDocument, "id">) => {
+      // TODO: S3 upload integration (Step 6) — for now just transition status
+      void changeStatus(tenderId, "NIT_UPLOADED");
     },
-    [updateTender]
+    [changeStatus],
   );
 
   const uploadDocuments = useCallback(
-    (tenderId: string, documents: Omit<TenderDocument, "id">[]) => {
-      const newDocs: TenderDocument[] = documents.map((doc, idx) => ({
-        ...doc,
-        id: `doc-${Date.now()}-${idx}`,
-      }));
-
-      setState((prev) => ({
-        ...prev,
-        tenders: prev.tenders.map((t) =>
-          t.id === tenderId
-            ? {
-                ...t,
-                status: "DOCS_UPLOADED" as TenderStatus,
-                documents: [...t.documents, ...newDocs],
-                updatedAt: new Date(),
-              }
-            : t
-        ),
-      }));
+    (tenderId: string, _documents: Omit<TenderDocument, "id">[]) => {
+      // TODO: S3 upload integration (Step 6) — for now just transition status
+      void changeStatus(tenderId, "DOCS_UPLOADED");
     },
-    []
+    [changeStatus],
   );
 
-  // Mail operations
+  // ─── Mail operations ───────────────────────────────────────────────────────
+
   const markReadyToMail = useCallback(
     (tenderId: string) => {
-      updateTender(tenderId, {
-        status: "READY_TO_MAIL",
-      });
+      void changeStatus(tenderId, "READY_TO_MAIL");
     },
-    [updateTender]
+    [changeStatus],
   );
 
   const sendMail = useCallback(
     (tenderId: string) => {
-      updateTender(tenderId, {
-        status: "MAIL_SENT",
-        mailSentAt: new Date(),
-      });
+      void changeStatus(tenderId, "MAIL_SENT");
     },
-    [updateTender]
+    [changeStatus],
   );
 
-  const sendMailBulk = useCallback((ids: string[]) => {
-    setState((prev) => ({
-      ...prev,
-      tenders: prev.tenders.map((t) =>
-        ids.includes(t.id) && t.status === "READY_TO_MAIL"
-          ? { ...t, status: "MAIL_SENT" as TenderStatus, mailSentAt: new Date(), updatedAt: new Date() }
-          : t
-      ),
-    }));
-  }, []);
-
-  // Data accessors
-  const getTendersByTab = useCallback(
-    (tabKey: string): Tender[] => {
-      const tabs = role === "USER" ? USER_TABS : MD_TABS;
-      const tabConfig = tabs.find((t) => t.key === tabKey);
-      if (!tabConfig) return [];
-      return state.tenders.filter((t) => tabConfig.statuses.includes(t.status));
+  const sendMailBulk = useCallback(
+    (ids: string[]) => {
+      const promises = ids.map((id) => changeStatus(id, "MAIL_SENT"));
+      void Promise.all(promises);
     },
-    [state.tenders, role]
+    [changeStatus],
+  );
+
+  // ─── Data accessors ────────────────────────────────────────────────────────
+
+  const getTendersByTab = useCallback(
+    (tabKey: string) => {
+      const tabList = role === "USER" ? USER_TABS : MD_TABS;
+      const tabConfig = tabList.find((t) => t.key === tabKey);
+      if (!tabConfig) return [];
+      return tenders.filter((t) => tabConfig.statuses.includes(t.status));
+    },
+    [tenders, role],
   );
 
   const getTabCounts = useMemo(() => {
     return (): Record<string, number> => {
-      const tabs = role === "USER" ? USER_TABS : MD_TABS;
+      const tabList = role === "USER" ? USER_TABS : MD_TABS;
       const counts: Record<string, number> = {};
-      
-      tabs.forEach((tab) => {
-        counts[tab.key] = state.tenders.filter((t) => tab.statuses.includes(t.status)).length;
+      tabList.forEach((tab) => {
+        counts[tab.key] = tenders.filter((t) => tab.statuses.includes(t.status)).length;
       });
-      
       return counts;
     };
-  }, [state.tenders, role]);
-
-  const getAvailableTags = useCallback(() => AVAILABLE_TAGS, []);
+  }, [tenders, role]);
 
   const getCurrentTabs = useCallback(() => {
     return role === "USER" ? USER_TABS : MD_TABS;
   }, [role]);
+
+  // ─── Composed state (matches previous shape for page compatibility) ─────────
+
+  const state = useMemo(
+    () => ({
+      tenders,
+      previewData: ui.previewData,
+      selectedPreviewKeys: ui.selectedPreviewKeys,
+      isLoading: loading,
+      activeDrawerTender: ui.activeDrawerTender,
+      isDrawerOpen: ui.isDrawerOpen,
+    }),
+    [tenders, ui, loading],
+  );
 
   return {
     state,
@@ -432,7 +460,6 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     canPerformAction,
     getTendersByTab,
     getTabCounts,
-    getAvailableTags,
     getCurrentTabs,
   };
 }

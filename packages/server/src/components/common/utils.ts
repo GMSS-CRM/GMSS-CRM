@@ -1,20 +1,18 @@
 /**
  * Permission checking utility
  * Checks if the current user has a specific permission
- * Uses the global GraphQL context to access user permissions
+ * Uses request-scoped AsyncLocalStorage context
  */
-
-declare global {
-  var graphqlContext: any;
-}
+import { getRequestContext } from './request-context';
 
 export function hasPermission(permission: string): boolean {
-  if (!global.graphqlContext) {
-    console.warn('⚠️ GraphQL context not available');
+  const ctx = getRequestContext();
+  if (!ctx) {
+    console.warn('⚠️ Request context not available');
     return false;
   }
 
-  const { permissions = [] } = global.graphqlContext;
+  const { permissions = [] } = ctx;
 
   if (!Array.isArray(permissions)) {
     console.warn('⚠️ Permissions is not an array');
@@ -31,25 +29,28 @@ export function requirePermission(permission: string): void {
 }
 
 export function getCurrentUser() {
-  if (!global.graphqlContext) {
+  const ctx = getRequestContext();
+  if (!ctx) {
     return null;
   }
 
-  return global.graphqlContext.user;
+  return ctx.user;
 }
 
 export function getCurrentEmail() {
-  if (!global.graphqlContext) {
-    return null;
+  const ctx = getRequestContext();
+  if (!ctx) {
+    return '';
   }
 
-  return global.graphqlContext.email;
+  return ctx.email;
 }
 
 export function getPermissions(): string[] {
-  if (!global.graphqlContext) {
+  const ctx = getRequestContext();
+  if (!ctx) {
     return [];
   }
 
-  return global.graphqlContext.permissions || [];
+  return ctx.permissions || [];
 }

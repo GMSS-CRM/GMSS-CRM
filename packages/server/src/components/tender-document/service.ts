@@ -80,6 +80,6 @@ export class TenderDocumentService implements ITenderDocumentService {
   }
 
   async searchDocument(params: any) {
-    return this.documentRepository.search(params);
+    return this.documentRepository.search(params || {});
   }
 }

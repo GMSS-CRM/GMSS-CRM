@@ -19,5 +19,8 @@ export const vendorTagResolvers = {
 
     deleteVendorTag: (_: unknown, { id }: any) =>
       getService().deleteVendorTag(id),
+
+    updateVendorTagEmail: (_: unknown, { id, enableMail }: any) =>
+      getService().updateVendorTagEmail(id, enableMail),
   },
 };

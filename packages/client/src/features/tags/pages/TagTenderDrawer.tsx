@@ -21,11 +21,10 @@ import type {
   TagTenderDisplay, 
   TenderVendorDisplay 
 } from '../types/tagTypes';
-import { 
-  dummyTagTenders, 
-  getVendorsForTender, 
-  simulateDelay 
-} from '../data/dummyData';
+import {
+  useGetTendersByTag,
+  useUpdateVendorTagEmail,
+} from '../services/tags.service';
 import styles from '../styles/tags.module.css';
 
 interface TagTendersDrawerProps {
@@ -43,46 +42,36 @@ export default function TagTendersDrawer({
 }: TagTendersDrawerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('tenders');
   const [selectedTender, setSelectedTender] = useState<TagTenderDisplay | null>(null);
-  const [tenders, setTenders] = useState<TagTenderDisplay[]>([]);
   const [vendors, setVendors] = useState<TenderVendorDisplay[]>([]);
-  const [loading, setLoading] = useState(false);
   const [vendorLoading, setVendorLoading] = useState<Record<string, boolean>>({});
 
-  // Load tenders when tag changes
+  const tagId = open && tag ? tag.id : null;
+  const { data: tendersData, loading } = useGetTendersByTag(tagId);
+  const [updateEmailMutation] = useUpdateVendorTagEmail();
+
+  const tenders: TagTenderDisplay[] = (tendersData?.getTendersByTag ?? []).map((t) => ({
+    id: t.id,
+    tenderId: t.id,
+    tenderTitle: t.name ?? '',
+    tenderNumber: t.id.substring(0, 8).toUpperCase(),
+    status: 'active' as const,
+    vendorCount: 0,
+    enabledMailCount: 0,
+  }));
+
+  // Reset state when drawer closes
   useEffect(() => {
-    if (open && tag) {
-      loadTenders();
-    }
-    // Reset state when drawer closes
     if (!open) {
       setViewMode('tenders');
       setSelectedTender(null);
-      setTenders([]);
       setVendors([]);
     }
-  }, [open, tag]);
-
-  const loadTenders = async () => {
-    if (!tag) return;
-    setLoading(true);
-    await simulateDelay(300);
-    const tagTenders = dummyTagTenders[tag.id] || [];
-    setTenders(tagTenders);
-    setLoading(false);
-  };
-
-  const loadVendors = async (tender: TagTenderDisplay) => {
-    setLoading(true);
-    await simulateDelay(300);
-    const tenderVendors = getVendorsForTender(tender.id);
-    setVendors(tenderVendors);
-    setLoading(false);
-  };
+  }, [open]);
 
   const handleTenderClick = (tender: TagTenderDisplay) => {
     setSelectedTender(tender);
     setViewMode('vendors');
-    loadVendors(tender);
+    setVendors([]);
   };
 
   const handleBackToTenders = () => {
@@ -99,7 +88,7 @@ export default function TagTendersDrawer({
     setVendorLoading(prev => ({ ...prev, [vendorId]: true }));
     
     try {
-      await simulateDelay(400);
+      await updateEmailMutation({ variables: { id: vendorId, enableMail } });
       
       // Update local state
       setVendors(prev => 
@@ -113,13 +102,13 @@ export default function TagTendersDrawer({
       );
       
       return true;
-    } catch (error) {
+    } catch {
       message.error('Failed to update email settings');
       return false;
     } finally {
       setVendorLoading(prev => ({ ...prev, [vendorId]: false }));
     }
-  }, []);
+  }, [updateEmailMutation]);
 
   const getTenderStatusClass = (status: string) => {
     switch (status) {

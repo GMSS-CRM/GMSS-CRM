@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Modal, Upload, Button, Typography, Space, message, Select, List, Tag } from "antd";
 import { UploadOutlined, FileTextOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd";
 import type { Tender, TenderDocument } from "../types/tender.types";
 import { DOCUMENT_TYPES } from "../types/tender.types";
+import { useGenerateUploadUrl, uploadFileToS3 } from "../services/upload.service";
+import { useCreateTenderDocument } from "../services/tenders.service";
 import s from "../styles/tender-workflow.module.css";
 
 const { Text } = Typography;
 
 interface PendingDoc {
-  file: UploadFile;
+  file: File;
+  uid: string;
   type: "TECHNICAL" | "FINANCIAL" | "OTHER";
 }
 
@@ -33,6 +35,8 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
   const [pending, setPending] = useState<PendingDoc[]>([]);
   const [docType, setDocType] = useState<"TECHNICAL" | "FINANCIAL" | "OTHER">("TECHNICAL");
   const [uploading, setUploading] = useState(false);
+  const [generateUrl] = useGenerateUploadUrl();
+  const [createDoc] = useCreateTenderDocument();
 
   const handleClose = () => {
     setPending([]);
@@ -48,32 +52,56 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
       message.error("Max 10 MB");
       return false;
     }
-    const uf: UploadFile = {
-      uid: `${Date.now()}-${file.name}`,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      status: "done",
-    };
-    setPending((p) => [...p, { file: uf, type: docType }]);
+    setPending((p) => [...p, { file, uid: `${Date.now()}-${file.name}`, type: docType }]);
     return false;
   };
 
   const handleUpload = async () => {
     if (!tender || !pending.length) return;
     setUploading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    const docs: Omit<TenderDocument, "id">[] = pending.map((d) => ({
-      name: d.file.name,
-      type: d.type,
-      uploadedAt: new Date(),
-      size: d.file.size,
-    }));
-    onUpload(tender.id, docs);
-    message.success(`${docs.length} document${docs.length !== 1 ? "s" : ""} uploaded`);
-    setPending([]);
-    setUploading(false);
-    onClose();
+
+    try {
+      const uploaded: Omit<TenderDocument, "id">[] = [];
+
+      for (const doc of pending) {
+        // 1. Upload to S3
+        const { publicUrl } = await uploadFileToS3(
+          doc.file,
+          `tenders/${tender.id}/docs`,
+          generateUrl,
+        );
+
+        // 2. Create document record
+        await createDoc({
+          variables: {
+            input: {
+              tenderId: tender.id,
+              documentName: doc.file.name,
+              documentUrl: publicUrl,
+            },
+          },
+        });
+
+        uploaded.push({
+          name: doc.file.name,
+          type: doc.type,
+          uploadedAt: new Date(),
+          url: publicUrl,
+          size: doc.file.size,
+        });
+      }
+
+      // 3. Trigger status transition
+      onUpload(tender.id, uploaded);
+      message.success(`${uploaded.length} document${uploaded.length !== 1 ? "s" : ""} uploaded`);
+      setPending([]);
+      setUploading(false);
+      onClose();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      message.error(msg);
+      setUploading(false);
+    }
   };
 
   if (!tender) return null;
@@ -155,7 +183,7 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
                       danger
                       size="small"
                       icon={<DeleteOutlined />}
-                      onClick={() => setPending((p) => p.filter((x) => x.file.uid !== d.file.uid))}
+                      onClick={() => setPending((p) => p.filter((x) => x.uid !== d.uid))}
                     />,
                   ]}
                 >
@@ -184,9 +212,6 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
                   <Space size={6}>
                     <FileTextOutlined />
                     <Text style={{ fontSize: 12 }}>{d.name}</Text>
-                    <Tag color={typeColor(d.type)} style={{ fontSize: 10, margin: 0 }}>
-                      {DOCUMENT_TYPES.find((t) => t.value === d.type)?.label}
-                    </Tag>
                   </Space>
                 </List.Item>
               )}

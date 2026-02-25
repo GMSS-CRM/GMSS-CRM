@@ -27,11 +27,15 @@ export class TenderRepository extends Repository<Tender> implements ITenderRepos
     });
   }
 
-  search(params: { search?: string; limit?: number; offset?: number }) {
+  search(params: { search?: string; status?: string; limit?: number; offset?: number }) {
     const query = this.createQueryBuilder('tender');
 
     if (params.search) {
       query.where('tender.name ILIKE :search', { search: `%${params.search}%` });
+    }
+
+    if (params.status) {
+      query.andWhere('tender.status = :status', { status: params.status });
     }
 
     query.leftJoinAndSelect('tender.documents', 'documents');

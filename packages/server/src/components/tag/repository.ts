@@ -2,6 +2,8 @@ import { inject, injectable } from 'inversify';
 import { DataSource, Repository } from 'typeorm';
 import { TYPES } from '../../inversify/types';
 import { Tag } from '../../entities/Tag';
+import { VendorTag } from '../../entities/VendorTag';
+import { TenderTag } from '../../entities/TenderTag';
 import { ITagRepository } from './types';
 
 @injectable()
@@ -54,5 +56,26 @@ export class TagRepository extends Repository<Tag> implements ITagRepository {
 
   deleteTags(ids: string[]) {
     return this.delete(ids).then(() => true);
+  }
+
+  async getVendorCount(tagId: string): Promise<number> {
+    return this.dbContext.getRepository(VendorTag).count({ where: { tagId } });
+  }
+
+  async getEnabledMailCount(tagId: string): Promise<number> {
+    return this.dbContext
+      .getRepository(VendorTag)
+      .count({ where: { tagId, enableMail: true } });
+  }
+
+  async getTenderCount(tagId: string): Promise<number> {
+    return this.dbContext.getRepository(TenderTag).count({ where: { tagId } });
+  }
+
+  async findTendersByTagId(tagId: string) {
+    const tenderTags = await this.dbContext
+      .getRepository(TenderTag)
+      .find({ where: { tagId }, relations: ['tender'] });
+    return tenderTags.map((tt) => tt.tender);
   }
 }

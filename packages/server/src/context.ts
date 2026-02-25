@@ -1,13 +1,7 @@
-import { GraphQLError } from 'graphql';
 import { getContainer } from './inversify/container';
 import { TYPES } from './inversify/types';
 import { IUserService } from './components/user/types';
 import { IRolePermissionService } from './components/role-permission/types';
-import ErrorInfo from './components/common/error-info';
-
-declare global {
-  var graphqlContext: any;
-}
 
 /**
  * Safely decode a Firebase JWT token without verification
@@ -27,11 +21,16 @@ function safeJwtDecode(token: string): any | null {
   }
 }
 
+// Default JWT token for testing (demo@demo.com user) — only used in development
+const DEFAULT_DEV_TOKEN = 'eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZ21zcy0tY3JtIiwiYXVkIjoiZ21zcy0tY3JtIiwiYXV0aF90aW1lIjoxNzY5NTE4OTk1LCJ1c2VyX2lkIjoiSlMxTGxya0t0SE0xOWVJMWVid29ZOWxPSTV3MSIsInN1YiI6IkpTMUxzcmtLdEhNMTllSTFlYndvWTlsT0k1dzEiLCJpYXQiOjE3Njk1MTg5OTUsImV4cCI6MTc2OTUyMjU5NSwiZW1haWwiOiJkZW1vQGRlbW8uY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImRlbW9AZGVtby5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ';
+
 export const buildContext = async ({ req }: { req: any }) => {
-  // Default JWT token for testing (demo@demo.com user)
-  const defaultToken = 'eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZ21zcy0tY3JtIiwiYXVkIjoiZ21zcy0tY3JtIiwiYXV0aF90aW1lIjoxNzY5NTE4OTk1LCJ1c2VyX2lkIjoiSlMxTGxya0t0SE0xOWVJMWVid29ZOWxPSTV3MSIsInN1YiI6IkpTMUxzcmtLdEhNMTllSTFlYndvWTlsT0k1dzEiLCJpYXQiOjE3Njk1MTg5OTUsImV4cCI6MTc2OTUyMjU5NSwiZW1haWwiOiJkZW1vQGRlbW8uY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImRlbW9AZGVtby5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ';
-  
-  const token = (req.headers.authorization as string | undefined) || `Bearer ${defaultToken}`;
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  const authHeader = req.headers.authorization as string | undefined;
+  const token = isProduction
+    ? authHeader ?? ''
+    : authHeader ?? `Bearer ${DEFAULT_DEV_TOKEN}`;
   
   let user: any = null;
   let decoded: any = null;
@@ -41,14 +40,18 @@ export const buildContext = async ({ req }: { req: any }) => {
   const bearerToken = token.replace(/^Bearer\s+/i, '');
   decoded = safeJwtDecode(bearerToken);
 
-  // DEVELOPMENT MODE: Skip strict validation, use default token if needed
-  if (!decoded) {
-    console.warn('⚠️ Invalid token, using default demo user');
-    decoded = safeJwtDecode(defaultToken);
+  if (!decoded && !isProduction) {
+    console.warn('⚠️ Invalid token, falling back to default demo user (dev mode only)');
+    decoded = safeJwtDecode(DEFAULT_DEV_TOKEN);
+  }
+
+  if (!decoded && isProduction) {
+    console.error('❌ Invalid or missing auth token in production');
+    return { user: null, decoded: null, permissions: [], email: '' };
   }
 
   // Extract email from Firebase JWT token
-  const email = decoded?.email || 'demo@demo.com';
+  const email = decoded?.email || (isProduction ? '' : 'demo@demo.com');
 
   // Fetch user and their permissions from database
   const container = getContainer();
@@ -71,21 +74,13 @@ export const buildContext = async ({ req }: { req: any }) => {
     }
   } catch (error) {
     console.error('User Not Authorized:', error);
-    // Continue without user for testing
+    if (isProduction) {
+      return { user: null, decoded: null, permissions: [], email: '' };
+    }
+    // Continue without user in development for testing
   }
 
-  // Build context object with user, decoded token, and permissions
-  const context = { 
-    user, 
-    decoded,
-    permissions,
-    email 
-  };
-
-  // Store in global context for access throughout the application
-  global.graphqlContext = context;
-
-  return context;
+  return { user, decoded, permissions, email };
 };
 
 export default buildContext;

@@ -95,6 +95,17 @@ import {
 import { VendorTenderRepository } from '../components/vendor-tender/repository';
 import { VendorTenderService } from '../components/vendor-tender/service';
 
+import {
+  IVendorMdRequestRepository,
+  IVendorMdRequestService,
+} from '../components/vendor-md-request/types';
+
+import { VendorMdRequestRepository } from '../components/vendor-md-request/repository';
+import { VendorMdRequestService } from '../components/vendor-md-request/service';
+
+import { S3Service } from '../components/upload/service';
+import { IS3Service } from '../components/upload/types';
+
 
 
 let _container: Container | null = null;
@@ -216,6 +227,17 @@ container
   .bind<IVendorFollowUpService>(TYPES.IVendorFollowUpService)
   .to(VendorFollowUpService);
 
+  container
+    .bind<IVendorMdRequestRepository>(TYPES.IVendorMdRequestRepository)
+    .to(VendorMdRequestRepository);
+
+  container
+    .bind<IVendorMdRequestService>(TYPES.IVendorMdRequestService)
+    .to(VendorMdRequestService);
+
+  container
+    .bind<IS3Service>(TYPES.IS3Service)
+    .to(S3Service);
 
 
 

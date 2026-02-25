@@ -37,4 +37,12 @@ export class VendorTagService implements IVendorTagService {
   async getVendorsByTag(tagId: string) {
     return this.vendorTagRepository.findVendorsByTagId(tagId);
   }
+
+  async updateVendorTagEmail(id: string, enableMail: boolean) {
+    const vendorTag = await this.vendorTagRepository.findById(id);
+    if (!vendorTag) {
+      throw new Error(ErrorInfo.TAG_NOT_FOUND);
+    }
+    return this.vendorTagRepository.updateEnableMail(id, enableMail);
+  }
 }

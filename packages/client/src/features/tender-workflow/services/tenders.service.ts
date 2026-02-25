@@ -1,163 +1,169 @@
-// Using a local mock type in this service - do not import application Tender types here
+import { gql } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client/react';
+import type {
+  Tender,
+  CreateTenderInput,
+  UpdateTenderInput,
+  SearchTenderInput,
+  ChangeTenderStatusInput,
+} from '@gmss/types';
 
-import type { Tender, TenderStatus } from "../types/tender.types";
+// ─── Fragments ────────────────────────────────────────────────────────────────
 
-// Mock data for tenders (uses extended shape; cast to Tender for service compatibility)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Tenders: Tender[] = ([
-  {
-    id: '1',
-    name: 'Supply of Office Furniture and Equipment',
-    referenceNumber: 'REF/2026/001',
-    issuingDepartment: 'Administration Department',
-    description: 'Requirement for supply and installation of office furniture including desks, chairs, filing cabinets, and other office equipment for the new office building.',
-    tags: [{ id: 't1', name: 'Furniture', color: '#1677ff' }, { id: 't2', name: 'Equipment', color: '#52c41a' }, { id: 't3', name: 'Office', color: '#faad14' }],
-    status: 'DRAFT' as TenderStatus,
-    documents: [],
-    createdAt: new Date('2025-12-20'),
-    updatedAt: new Date('2026-01-01'),
-  },
-  {
-    id: '2',
-    name: 'IT Infrastructure Upgrade Services',
-    referenceNumber: 'REF/2026/002',
-    issuingDepartment: 'IT Department',
-    description: 'Comprehensive IT infrastructure upgrade including network equipment, servers, security systems, and implementation services.',
-    tags: [{ id: 't4', name: 'IT', color: '#1677ff' }, { id: 't5', name: 'Networking', color: '#52c41a' }, { id: 't6', name: 'Security', color: '#f5222d' }, { id: 't7', name: 'Servers', color: '#722ed1' }],
-    status: 'MD_TAGGED' as TenderStatus,
-    documents: [],
-    createdAt: new Date('2025-12-25'),
-    updatedAt: new Date('2026-01-10'),
-  },
-  {
-    id: '3',
-    name: 'Annual Maintenance Contract for HVAC Systems',
-    referenceNumber: 'REF/2026/003',
-    issuingDepartment: 'Facilities Management',
-    description: 'Annual maintenance contract for all HVAC systems across multiple office locations including preventive and breakdown maintenance.',
-    tags: [{ id: 't8', name: 'HVAC', color: '#13c2c2' }, { id: 't9', name: 'Maintenance', color: '#52c41a' }, { id: 't10', name: 'AMC', color: '#fa8c16' }],
-    status: 'MAIL_SENT' as TenderStatus,
-    documents: [],
-    createdAt: new Date('2025-12-10'),
-    updatedAt: new Date('2026-01-25'),
-  },
-  {
-    id: '4',
-    name: 'Construction of New Warehouse Facility',
-    referenceNumber: 'REF/2026/004',
-    issuingDepartment: 'Infrastructure Development',
-    description: 'Design, construction, and commissioning of a new 50,000 sq ft warehouse facility with modern storage systems and loading bays.',
-    tags: [{ id: 't11', name: 'Construction', color: '#d48806' }, { id: 't12', name: 'Warehouse', color: '#08979c' }, { id: 't13', name: 'Civil Works', color: '#389e0d' }],
-    status: 'DRAFT' as TenderStatus,
-    documents: [],
-    createdAt: new Date('2026-01-02'),
-    updatedAt: new Date('2026-01-03'),
-  },
-  {
-    id: '5',
-    name: 'Supply of Stationery Items',
-    referenceNumber: 'REF/2026/005',
-    issuingDepartment: 'Administration Department',
-    description: 'Annual rate contract for supply of various stationery items including paper, pens, files, and other office consumables.',
-    tags: [{ id: 't14', name: 'Stationery', color: '#1677ff' }, { id: 't15', name: 'Office', color: '#faad14' }, { id: 't16', name: 'Consumables', color: '#52c41a' }],
-    status: 'DRAFT' as TenderStatus,
-    documents: [],
-    createdAt: new Date('2025-12-28'),
-    updatedAt: new Date('2026-01-02'),
-  },
-] as unknown) as Tender[];
+const TENDER_FIELDS = gql`
+  fragment TenderFields on Tender {
+    id
+    name
+    referenceNumber
+    issuingDepartment
+    description
+    status
+    submissionDeadline
+    rejectionReason
+    mailSentAt
+    createdBy
+    updatedBy
+    createdDate
+    updatedDate
+    documents {
+      id
+      documentName
+      documentUrl
+      expiresOn
+      tenderId
+      createdBy
+      createdDate
+    }
+    tags {
+      id
+      tenderId
+      tagId
+      tag {
+        id
+        name
+      }
+    }
+  }
+`;
 
-// In-memory storage
-let tenders: Tender[] = [...Tenders];
-let nextId = 6;
+// ─── Queries ──────────────────────────────────────────────────────────────────
 
-export const tendersService = {
-  // Get all tenders
-  getAllTenders: async (): Promise<Tender[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([...tenders]);
-      }, 300);
-    });
-  },
+export const SEARCH_TENDERS = gql`
+  ${TENDER_FIELDS}
+  query SearchTenders($searchInput: SearchTenderInput) {
+    searchTenders(searchInput: $searchInput) {
+      ...TenderFields
+    }
+  }
+`;
 
-  // Get tender by ID
-  getTenderById: async (id: string): Promise<Tender | null> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const tender = tenders.find((t) => t.id === id);
-        resolve(tender || null);
-      }, 300);
-    });
-  },
+export const GET_TENDER_BY_ID = gql`
+  ${TENDER_FIELDS}
+  query GetTenderById($id: ID!) {
+    getTenderById(id: $id) {
+      ...TenderFields
+    }
+  }
+`;
 
-  // Create new tender
-  createTender: async (data: any): Promise<Tender> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newTender: Tender = {
-          ...data,
-          id: String(nextId),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        nextId++;
-        tenders.push(newTender);
-        resolve(newTender);
-      }, 300);
-    });
-  },
+// ─── Mutations ────────────────────────────────────────────────────────────────
 
-  // Update tender
-  updateTender: async (id: string, data: Partial<any>): Promise<Tender | null> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = tenders.findIndex((t) => t.id === id);
-        if (index !== -1) {
-          tenders[index] = {
-            ...tenders[index],
-            ...data,
-            updatedAt: new Date(),
-          };
-          resolve(tenders[index]);
-        } else {
-          resolve(null);
-        }
-      }, 300);
-    });
-  },
+export const CREATE_TENDER = gql`
+  ${TENDER_FIELDS}
+  mutation CreateTender($input: CreateTenderInput!) {
+    createTender(input: $input) {
+      ...TenderFields
+    }
+  }
+`;
 
-  // Update tender status
-  updateTenderStatus: async (id: string, status: string): Promise<Tender | null> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = tenders.findIndex((t) => t.id === id);
-        if (index !== -1) {
-          tenders[index] = {
-            ...tenders[index],
-            status: status as TenderStatus,
-            updatedAt: new Date(),
-          };
-          resolve(tenders[index]);
-        } else {
-          resolve(null);
-        }
-      }, 300);
-    });
-  },
+export const UPDATE_TENDER = gql`
+  ${TENDER_FIELDS}
+  mutation UpdateTender($id: ID!, $input: UpdateTenderInput!) {
+    updateTender(id: $id, input: $input) {
+      ...TenderFields
+    }
+  }
+`;
 
-  // Delete tender
-  deleteTender: async (id: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = tenders.findIndex((t) => t.id === id);
-        if (index !== -1) {
-          tenders.splice(index, 1);
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 300);
-    });
-  },
-};
+export const DELETE_TENDER = gql`
+  mutation DeleteTender($id: ID!) {
+    deleteTender(id: $id)
+  }
+`;
+
+export const DELETE_TENDERS = gql`
+  mutation DeleteTenders($ids: [ID!]!) {
+    deleteTenders(ids: $ids)
+  }
+`;
+
+export const CHANGE_TENDER_STATUS = gql`
+  ${TENDER_FIELDS}
+  mutation ChangeTenderStatus($input: ChangeTenderStatusInput!) {
+    changeTenderStatus(input: $input) {
+      ...TenderFields
+    }
+  }
+`;
+
+export const CREATE_TENDER_DOCUMENT = gql`
+  mutation CreateTenderDocument($input: CreateTenderDocumentInput!) {
+    createTenderDocument(input: $input) {
+      id
+      documentName
+      documentUrl
+      tenderId
+      createdBy
+      createdDate
+    }
+  }
+`;
+
+// ─── Hooks ────────────────────────────────────────────────────────────────────
+
+export const useSearchTenders = (searchInput?: SearchTenderInput) =>
+  useQuery<{ searchTenders: Tender[] }>(SEARCH_TENDERS, {
+    variables: { searchInput },
+    fetchPolicy: 'cache-and-network',
+  });
+
+export const useGetTenderById = (id: string) =>
+  useQuery<{ getTenderById: Tender | null }>(GET_TENDER_BY_ID, {
+    variables: { id },
+    skip: !id,
+  });
+
+export const useCreateTender = () =>
+  useMutation<{ createTender: Tender }, { input: CreateTenderInput }>(CREATE_TENDER, {
+    refetchQueries: [{ query: SEARCH_TENDERS }],
+  });
+
+export const useUpdateTender = () =>
+  useMutation<{ updateTender: Tender }, { id: string; input: UpdateTenderInput }>(UPDATE_TENDER, {
+    refetchQueries: [{ query: SEARCH_TENDERS }],
+  });
+
+export const useDeleteTender = () =>
+  useMutation<{ deleteTender: boolean }, { id: string }>(DELETE_TENDER, {
+    refetchQueries: [{ query: SEARCH_TENDERS }],
+  });
+
+export const useDeleteTenders = () =>
+  useMutation<{ deleteTenders: boolean }, { ids: string[] }>(DELETE_TENDERS, {
+    refetchQueries: [{ query: SEARCH_TENDERS }],
+  });
+
+export const useChangeTenderStatus = () =>
+  useMutation<{ changeTenderStatus: Tender }, { input: ChangeTenderStatusInput }>(
+    CHANGE_TENDER_STATUS,
+    { refetchQueries: [{ query: SEARCH_TENDERS }] },
+  );
+
+export const useCreateTenderDocument = () =>
+  useMutation<
+    { createTenderDocument: { id: string; documentName: string; documentUrl: string } },
+    { input: { tenderId: string; documentName: string; documentUrl: string } }
+  >(CREATE_TENDER_DOCUMENT, {
+    refetchQueries: [{ query: SEARCH_TENDERS }],
+  });

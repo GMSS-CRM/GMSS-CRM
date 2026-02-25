@@ -54,11 +54,14 @@ export default function VendorList({
   }, [vendors]);
 
   const formatDate = useCallback((dateString: string): string => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
     return new Intl.DateTimeFormat('en-IN', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-    }).format(new Date(dateString));
+    }).format(date);
   }, []);
 
   const getStatusConfig = useCallback((status: string): { color: string; label: string } => {
@@ -341,7 +344,7 @@ export default function VendorList({
           ) : (
             <span>
               <strong>{pendingRequests.length}</strong> vendor{pendingRequests.length !== 1 ? 's' : ''} sent to
-              MD for review â€” view only until resolved.
+              MD for review.
             </span>
           )}
         </div>
@@ -350,7 +353,7 @@ export default function VendorList({
         <div className={styles.resolvedBanner}>
           <CheckCircleOutlined style={{ color: '#059669' }} />
           <span>
-            <strong>{resolvedRequests.length}</strong> resolved request{resolvedRequests.length !== 1 ? 's' : ''} â€” showing employee and MD remarks.
+            <strong>{resolvedRequests.length}</strong> resolved request{resolvedRequests.length !== 1 ? 's' : ''}.
           </span>
         </div>
       )}

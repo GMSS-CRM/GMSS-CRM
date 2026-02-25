@@ -86,6 +86,13 @@ export const ErrorInfo = {
   // Vendor Workflow errors
   VENDOR_STATUS_SAME: 'Vendor already in this status',
   VENDOR_WORKFLOW_UPDATE_FAILED: 'Failed to update vendor status workflow',
+
+  // Vendor MD Request errors
+  MD_REQUEST_NOT_FOUND: 'MD request not found',
+  MD_REQUEST_ALREADY_RESOLVED: 'MD request is already resolved',
+  MD_REQUEST_PENDING_EXISTS: 'A pending MD request already exists for this vendor',
+  MD_REQUEST_VENDOR_NOT_INTERESTED: 'Vendor must be in INTERESTED status to send to MD',
+  MD_REQUEST_ID_REQUIRED: 'Request ID is required',
 };
 
 export default ErrorInfo;

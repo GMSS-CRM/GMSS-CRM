@@ -14,15 +14,18 @@ export const tenderResolvers = {
   },
 
   Mutation: {
-    createTender: (_: unknown, { input }: any, context: any) =>
+    createTender: (_: unknown, { input }: any) =>
       getService().createTender(input as any),
 
-    updateTender: (_: unknown, { id, input }: any, context: any) =>
+    updateTender: (_: unknown, { id, input }: any) =>
       getService().updateTender(id, input as any),
 
     deleteTender: (_: unknown, { id }: any) => getService().deleteTender(id),
 
     deleteTenders: (_: unknown, { ids }: any) => getService().deleteTenders(ids),
+
+    changeTenderStatus: (_: unknown, { input }: any) =>
+      getService().changeTenderStatus(input as any),
   },
 
   Tender: {

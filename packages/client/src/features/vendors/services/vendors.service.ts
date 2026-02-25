@@ -1,376 +1,539 @@
-import type { Vendor, VendorDocument, Tag, VendorMdRequest, CompanyType } from '../types';
+import { gql } from 'graphql-tag';
+import { useQuery, useMutation } from '@apollo/client/react';
+import type { Vendor, VendorDocument, VendorMdRequest, ContactPerson, CompanyStatus, CompanyType } from '../types';
 
-/**
- * Vendors Service
- * API integration layer for vendor management operations
- * TODO: Integrate with GraphQL/REST API
- */
+// ─── Type Mappers ────────────────────────────────────────────────────────────
 
-// Mock Tags Data
-export const MOCK_TAGS: Tag[] = [
-  { id: '1', name: 'Electronics', color: 'blue' },
-  { id: '2', name: 'Medical Equipment', color: 'green' },
-  { id: '3', name: 'Construction', color: 'orange' },
-  { id: '4', name: 'IT Services', color: 'purple' },
-  { id: '5', name: 'Pharmaceuticals', color: 'red' },
-  { id: '6', name: 'Industrial Machinery', color: 'cyan' },
-];
+function gqlStatusToFrontend(status: string): CompanyStatus {
+  switch (status) {
+    case 'NEW':                 return 'New';
+    case 'INTERESTED':
+    case 'PENDING_MD_APPROVAL':
+    case 'NOT_INTERESTED':      return 'Interested';
+    case 'APPROVED':
+    case 'FINAL':               return 'Final';
+    default:                    return 'New';
+  }
+}
 
-// Mock Vendors Data — using CompanyStatus: New | Interested | Final
-export const MOCK_VENDORS: Vendor[] = [
-  {
-    id: '1',
-    vendorCode: 'VND-0001',
-    companyName: 'TechCorp India Pvt Ltd',
-    companyType: 'Vendor' as CompanyType,
-    isLinkedWithRailways: true,
-    address: '123 MG Road, Bangalore, Karnataka 560001',
-    contactPersons: [
-      {
-        id: 'cp1',
-        name: 'Rahul Mehta',
-        designation: 'Sales Manager',
-        phone: '+91 9876543210',
-        email: {
-          mailto: ['rahul.mehta@techcorp.in'],
-          cc: [],
-          bcc: [],
-        },
-      },
-    ],
-    gstNumber: '29ABCDE1234F1Z5',
-    panNumber: 'ABCDE1234F',
-    msmeNumber: 'UDYAM-KA-12-1234567',
-    cinNumber: 'U72900KA2015PTC123456',
-    tags: ['1', '4'],
-    status: 'Final',
-    createdDate: new Date('2024-01-15').toISOString(),
-    createdBy: 'emp001',
-    isDeleted: false,
-  },
-  {
-    id: '2',
-    vendorCode: 'VND-0002',
-    companyName: 'MedEquip Solutions',
-    companyType: 'Consultant' as CompanyType,
-    isLinkedWithRailways: false,
-    address: 'Plot 45, Industrial Area, Phase 2, Noida, UP 201301',
-    contactPersons: [
-      {
-        id: 'cp2',
-        name: 'Dr. Priya Sharma',
-        designation: 'Technical Director',
-        phone: '+91 9123456789',
-        email: {
-          mailto: ['priya@medequip.co.in'],
-          cc: ['admin@medequip.co.in'],
-          bcc: [],
-        },
-      },
-    ],
-    gstNumber: '09XYZAB5678G2Z1',
-    panNumber: 'XYZAB5678G',
-    msmeNumber: 'UDYAM-UP-09-2345678',
-    tags: ['2', '5'],
-    status: 'Interested',
-    createdDate: new Date('2024-02-01').toISOString(),
-    createdBy: 'emp001',
-    updatedDate: new Date('2024-02-05').toISOString(),
-    isDeleted: false,
-  },
-  {
-    id: '3',
-    vendorCode: 'VND-0003',
-    companyName: 'Global Trade Partners',
-    companyType: 'Vendor' as CompanyType,
-    isLinkedWithRailways: true,
-    address: '56 Nehru Place, New Delhi, Delhi 110019',
-    contactPersons: [
-      {
-        id: 'cp3',
-        name: 'Amit Kumar',
-        designation: 'Business Development Manager',
-        phone: '+91 9988776655',
-        email: {
-          mailto: ['amit@globaltp.com'],
-          cc: [],
-          bcc: [],
-        },
-      },
-      {
-        id: 'cp4',
-        name: 'Sneha Gupta',
-        designation: 'Operations Manager',
-        phone: '+91 9876543211',
-        email: {
-          mailto: ['sneha@globaltp.com'],
-          cc: ['amit@globaltp.com'],
-          bcc: [],
-        },
-      },
-    ],
-    gstNumber: '07PQRST9012H3Z4',
-    panNumber: 'PQRST9012H',
-    tags: ['1', '3', '6'],
-    status: 'New',
-    createdDate: new Date('2024-03-10').toISOString(),
-    createdBy: 'emp002',
-    isDeleted: false,
-  },
-  {
-    id: '4',
-    vendorCode: 'VND-0004',
-    companyName: 'Pharma Distributors Inc',
-    companyType: 'Consultant' as CompanyType,
-    isLinkedWithRailways: false,
-    address: 'Tower B, Cyber City, Gurgaon, Haryana 122002',
-    contactPersons: [
-      {
-        id: 'cp5',
-        name: 'Anjali Verma',
-        designation: 'Procurement Specialist',
-        phone: '+91 9876012345',
-        email: {
-          mailto: ['anjali@pharmadist.in'],
-          cc: ['support@pharmadist.in'],
-          bcc: ['manager@pharmadist.in'],
-        },
-      },
-    ],
-    gstNumber: '06LMNOP3456I4Z9',
-    panNumber: 'LMNOP3456I',
-    tags: ['5'],
-    status: 'New',
-    createdDate: new Date('2024-03-20').toISOString(),
-    createdBy: 'emp002',
-    isDeleted: false,
-  },
-  {
-    id: '5',
-    vendorCode: 'VND-0005',
-    companyName: 'Industrial Systems OEM',
-    companyType: 'Vendor' as CompanyType,
-    isLinkedWithRailways: true,
-    address: 'MIDC Area, Pune, Maharashtra 411019',
-    contactPersons: [
-      {
-        id: 'cp6',
-        name: 'Vikram Patel',
-        designation: 'CEO',
-        phone: '+91 9123987654',
-        email: {
-          mailto: ['vikram@industrialoem.com'],
-          cc: [],
-          bcc: [],
-        },
-      },
-    ],
-    gstNumber: '27FGHIJ6789K5Z2',
-    panNumber: 'FGHIJ6789K',
-    cinNumber: 'U28910MH2018PLC234567',
-    tags: ['6'],
-    status: 'Interested',
-    createdDate: new Date('2024-02-15').toISOString(),
-    createdBy: 'emp001',
-    updatedDate: new Date('2024-02-25').toISOString(),
-    isDeleted: false,
-  },
-];
+function frontendStatusToGql(status: CompanyStatus): string {
+  switch (status) {
+    case 'New':        return 'NEW';
+    case 'Interested': return 'INTERESTED';
+    case 'Final':      return 'FINAL';
+  }
+}
 
-// Mock MD Requests Data
-// IS_RESOLVED=false → pending (employee sent to MD, awaiting decision)
-// IS_RESOLVED=true  → resolved (MD has acted)
-export let MOCK_MD_REQUESTS: VendorMdRequest[] = [
-  {
-    id: 'mdr-1',
-    vendorId: '3',
-    empId: 'emp002',
-    empRemark: 'Customer visited HQ and showed strong interest. Requesting status change to Interested.',
-    isResolved: false,
-    createdDate: new Date('2024-03-25').toISOString(),
-  },
-  {
-    id: 'mdr-2',
-    vendorId: '5',
-    empId: 'emp001',
-    empRemark: 'All documents verified. Long-term relationship established. Propose to mark as Final.',
-    mdId: 'md001',
-    mdRemark: 'Reviewed and agreed. Status updated to Final by MD.',
-    isResolved: true,
-    createdDate: new Date('2024-02-20').toISOString(),
-    resolvedDate: new Date('2024-02-25').toISOString(),
-  },
-  {
-    id: 'mdr-3',
-    vendorId: '4',
-    empId: 'emp002',
-    empRemark: 'Initial meetings conducted. Company has shown genuine interest in collaboration.',
-    isResolved: false,
-    createdDate: new Date('2024-04-01').toISOString(),
-  },
-];
+function mapGqlContactPerson(cp: any): ContactPerson {
+  return {
+    id: cp.id,
+    name: cp.name ?? '',
+    designation: cp.designation,
+    phone: cp.phoneNumber,
+    email: {
+      mailto: cp.email ? [cp.email] : [],
+      cc: cp.cc ? cp.cc.split(',').map((e: string) => e.trim()).filter(Boolean) : [],
+      bcc: cp.bcc ? cp.bcc.split(',').map((e: string) => e.trim()).filter(Boolean) : [],
+    },
+  };
+}
 
-// Mock Documents Data
-export const MOCK_DOCUMENTS: VendorDocument[] = [
-  {
-    id: '1',
-    vendorId: '1',
-    documentType: 'GST Certificate',
-    fileName: 'TechCorp_GST_Certificate.pdf',
-    status: 'Verified',
-    remarks: 'Valid until Dec 2026',
-    uploadedDate: new Date('2024-01-16').toISOString(),
-    uploadedBy: 'emp001',
-    verifiedDate: new Date('2024-01-17').toISOString(),
-    verifiedBy: 'md001',
-  },
-  {
-    id: '2',
-    vendorId: '1',
-    documentType: 'PAN Card',
-    fileName: 'TechCorp_PAN.pdf',
-    status: 'Verified',
-    uploadedDate: new Date('2024-01-16').toISOString(),
-    uploadedBy: 'emp001',
-    verifiedDate: new Date('2024-01-17').toISOString(),
-    verifiedBy: 'md001',
-  },
-  {
-    id: '3',
-    vendorId: '2',
-    documentType: 'GST Certificate',
-    fileName: 'MedEquip_GST.pdf',
-    status: 'Verified',
-    uploadedDate: new Date('2024-02-02').toISOString(),
-    uploadedBy: 'emp001',
-    verifiedDate: new Date('2024-02-03').toISOString(),
-    verifiedBy: 'md001',
-  },
-  {
-    id: '4',
-    vendorId: '3',
-    documentType: 'GST Certificate',
-    fileName: 'GlobalTP_GST.pdf',
+function mapGqlVendor(v: any): Vendor {
+  return {
+    id: v.id,
+    companyName: v.name ?? '',
+    companyType: (v.type as CompanyType) ?? 'Vendor',
+    isLinkedWithRailways: v.isRailwayLinked ?? false,
+    address: v.address,
+    gstNumber: v.gstNumber,
+    panNumber: v.panNumber,
+    msmeNumber: v.msmeUdyamNumber,
+    cinNumber: v.cinNumber,
+    tags: (v.tags ?? []).map((t: any) => t.tagId as string),
+    status: gqlStatusToFrontend(v.status),
+    createdDate: v.createdDate ?? new Date().toISOString(),
+    updatedDate: v.updatedDate,
+    isDeleted: v.status === 'DELETED',
+    contactPersons: (v.contactPersons ?? []).map(mapGqlContactPerson),
+  };
+}
+
+function mapGqlDocument(d: any): VendorDocument {
+  return {
+    id: d.id,
+    vendorId: d.vendorId,
+    documentType: d.documentName ?? '',
+    fileName: d.documentName,
     status: 'Pending',
-    uploadedDate: new Date('2024-03-11').toISOString(),
-    uploadedBy: 'emp002',
-  },
-  {
-    id: '5',
-    vendorId: '3',
-    documentType: 'PAN Card',
-    fileName: 'GlobalTP_PAN.pdf',
-    status: 'Pending',
-    uploadedDate: new Date('2024-03-11').toISOString(),
-    uploadedBy: 'emp002',
-  },
-];
-
-// ─── Vendor CRUD ────────────────────────────────────────────────────────────
-
-export const fetchVendors = async (): Promise<Vendor[]> => {
-  return Promise.resolve(MOCK_VENDORS);
-};
-
-export const fetchVendorById = async (id: string): Promise<Vendor | null> => {
-  const vendor = MOCK_VENDORS.find((v) => v.id === id);
-  return Promise.resolve(vendor || null);
-};
-
-export const createVendor = async (
-  vendor: Omit<Vendor, 'id' | 'createdDate' | 'isDeleted'>
-): Promise<Vendor> => {
-  const newVendor: Vendor = {
-    ...vendor,
-    id: `vendor-${Date.now()}`,
-    createdDate: new Date().toISOString(),
-    isDeleted: false,
+    uploadedDate: d.createdDate,
+    uploadedBy: d.createdBy,
   };
-  MOCK_VENDORS.push(newVendor);
-  return Promise.resolve(newVendor);
-};
+}
 
-export const updateVendor = async (
-  id: string,
-  updates: Partial<Vendor>
-): Promise<Vendor> => {
-  const index = MOCK_VENDORS.findIndex((v) => v.id === id);
-  if (index === -1) throw new Error(`Vendor with id ${id} not found`);
-  const updatedVendor: Vendor = {
-    ...MOCK_VENDORS[index],
-    ...updates,
-    updatedDate: new Date().toISOString(),
+function mapGqlMdRequest(r: any): VendorMdRequest {
+  return {
+    id: r.id,
+    vendorId: r.vendorId,
+    empId: r.empId ?? '',
+    empRemark: r.empRemark ?? undefined,
+    mdId: r.mdId ?? undefined,
+    mdRemark: r.mdRemark ?? undefined,
+    isResolved: r.isResolved ?? false,
+    createdDate: r.createdDate ?? new Date().toISOString(),
+    resolvedDate: r.updatedDate,
   };
-  MOCK_VENDORS[index] = updatedVendor;
-  return Promise.resolve(updatedVendor);
-};
+}
 
-export const deleteVendor = async (id: string): Promise<void> => {
-  const index = MOCK_VENDORS.findIndex((v) => v.id === id);
-  if (index === -1) throw new Error(`Vendor with id ${id} not found`);
-  MOCK_VENDORS[index] = { ...MOCK_VENDORS[index], isDeleted: true };
-  return Promise.resolve();
-};
-
-export const fetchTags = async (): Promise<Tag[]> => {
-  return Promise.resolve(MOCK_TAGS);
-};
-
-export const fetchVendorDocuments = async (vendorId: string): Promise<VendorDocument[]> => {
-  return Promise.resolve(MOCK_DOCUMENTS.filter((doc) => doc.vendorId === vendorId));
-};
-
-// ─── MD Request functions ────────────────────────────────────────────────────
-
-/** Return all pending (unresolved) MD requests */
-export const fetchPendingMdRequests = async (): Promise<VendorMdRequest[]> => {
-  return Promise.resolve(MOCK_MD_REQUESTS.filter((r) => !r.isResolved));
-};
-
-/** Return all resolved MD requests */
-export const fetchResolvedMdRequests = async (): Promise<VendorMdRequest[]> => {
-  return Promise.resolve(MOCK_MD_REQUESTS.filter((r) => r.isResolved));
-};
-
-/** Employee sends vendor to MD → creates a pending request */
-export const sendVendorToMd = async (
-  vendorId: string,
-  empId: string,
-  empRemark: string
-): Promise<VendorMdRequest> => {
-  const request: VendorMdRequest = {
-    id: `mdr-${Date.now()}`,
-    vendorId,
-    empId,
-    empRemark,
-    isResolved: false,
-    createdDate: new Date().toISOString(),
+function cpToGqlInput(cp: ContactPerson) {
+  return {
+    name: cp.name,
+    designation: cp.designation,
+    phoneNumber: cp.phone ?? '',
+    email: cp.email?.mailto?.[0] ?? '',
+    cc: (cp.email?.cc ?? []).join(','),
+    bcc: (cp.email?.bcc ?? []).join(','),
   };
-  MOCK_MD_REQUESTS.push(request);
-  return Promise.resolve(request);
-};
+}
 
-/** MD resolves a pending request */
-export const resolveMdRequest = async (
-  requestId: string,
-  mdId: string,
-  mdRemark: string
-): Promise<VendorMdRequest> => {
-  const index = MOCK_MD_REQUESTS.findIndex((r) => r.id === requestId);
-  if (index === -1) throw new Error(`MD request ${requestId} not found`);
-  const resolved: VendorMdRequest = {
-    ...MOCK_MD_REQUESTS[index],
-    mdId,
-    mdRemark,
-    isResolved: true,
-    resolvedDate: new Date().toISOString(),
+// ─── Fragments ────────────────────────────────────────────────────────────────
+
+const VENDOR_FIELDS = gql`
+  fragment VendorFields on Vendor {
+    id
+    name
+    type
+    status
+    isRailwayLinked
+    gstNumber
+    panNumber
+    cinNumber
+    msmeUdyamNumber
+    address
+    createdDate
+    updatedDate
+    tags {
+      id
+      tagId
+      enableMail
+      tag { id name }
+    }
+    contactPersons {
+      id
+      vendorId
+      name
+      designation
+      phoneNumber
+      email
+      cc
+      bcc
+    }
+  }
+`;
+
+const MD_REQUEST_FIELDS = gql`
+  fragment MdRequestFields on VendorMdRequest {
+    id
+    vendorId
+    empId
+    empRemark
+    mdId
+    mdRemark
+    isResolved
+    createdDate
+    updatedDate
+  }
+`;
+
+const VENDOR_DOCUMENT_FIELDS = gql`
+  fragment VendorDocumentFields on VendorDocument {
+    id
+    vendorId
+    documentName
+    documentUrl
+    expiresOn
+    createdBy
+    createdDate
+    updatedBy
+    updatedDate
+  }
+`;
+
+// ─── Queries ─────────────────────────────────────────────────────────────────
+
+export const SEARCH_VENDORS = gql`
+  ${VENDOR_FIELDS}
+  query SearchVendors($search: String, $status: VendorStatus) {
+    searchVendors(search: $search, status: $status) {
+      ...VendorFields
+    }
+  }
+`;
+
+const GET_VENDOR_BY_ID = gql`
+  ${VENDOR_FIELDS}
+  query GetVendorById($id: ID!) {
+    getVendorById(id: $id) {
+      ...VendorFields
+    }
+  }
+`;
+
+export const GET_PENDING_MD_REQUESTS = gql`
+  ${MD_REQUEST_FIELDS}
+  query GetPendingMdRequests {
+    getPendingMdRequests {
+      ...MdRequestFields
+    }
+  }
+`;
+
+export const GET_RESOLVED_MD_REQUESTS = gql`
+  ${MD_REQUEST_FIELDS}
+  query GetResolvedMdRequests {
+    getResolvedMdRequests {
+      ...MdRequestFields
+    }
+  }
+`;
+
+const GET_ACTIVE_PENDING_REQUEST = gql`
+  ${MD_REQUEST_FIELDS}
+  query GetActivePendingRequest($vendorId: ID!) {
+    getActivePendingRequest(vendorId: $vendorId) {
+      ...MdRequestFields
+    }
+  }
+`;
+
+const SEARCH_VENDOR_DOCUMENTS = gql`
+  ${VENDOR_DOCUMENT_FIELDS}
+  query SearchVendorDocuments($vendorId: ID) {
+    searchVendorDocuments(searchInput: { vendorId: $vendorId }) {
+      ...VendorDocumentFields
+    }
+  }
+`;
+
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+const CREATE_VENDOR = gql`
+  ${VENDOR_FIELDS}
+  mutation CreateVendor($input: CreateVendorInput!) {
+    createVendor(input: $input) {
+      ...VendorFields
+    }
+  }
+`;
+
+const UPDATE_VENDOR = gql`
+  ${VENDOR_FIELDS}
+  mutation UpdateVendor($id: ID!, $input: UpdateVendorInput!) {
+    updateVendor(id: $id, input: $input) {
+      ...VendorFields
+    }
+  }
+`;
+
+const DELETE_VENDOR = gql`
+  mutation DeleteVendor($id: ID!) {
+    deleteVendor(id: $id)
+  }
+`;
+
+const CHANGE_VENDOR_STATUS = gql`
+  mutation ChangeVendorStatus($input: ChangeVendorStatusInput!) {
+    changeVendorStatus(input: $input) {
+      id
+      status
+    }
+  }
+`;
+
+const CREATE_MD_REQUEST = gql`
+  ${MD_REQUEST_FIELDS}
+  mutation CreateMdRequest($input: CreateMdRequestInput!) {
+    createMdRequest(input: $input) {
+      ...MdRequestFields
+    }
+  }
+`;
+
+const RESOLVE_MD_REQUEST = gql`
+  ${MD_REQUEST_FIELDS}
+  mutation ResolveMdRequest($input: ResolveMdRequestInput!) {
+    resolveMdRequest(input: $input) {
+      ...MdRequestFields
+    }
+  }
+`;
+
+export const UPLOAD_VENDOR_DOCUMENT = gql`
+  ${VENDOR_DOCUMENT_FIELDS}
+  mutation UploadVendorDocument($input: UploadVendorDocumentInput!) {
+    uploadVendorDocument(input: $input) {
+      ...VendorDocumentFields
+    }
+  }
+`;
+
+// ─── Hooks ───────────────────────────────────────────────────────────────────
+
+export const useSearchVendors = (search?: string, status?: string) => {
+  const { data, loading, error, refetch } = useQuery<{ searchVendors: any[] }>(SEARCH_VENDORS, {
+    variables: { search: search || undefined, status: status || undefined },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    vendors: (data?.searchVendors ?? []).map(mapGqlVendor) as Vendor[],
+    loading,
+    error,
+    refetch,
   };
-  MOCK_MD_REQUESTS[index] = resolved;
-  return Promise.resolve(resolved);
 };
 
-/** Check if a vendor has an active (unresolved) pending request */
-export const getActivePendingRequest = async (vendorId: string): Promise<VendorMdRequest | null> => {
-  const req = MOCK_MD_REQUESTS.find((r) => r.vendorId === vendorId && !r.isResolved);
-  return Promise.resolve(req || null);
+export const useGetVendorById = (id: string | undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ getVendorById: any }>(GET_VENDOR_BY_ID, {
+    variables: { id },
+    skip: !id,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    vendor: data?.getVendorById ? mapGqlVendor(data.getVendorById) : null,
+    // raw GQL status needed to detect valid transitions on save
+    rawStatus: data?.getVendorById?.status as string | undefined,
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useGetPendingMdRequests = () => {
+  const { data, loading, error, refetch } = useQuery<{ getPendingMdRequests: any[] }>(GET_PENDING_MD_REQUESTS, {
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    requests: (data?.getPendingMdRequests ?? []).map(mapGqlMdRequest) as VendorMdRequest[],
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useGetResolvedMdRequests = () => {
+  const { data, loading, error, refetch } = useQuery<{ getResolvedMdRequests: any[] }>(GET_RESOLVED_MD_REQUESTS, {
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    requests: (data?.getResolvedMdRequests ?? []).map(mapGqlMdRequest) as VendorMdRequest[],
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useGetActivePendingRequest = (vendorId: string | undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ getActivePendingRequest: any }>(GET_ACTIVE_PENDING_REQUEST, {
+    variables: { vendorId },
+    skip: !vendorId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    request: data?.getActivePendingRequest
+      ? mapGqlMdRequest(data.getActivePendingRequest)
+      : null,
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useSearchVendorDocuments = (vendorId: string | undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ searchVendorDocuments: any[] }>(SEARCH_VENDOR_DOCUMENTS, {
+    variables: { vendorId },
+    skip: !vendorId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    documents: (data?.searchVendorDocuments ?? []).map(mapGqlDocument) as VendorDocument[],
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useCreateVendor = () => {
+  const [mutate, { loading }] = useMutation<{ createVendor: any }>(CREATE_VENDOR, {
+    refetchQueries: [{ query: SEARCH_VENDORS }],
+  });
+
+  const createVendor = async (values: {
+    companyName: string;
+    companyType: CompanyType;
+    isLinkedWithRailways: boolean;
+    status: CompanyStatus;
+    address?: string;
+    contactPersons: ContactPerson[];
+    gstNumber?: string;
+    panNumber?: string;
+    msmeNumber?: string;
+    cinNumber?: string;
+  }) => {
+    const result = await mutate({
+      variables: {
+        input: {
+          name: values.companyName,
+          type: values.companyType,
+          isRailwayLinked: values.isLinkedWithRailways,
+          address: values.address,
+          gstNumber: values.gstNumber,
+          panNumber: values.panNumber,
+          msmeUdyamNumber: values.msmeNumber,
+          cinNumber: values.cinNumber,
+          contactPersons: (values.contactPersons ?? [])
+            .filter((cp) => cp.name)
+            .map(cpToGqlInput),
+        },
+      },
+    });
+    return result.data?.createVendor ? mapGqlVendor(result.data.createVendor) : null;
+  };
+
+  return { createVendor, loading };
+};
+
+export const useUpdateVendor = () => {
+  const [mutate, { loading }] = useMutation<{ updateVendor: any }>(UPDATE_VENDOR, {
+    refetchQueries: [{ query: SEARCH_VENDORS }],
+  });
+  const [changeStatus] = useMutation(CHANGE_VENDOR_STATUS);
+
+  const updateVendor = async (
+    id: string,
+    values: {
+      companyName: string;
+      companyType: CompanyType;
+      isLinkedWithRailways: boolean;
+      status: CompanyStatus;
+      address?: string;
+      contactPersons: ContactPerson[];
+      gstNumber?: string;
+      panNumber?: string;
+      msmeNumber?: string;
+      cinNumber?: string;
+    },
+    currentGqlStatus: string,
+  ) => {
+    // 1. Update basic fields (no status — handled through workflow)
+    const result = await mutate({
+      variables: {
+        id,
+        input: {
+          name: values.companyName,
+          type: values.companyType,
+          isRailwayLinked: values.isLinkedWithRailways,
+          address: values.address,
+          gstNumber: values.gstNumber,
+          panNumber: values.panNumber,
+          msmeUdyamNumber: values.msmeNumber,
+          cinNumber: values.cinNumber,
+          contactPersons: (values.contactPersons ?? [])
+            .filter((cp) => cp.name)
+            .map((cp) => ({
+              id: cp.id?.startsWith('cp_') ? undefined : cp.id,
+              ...cpToGqlInput(cp),
+            })),
+        },
+      },
+    });
+
+    // 2. Handle status change via workflow if needed
+    const desiredGql = frontendStatusToGql(values.status);
+    if (desiredGql !== currentGqlStatus) {
+      try {
+        await changeStatus({
+          variables: {
+            input: { vendorId: id, newStatus: desiredGql, remarks: 'Status updated from form' },
+          },
+        });
+      } catch {
+        // Transition may not be valid from current status — other fields still saved
+      }
+    }
+
+    return result.data?.updateVendor ? mapGqlVendor(result.data.updateVendor) : null;
+  };
+
+  return { updateVendor, loading };
+};
+
+export const useDeleteVendor = () => {
+  const [mutate, { loading }] = useMutation<{ deleteVendor: boolean }>(DELETE_VENDOR, {
+    refetchQueries: [{ query: SEARCH_VENDORS }],
+  });
+
+  const deleteVendor = async (id: string) => {
+    await mutate({ variables: { id } });
+  };
+
+  return { deleteVendor, loading };
+};
+
+export const useCreateMdRequest = () => {
+  const [mutate, { loading }] = useMutation<{ createMdRequest: any }>(CREATE_MD_REQUEST, {
+    refetchQueries: [{ query: GET_PENDING_MD_REQUESTS }, { query: SEARCH_VENDORS }],
+  });
+
+  const createMdRequest = async (vendorId: string, empRemark: string) => {
+    const result = await mutate({
+      variables: { input: { vendorId, empRemark } },
+    });
+    return result.data?.createMdRequest ? mapGqlMdRequest(result.data.createMdRequest) : null;
+  };
+
+  return { createMdRequest, loading };
+};
+
+export const useResolveMdRequest = () => {
+  const [mutate, { loading }] = useMutation<{ resolveMdRequest: any }>(RESOLVE_MD_REQUEST, {
+    refetchQueries: [
+      { query: GET_PENDING_MD_REQUESTS },
+      { query: GET_RESOLVED_MD_REQUESTS },
+      { query: SEARCH_VENDORS },
+    ],
+  });
+
+  const resolveMdRequest = async (requestId: string, mdRemark: string, approved: boolean) => {
+    const result = await mutate({
+      variables: { input: { requestId, mdRemark, approved } },
+    });
+    return result.data?.resolveMdRequest ? mapGqlMdRequest(result.data.resolveMdRequest) : null;
+  };
+
+  return { resolveMdRequest, loading };
+};
+
+export const useUploadVendorDocument = () => {
+  const [mutate, { loading }] = useMutation<{ uploadVendorDocument: any }>(UPLOAD_VENDOR_DOCUMENT);
+
+  const uploadVendorDocument = async (
+    vendorId: string,
+    documentName: string,
+    documentUrl: string,
+    expiresOn?: string,
+  ) => {
+    const result = await mutate({
+      variables: { input: { vendorId, documentName, documentUrl, expiresOn } },
+    });
+    return result.data?.uploadVendorDocument
+      ? mapGqlDocument(result.data.uploadVendorDocument)
+      : null;
+  };
+
+  return { uploadVendorDocument, loading };
 };

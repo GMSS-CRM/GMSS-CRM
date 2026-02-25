@@ -95,12 +95,6 @@ export const vendorTypeDefs = gql`
     documents: [UpdateVendorDocumentInput!]
   }
 
-  input ChangeVendorStatusInput {
-    vendorId: ID!
-    newStatus: VendorStatus!
-    remarks: String
-  }
-
   extend type Query {
     getVendorById(id: ID!): Vendor
     searchVendors(search: String, status: VendorStatus): [Vendor!]!
@@ -111,6 +105,5 @@ export const vendorTypeDefs = gql`
     updateVendor(id: ID!, input: UpdateVendorInput!): Vendor!
     deleteVendor(id: ID!): Boolean!
     deleteVendors(ids: [ID!]!): Boolean!
-    changeVendorStatus(input: ChangeVendorStatusInput!): Vendor!
   }
 `;

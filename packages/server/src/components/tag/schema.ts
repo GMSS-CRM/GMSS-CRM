@@ -8,6 +8,9 @@ export const tagTypeDefs = gql`
     updatedBy: String
     createdDate: String!
     updatedDate: String!
+    vendorCount: Int!
+    enabledMailCount: Int!
+    tenderCount: Int!
   }
 
   input CreateTagInput {
@@ -27,6 +30,7 @@ export const tagTypeDefs = gql`
   extend type Query {
     getTagById(id: ID!): Tag
     searchTags(searchInput: SearchTagInput): [Tag!]!
+    getTendersByTag(tagId: ID!): [Tender!]!
   }
 
   extend type Mutation {

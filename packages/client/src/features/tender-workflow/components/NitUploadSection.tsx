@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Modal, Upload, Button, Typography, message, Progress } from "antd";
 import { UploadOutlined, FileTextOutlined, CheckCircleOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd";
 import type { Tender, TenderDocument } from "../types/tender.types";
+import { useGenerateUploadUrl, uploadFileToS3 } from "../services/upload.service";
+import { useCreateTenderDocument } from "../services/tenders.service";
 import s from "../styles/tender-workflow.module.css";
 
 const { Text } = Typography;
@@ -15,9 +16,11 @@ interface Props {
 }
 
 export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpload }) => {
-  const [file, setFile] = useState<UploadFile | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [generateUrl] = useGenerateUploadUrl();
+  const [createDoc] = useCreateTenderDocument();
 
   const reset = () => {
     setFile(null);
@@ -28,15 +31,37 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
   const handleUpload = async () => {
     if (!tender || !file) return;
     setUploading(true);
-    setProgress(0);
-    const iv = setInterval(() => setProgress((p) => Math.min(p + 15, 90)), 200);
-    await new Promise((r) => setTimeout(r, 1500));
-    clearInterval(iv);
-    setProgress(100);
-    onUpload(tender.id, { name: file.name, type: "NIT", uploadedAt: new Date(), size: file.size });
-    message.success("NIT uploaded");
-    reset();
-    onClose();
+    setProgress(10);
+
+    try {
+      // 1. Upload to S3
+      setProgress(30);
+      const { publicUrl } = await uploadFileToS3(file, `tenders/${tender.id}/nit`, generateUrl);
+      setProgress(70);
+
+      // 2. Create document record
+      await createDoc({
+        variables: {
+          input: {
+            tenderId: tender.id,
+            documentName: file.name,
+            documentUrl: publicUrl,
+          },
+        },
+      });
+      setProgress(100);
+
+      // 3. Trigger status transition
+      onUpload(tender.id, { name: file.name, type: "NIT", uploadedAt: new Date(), url: publicUrl, size: file.size });
+      message.success("NIT uploaded");
+      reset();
+      onClose();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      message.error(msg);
+      setUploading(false);
+      setProgress(0);
+    }
   };
 
   const handleClose = () => {
@@ -87,15 +112,16 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
               maxCount={1}
               showUploadList={false}
               beforeUpload={(f) => {
-                if (f.type !== "application/pdf") {
+                const nativeFile = f as unknown as File;
+                if (nativeFile.type !== "application/pdf") {
                   message.error("PDF only");
                   return false;
                 }
-                if (f.size / 1024 / 1024 > 10) {
+                if (nativeFile.size / 1024 / 1024 > 10) {
                   message.error("Max 10 MB");
                   return false;
                 }
-                setFile(f as unknown as UploadFile);
+                setFile(nativeFile);
                 return false;
               }}
             >
@@ -114,7 +140,7 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
               <CheckCircleOutlined />
               {file.name}
               <span className={s.fileSize}>
-                ({((file.size || 0) / 1024 / 1024).toFixed(1)} MB)
+                ({(file.size / 1024 / 1024).toFixed(1)} MB)
               </span>
             </span>
             <Button size="small" type="text" danger onClick={() => setFile(null)}>

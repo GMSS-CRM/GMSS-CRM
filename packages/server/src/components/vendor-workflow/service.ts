@@ -41,14 +41,14 @@ export class VendorWorkflowService
       throw new Error(ErrorInfo.VENDOR_STATUS_SAME);
     }
 
-    const allowedTransitions =
-      VALID_VENDOR_TRANSITIONS[currentStatus];
+    // const allowedTransitions =
+    //   VALID_VENDOR_TRANSITIONS[currentStatus];
 
-    if (!allowedTransitions.includes(newStatus)) {
-      throw new Error(
-        `Invalid transition from ${currentStatus} to ${newStatus}`
-      );
-    }
+    // if (!allowedTransitions.includes(newStatus)) {
+    //   throw new Error(
+    //     `Invalid transition from ${currentStatus} to ${newStatus}`
+    //   );
+    // }
 
     return await this.db.transaction(async (manager: any) => {
       vendor.status = newStatus;

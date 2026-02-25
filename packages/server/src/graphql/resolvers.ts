@@ -16,6 +16,8 @@ import { vendorPaymentResolvers } from "../components/vendor-payment";
 import { vendorProposalResolvers } from "../components/vendor-proposal";
 import { vendorTenderResolvers } from "../components/vendor-tender";
 import { vendorWorkflowResolvers } from "../components/vendor-workflow";
+import { vendorMdRequestResolvers } from "../components/vendor-md-request";
+import { uploadResolvers } from "../components/upload";
 
 export const resolvers = [
   userResolvers,
@@ -36,4 +38,6 @@ export const resolvers = [
   vendorProposalResolvers,
   vendorTenderResolvers,
   vendorWorkflowResolvers,
+  vendorMdRequestResolvers,
+  uploadResolvers,
 ];

@@ -51,4 +51,8 @@ export const TYPES = {
   IVendorTenderRepository: Symbol.for('IVendorTenderRepository'),
   IVendorTenderService: Symbol.for('IVendorTenderService'),
 
+  IVendorMdRequestRepository: Symbol.for('IVendorMdRequestRepository'),
+  IVendorMdRequestService: Symbol.for('IVendorMdRequestService'),
+
+  IS3Service: Symbol.for('IS3Service'),
 };

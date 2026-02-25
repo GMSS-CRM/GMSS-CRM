@@ -1,6 +1,6 @@
 // packages/client/src/features/tags/pages/TagsListPage.tsx
-import { useState, useEffect, useMemo } from 'react';
-import { Button, Typography, message, Modal } from 'antd';
+import { useState, useMemo } from 'react';
+import { Button, Typography, Modal } from 'antd';
 import { 
   PlusOutlined, 
   TagsOutlined,
@@ -12,15 +12,14 @@ import TagSearchBar from '../components/TagSearchBar';
 import CreateTagModal from './CreateTagModal';
 import DeleteTagModal from './DeleteTagModal';
 import type { TagWithVendorCount } from '../types/tagTypes';
-import { dummyTags, simulateDelay } from '../data/dummyData';
+import { useTagsData, useTagMutations } from '../hooks/useTagData';
 import styles from '../styles/tags.module.css';
 import TagTendersDrawer from './TagTenderDrawer';
 
 const { Title } = Typography;
 
 export default function TagsListPage() {
-  const [tags, setTags] = useState<TagWithVendorCount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { tags, loading, refetch, stats } = useTagsData();
   const [searchText, setSearchText] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   
@@ -33,17 +32,9 @@ export default function TagsListPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTag, setDrawerTag] = useState<TagWithVendorCount | null>(null);
 
-  // Load tags
-  useEffect(() => {
-    loadTags();
-  }, []);
-
-  const loadTags = async () => {
-    setLoading(true);
-    await simulateDelay(500);
-    setTags(dummyTags);
-    setLoading(false);
-  };
+  const { createTag, deleteTag, deleteTags } = useTagMutations(() => {
+    refetch();
+  });
 
   // Filter tags based on search
   const filteredTags = useMemo(() => {
@@ -53,15 +44,6 @@ export default function TagsListPage() {
       tag.name.toLowerCase().includes(search)
     );
   }, [tags, searchText]);
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    return {
-      totalTags: tags.length,
-      totalAssignments: tags.reduce((sum, tag) => sum + tag.vendorCount, 0),
-      totalEmailEnabled: tags.reduce((sum, tag) => sum + tag.enabledMailCount, 0),
-    };
-  }, [tags]);
 
   // Handlers
   const handleView = (tag: TagWithVendorCount) => {
@@ -76,10 +58,7 @@ export default function TagsListPage() {
 
   const handleConfirmDelete = async () => {
     if (!selectedTag) return;
-    
-    await simulateDelay(300);
-    setTags(prev => prev.filter(t => t.id !== selectedTag.id));
-    message.success(`Tag "${selectedTag.name}" deleted successfully`);
+    await deleteTag(selectedTag.id, selectedTag.name);
     setDeleteModalOpen(false);
     setSelectedTag(null);
   };
@@ -93,29 +72,17 @@ export default function TagsListPage() {
       okType: 'danger',
       cancelText: 'Cancel',
       onOk: async () => {
-        await simulateDelay(300);
-        setTags(prev => prev.filter(t => !selectedRowKeys.includes(t.id)));
+        await deleteTags(selectedRowKeys as string[]);
         setSelectedRowKeys([]);
-        message.success(`${selectedRowKeys.length} tags deleted successfully`);
       },
     });
   };
 
   const handleCreateTag = async (values: { name: string }) => {
-    await simulateDelay(300);
-    const newTag: TagWithVendorCount = {
-      id: `new-${Date.now()}`,
-      name: values.name,
-      createdBy: 'current-user@gmss.com',
-      createdDate: new Date().toISOString(),
-      updatedDate: new Date().toISOString(),
-      vendorCount: 0,
-      enabledMailCount: 0,
-      tenderCount: 0,
-    };
-    setTags(prev => [newTag, ...prev]);
-    message.success(`Tag "${values.name}" created successfully`);
-    setCreateModalOpen(false);
+    const success = await createTag(values);
+    if (success) {
+      setCreateModalOpen(false);
+    }
   };
 
   return (
@@ -157,7 +124,7 @@ export default function TagsListPage() {
         <TagSearchBar
           searchText={searchText}
           onSearchChange={setSearchText}
-          onRefresh={loadTags}
+          onRefresh={() => { refetch(); }}
           selectedCount={selectedRowKeys.length}
           onBulkDelete={handleBulkDelete}
           loading={loading}

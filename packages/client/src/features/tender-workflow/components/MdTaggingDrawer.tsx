@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { StatusBadge } from "./StatusBadge";
 import type { Tender } from "../types/tender.types";
-import { AVAILABLE_TAGS } from "../types/tender.types";
+import { useSearchTags } from "../../tags/services/tags.service";
 import s from "../styles/tender-workflow.module.css";
 
 interface Props {
@@ -44,12 +44,14 @@ export const MdTaggingDrawer: React.FC<Props> = ({
     }
   }, [tender]);
 
+  const { data: tagsData } = useSearchTags();
+  const serverTags = tagsData?.searchTags ?? [];
+
   if (!tender) return null;
 
   const handleConfirm = async () => {
     if (!tags.length) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
     onConfirm(tender.id, tags);
     setLoading(false);
   };
@@ -57,13 +59,12 @@ export const MdTaggingDrawer: React.FC<Props> = ({
   const handleReject = async () => {
     if (!reason.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
     onReject(tender.id, reason.trim());
     setLoading(false);
   };
 
-  const tagOptions = AVAILABLE_TAGS.map((t) => ({
-    label: <Tag color={t.color}>{t.name}</Tag>,
+  const tagOptions = serverTags.map((t) => ({
+    label: <Tag color="blue">{t.name}</Tag>,
     value: t.id,
   }));
 
@@ -179,11 +180,11 @@ export const MdTaggingDrawer: React.FC<Props> = ({
           {tags.length > 0 && (
             <div className={s.tagChips}>
               {tags.map((id) => {
-                const tag = AVAILABLE_TAGS.find((t) => t.id === id);
+                const tag = serverTags.find((t) => t.id === id);
                 return tag ? (
                   <Tag
                     key={id}
-                    color={tag.color}
+                    color="blue"
                     closable
                     onClose={() => setTags((p) => p.filter((x) => x !== id))}
                   >

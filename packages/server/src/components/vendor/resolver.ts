@@ -10,7 +10,8 @@ const getService = () => {
 export const vendorResolvers = {
   Query: {
     getVendorById: (_: unknown, { id }: any) => getService().getVendorById(id),
-    searchVendors: (_: unknown, { searchInput }: any) => getService().searchVendor(searchInput as any),
+    searchVendors: (_: unknown, { search, status }: any) =>
+      getService().searchVendor({ search, status }),
   },
 
   Mutation: {

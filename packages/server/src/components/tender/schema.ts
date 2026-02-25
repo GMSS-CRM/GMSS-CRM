@@ -4,6 +4,13 @@ export const tenderTypeDefs = gql`
   type Tender {
     id: ID!
     name: String!
+    referenceNumber: String
+    issuingDepartment: String
+    description: String
+    status: TenderStatus!
+    submissionDeadline: String
+    rejectionReason: String
+    mailSentAt: String
     createdBy: String!
     createdDate: String!
     updatedBy: String
@@ -31,16 +38,32 @@ export const tenderTypeDefs = gql`
 
   input CreateTenderInput {
     name: String!
+    referenceNumber: String
+    issuingDepartment: String
+    description: String
+    submissionDeadline: String
   }
 
   input UpdateTenderInput {
     name: String
+    referenceNumber: String
+    issuingDepartment: String
+    description: String
+    submissionDeadline: String
   }
 
   input SearchTenderInput {
     search: String
+    status: TenderStatus
     limit: Int
     offset: Int
+  }
+
+  input ChangeTenderStatusInput {
+    tenderId: ID!
+    status: TenderStatus!
+    rejectionReason: String
+    tagIds: [ID!]
   }
 
   extend type Query {
@@ -53,5 +76,6 @@ export const tenderTypeDefs = gql`
     updateTender(id: ID!, input: UpdateTenderInput!): Tender!
     deleteTender(id: ID!): Boolean!
     deleteTenders(ids: [ID!]!): Boolean!
+    changeTenderStatus(input: ChangeTenderStatusInput!): Tender!
   }
 `;

@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { Tag } from '../../entities/Tag';
+import type { Tender } from '../../entities/Tender';
 import type {
   CreateTagInput,
   UpdateTagInput,
@@ -14,6 +15,10 @@ export interface ITagRepository extends Repository<Tag> {
   updateTag(id: string, tag: Partial<Tag>): Promise<Tag | null>;
   deleteTag(id: string): Promise<boolean>;
   deleteTags(ids: string[]): Promise<boolean>;
+  getVendorCount(tagId: string): Promise<number>;
+  getEnabledMailCount(tagId: string): Promise<number>;
+  getTenderCount(tagId: string): Promise<number>;
+  findTendersByTagId(tagId: string): Promise<Tender[]>;
 }
 
 export interface ITagService {
@@ -24,4 +29,8 @@ export interface ITagService {
   getTagById(id: string): Promise<Tag | null>;
   getTagByName(name: string): Promise<Tag | null>;
   searchTag(params: SearchTagInput): Promise<Tag[]>;
+  getVendorCount(tagId: string): Promise<number>;
+  getEnabledMailCount(tagId: string): Promise<number>;
+  getTenderCount(tagId: string): Promise<number>;
+  getTendersByTag(tagId: string): Promise<Tender[]>;
 }

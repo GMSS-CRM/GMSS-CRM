@@ -146,20 +146,6 @@ export const MD_TABS: TabConfig[] = [
   { key: "mdCompleted", label: "Completed", statuses: ["MD_TAGGED", "NIT_VERIFIED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"] },
 ];
 
-// Available tags for MD to assign
-export const AVAILABLE_TAGS: TenderTag[] = [
-  { id: "tag-1", name: "Infrastructure", color: "blue" },
-  { id: "tag-2", name: "IT Services", color: "green" },
-  { id: "tag-3", name: "Construction", color: "orange" },
-  { id: "tag-4", name: "Healthcare", color: "red" },
-  { id: "tag-5", name: "Education", color: "purple" },
-  { id: "tag-6", name: "Transportation", color: "cyan" },
-  { id: "tag-7", name: "Energy", color: "gold" },
-  { id: "tag-8", name: "Agriculture", color: "lime" },
-  { id: "tag-9", name: "Defense", color: "magenta" },
-  { id: "tag-10", name: "Environment", color: "geekblue" },
-];
-
 // Document type options
 export const DOCUMENT_TYPES = [
   { value: "TECHNICAL", label: "Technical Document" },
