@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 
 export const vendorContactPersonTypeDefs = gql`
+
   type VendorContactPerson {
     id: ID!
     vendorId: ID!
@@ -10,15 +11,13 @@ export const vendorContactPersonTypeDefs = gql`
     email: String!
     cc: String
     bcc: String
-    tags: [String!]
-    categories: [String!]
     createdBy: String!
     createdDate: String!
     updatedBy: String
     updatedDate: String!
   }
 
-  input CreateVendorContactPersonInput {
+  input CreateVendorContactPersonStandaloneInput {
     vendorId: ID!
     name: String!
     designation: String
@@ -26,37 +25,26 @@ export const vendorContactPersonTypeDefs = gql`
     email: String!
     cc: String
     bcc: String
-    tags: [String!]
-    categories: [String!]
   }
 
-  input UpdateVendorContactPersonInput {
+  input UpdateVendorContactPersonStandaloneInput {
     name: String
     designation: String
     phoneNumber: String
     email: String
     cc: String
     bcc: String
-    tags: [String!]
-    categories: [String!]
-  }
-
-  input SearchVendorContactPersonInput {
-    vendorId: ID
-    search: String
-    limit: Int
-    offset: Int
   }
 
   extend type Mutation {
-    createVendorContactPerson(input: CreateVendorContactPersonInput!): VendorContactPerson!
-    updateVendorContactPerson(id: ID!, input: UpdateVendorContactPersonInput!): VendorContactPerson!
+    createVendorContactPerson(input: CreateVendorContactPersonStandaloneInput!): VendorContactPerson!
+    updateVendorContactPerson(id: ID!, input: UpdateVendorContactPersonStandaloneInput!): VendorContactPerson!
     deleteVendorContactPerson(id: ID!): Boolean!
     deleteVendorContactPersons(ids: [ID!]!): Boolean!
   }
 
   extend type Query {
     getVendorContactPersonById(id: ID!): VendorContactPerson
-    searchVendorContactPersons(searchInput: SearchVendorContactPersonInput): [VendorContactPerson!]!
+    searchVendorContactPersons(search: String, vendorId: ID): [VendorContactPerson!]!
   }
 `;

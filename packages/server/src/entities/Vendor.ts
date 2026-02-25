@@ -6,9 +6,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import type { VendorTag } from './VendorTag';
-import type { VendorContactPerson } from './VendorContactPerson';
-import type { VendorDocument } from './VendorDocument';
+import { VendorStatus } from './enums/VendorStatus';
+import { VendorWorkflow } from './VendorWorkflow';
+import { VendorProposal } from './VendorProposal';
+import { VendorAgreement } from './VendorAgreement';
+import { VendorFollowUp } from './VendorFollowUp';
+import { VendorApproval } from './VendorApproval';
+import { VendorTender } from './VendorTender';
+import { VendorContactPerson } from './VendorContactPerson';
+import { VendorDocument } from './VendorDocument';
 
 export enum CompanyType {
   NEW = 'NEW',
@@ -23,14 +29,21 @@ export class Vendor {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column({ unique: true })
   name!: string;
 
   @Column({ nullable: true })
-  type?: string;
+  type?: string; // GMSS Vendor / Consulting
 
-  @Column({ type: 'enum', enum: CompanyType, default: CompanyType.NEW })
-  status!: CompanyType;
+  @Column({
+    type: 'enum',
+    enum: VendorStatus,
+    default: VendorStatus.NEW,
+  })
+  status!: VendorStatus;
+
+  @Column({ default: false })
+  isRailwayLinked!: boolean;
 
   @Column({ nullable: true })
   gstNumber?: string;
@@ -39,10 +52,10 @@ export class Vendor {
   panNumber?: string;
 
   @Column({ nullable: true })
-  msmeUdyamNumber?: string;
+  cinNumber?: string;
 
   @Column({ nullable: true })
-  cinNumber?: string;
+  msmeUdyamNumber?: string;
 
   @Column({ nullable: true })
   address?: string;
@@ -59,12 +72,41 @@ export class Vendor {
   @UpdateDateColumn()
   updatedDate!: Date;
 
-  @OneToMany('VendorTag', 'vendor', { cascade: true })
-  tags!: VendorTag[];
+  @Column({ default: false })
+  isDeleted!: boolean;
 
-  @OneToMany('VendorContactPerson', 'vendor', { cascade: true })
+  @Column({ nullable: true })
+  deletedBy?: string;
+
+  @Column({ nullable: true })
+  deletedDate?: Date;
+
+
+
+
+  /* RELATIONS */
+
+  @OneToMany(() => VendorWorkflow, (workflow) => workflow.vendor)
+  workflows!: VendorWorkflow[];
+
+  @OneToMany(() => VendorApproval, (approval) => approval.vendor)
+  approvals!: VendorApproval[];
+
+  @OneToMany(() => VendorProposal, (proposal) => proposal.vendor)
+  proposals!: VendorProposal[];
+
+  @OneToMany(() => VendorAgreement, (agreement) => agreement.vendor)
+  agreements!: VendorAgreement[];
+
+  @OneToMany(() => VendorFollowUp, (followUp) => followUp.vendor)
+  followUps!: VendorFollowUp[];
+
+  @OneToMany(() => VendorTender, (vendorTender) => vendorTender.vendor)
+  tenders!: VendorTender[];
+
+  @OneToMany(() => VendorContactPerson, cp => cp.vendor, { cascade: false })
   contactPersons!: VendorContactPerson[];
 
-  @OneToMany('VendorDocument', 'vendor', { cascade: true })
+  @OneToMany(() => VendorDocument, doc => doc.vendor, { cascade: false })
   documents!: VendorDocument[];
 }

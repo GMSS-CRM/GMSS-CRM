@@ -17,8 +17,8 @@ export const vendorResolvers = {
     createVendor: (_: unknown, { input }: any) =>
       getService().createVendor(input as any),
 
-    uploadVendor: (_: unknown, { input }: any) =>
-      getService().createVendor(input as any),
+    /*uploadVendor: (_: unknown, { input }: any) =>
+      getService().createVendor(input as any),*/
 
     updateVendor: (_: unknown, { id, input }: any) =>
       getService().updateVendor(id, input as any),

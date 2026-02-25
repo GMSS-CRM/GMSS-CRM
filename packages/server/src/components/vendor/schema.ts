@@ -1,66 +1,109 @@
 import { gql } from 'graphql-tag';
 
 export const vendorTypeDefs = gql`
-  enum CompanyType {
-    New
-    Interested
-    NotInterested
-    Final
-    Deleted
-  }
 
   type Vendor {
     id: ID!
     name: String!
     type: String
-    status: CompanyType!
+    status: VendorStatus!
+    isRailwayLinked: Boolean!
     gstNumber: String
     panNumber: String
-    msmeUdyamNumber: String
     cinNumber: String
+    msmeUdyamNumber: String
     address: String
-    createdBy: String!
-    createdDate: String!
-    updatedBy: String
-    updatedDate: String!
+
     tags: [VendorTag!]
     contactPersons: [VendorContactPerson!]
     documents: [VendorDocument!]
+
+    workflows: [VendorWorkflow!]
+    approvals: [VendorApproval!]
+    proposals: [VendorProposal!]
+    agreements: [VendorAgreement!]
+    followUps: [VendorFollowUp!]
+    tenders: [VendorTender!]
+
+    createdDate: String!
+    updatedDate: String!
   }
+
+  # ---------- Nested Contact Person ----------
+
+  input CreateVendorContactPersonInput {
+    name: String!
+    designation: String
+    phoneNumber: String!
+    email: String!
+    cc: String
+    bcc: String
+  }
+
+  input UpdateVendorContactPersonInput {
+    id: ID
+    name: String
+    designation: String
+    phoneNumber: String
+    email: String
+    cc: String
+    bcc: String
+  }
+
+  # ---------- Nested Documents ----------
+
+  input CreateVendorDocumentInput {
+    documentName: String!
+    documentUrl: String!
+    expiresOn: String
+  }
+
+  input UpdateVendorDocumentInput {
+    id: ID
+    documentName: String
+    documentUrl: String
+    expiresOn: String
+  }
+
+  # ---------- Vendor ----------
 
   input CreateVendorInput {
     name: String!
     type: String
-    status: CompanyType
+    isRailwayLinked: Boolean
     gstNumber: String
     panNumber: String
-    msmeUdyamNumber: String
     cinNumber: String
+    msmeUdyamNumber: String
     address: String
+
+    contactPersons: [CreateVendorContactPersonInput!]
+    documents: [CreateVendorDocumentInput!]
   }
 
   input UpdateVendorInput {
     name: String
     type: String
-    status: CompanyType
+    isRailwayLinked: Boolean
     gstNumber: String
     panNumber: String
-    msmeUdyamNumber: String
     cinNumber: String
+    msmeUdyamNumber: String
     address: String
+
+    contactPersons: [UpdateVendorContactPersonInput!]
+    documents: [UpdateVendorDocumentInput!]
   }
 
-  input SearchVendorInput {
-    search: String
-    status: CompanyType
-    type: String
-    limit: Int
-    offset: Int
+  input ChangeVendorStatusInput {
+    vendorId: ID!
+    newStatus: VendorStatus!
+    remarks: String
   }
 
   extend type Query {
     getVendorById(id: ID!): Vendor
-    searchVendors(searchInput: SearchVendorInput): [Vendor!]!
+    searchVendors(search: String, status: VendorStatus): [Vendor!]!
   }
 
   extend type Mutation {
@@ -68,6 +111,6 @@ export const vendorTypeDefs = gql`
     updateVendor(id: ID!, input: UpdateVendorInput!): Vendor!
     deleteVendor(id: ID!): Boolean!
     deleteVendors(ids: [ID!]!): Boolean!
-    uploadVendor(input: CreateVendorInput!): Vendor!
+    changeVendorStatus(input: ChangeVendorStatusInput!): Vendor!
   }
 `;

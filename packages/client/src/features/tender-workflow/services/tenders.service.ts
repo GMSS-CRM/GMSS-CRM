@@ -1,8 +1,10 @@
-import type { Tender, TenderFormData, TenderStatus } from '../types/tender.types';
+// Using a local mock type in this service - do not import application Tender types here
+
+import type { Tender, TenderStatus } from "../types/tender.types";
 
 // Mock data for tenders (uses extended shape; cast to Tender for service compatibility)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockTenders: Tender[] = ([
+const Tenders: Tender[] = ([
   {
     id: '1',
     name: 'Supply of Office Furniture and Equipment',
@@ -66,7 +68,7 @@ const mockTenders: Tender[] = ([
 ] as unknown) as Tender[];
 
 // In-memory storage
-let tenders: Tender[] = [...mockTenders];
+let tenders: Tender[] = [...Tenders];
 let nextId = 6;
 
 export const tendersService = {
@@ -90,7 +92,7 @@ export const tendersService = {
   },
 
   // Create new tender
-  createTender: async (data: TenderFormData): Promise<Tender> => {
+  createTender: async (data: any): Promise<Tender> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const newTender: Tender = {
@@ -107,7 +109,7 @@ export const tendersService = {
   },
 
   // Update tender
-  updateTender: async (id: string, data: Partial<TenderFormData>): Promise<Tender | null> => {
+  updateTender: async (id: string, data: Partial<any>): Promise<Tender | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const index = tenders.findIndex((t) => t.id === id);
@@ -126,14 +128,14 @@ export const tendersService = {
   },
 
   // Update tender status
-  updateTenderStatus: async (id: string, status: TenderStatus): Promise<Tender | null> => {
+  updateTenderStatus: async (id: string, status: string): Promise<Tender | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         const index = tenders.findIndex((t) => t.id === id);
         if (index !== -1) {
           tenders[index] = {
             ...tenders[index],
-            status,
+            status: status as TenderStatus,
             updatedAt: new Date(),
           };
           resolve(tenders[index]);
