@@ -99,11 +99,11 @@ export class UserService implements IUserService {
     return this.userRepository.findByEmail(email);
   }
 
-  searchUser(params: SearchUserInput) {
+  searchUser(params?: SearchUserInput) {
     return this.userRepository.search({
-      search: params.search ?? undefined,
-      limit: params.limit ?? undefined,
-      offset: params.offset ?? undefined,
+      search: params?.search ?? undefined,
+      limit: params?.limit ?? undefined,
+      offset: params?.offset ?? undefined,
     });
   }
 }

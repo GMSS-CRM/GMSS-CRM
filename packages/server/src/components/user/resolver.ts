@@ -18,7 +18,7 @@ export const userResolvers = {
     getUserById: (_: unknown, { id }: QueryGetUserByIdArgs) => getService().getUserById(id),
 
     searchUsers: (_: unknown, { searchInput }: QuerySearchUsersArgs) =>
-      getService().searchUser(searchInput as any),
+      getService().searchUser(searchInput ?? undefined),
   },
 
   Mutation: {

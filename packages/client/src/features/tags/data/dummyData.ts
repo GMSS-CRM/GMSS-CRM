@@ -518,7 +518,6 @@ export const getVendorsForTender = (tenderId: string): TenderVendorDisplay[] => 
 };
 
 // Dummy vendors mapped by tag id (used by tag-related hooks). Currently empty/defaults.
-import type { TagVendorDisplay } from '../types/tagTypes';
 export const dummyTagVendors: Record<string, TagVendorDisplay[]> = {
   // Example mapping (can be expanded):
   // '1': [ { id: 'tv1', vendorId: 'v1', vendorName: 'TechCorp Solutions', vendorEmail: 'contact@techcorp.com', enableMail: true } ],
@@ -528,5 +527,3 @@ export const dummyTagVendors: Record<string, TagVendorDisplay[]> = {
 export const simulateDelay = (ms: number = 500) =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-/** Dummy vendor-per-tag lookup (empty until populated from real API) */
-export const dummyTagVendors: Record<string, TagVendorDisplay[]> = {};
