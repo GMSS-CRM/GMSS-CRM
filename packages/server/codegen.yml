@@ -15,5 +15,7 @@ generates:
 
 config:
   federation: true
+  useTypeImports: true
+  enumsAsConst: true
   namingConvention:
     enumValues: keep
