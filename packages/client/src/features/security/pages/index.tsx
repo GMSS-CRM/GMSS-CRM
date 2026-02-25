@@ -92,6 +92,7 @@ export default function SecurityPage() {
           let firebaseUid: string | null = null;
           try {
             firebaseUid = await createFirebaseUser(email);
+            console.log('Firebase user created with UID:', firebaseUid);
           } catch (fbErr: any) {
             const msg =
               fbErr?.code === 'auth/email-already-in-use'
