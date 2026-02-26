@@ -2,6 +2,7 @@
 
 export type TenderStatus =
   | "DRAFT"
+  | "READY_FOR_NIT"
   | "PENDING_MD_TAGGING"
   | "MD_TAGGED"
   | "REJECTED"
@@ -83,10 +84,11 @@ export interface TenderWorkflowState {
 // Status transition map - defines valid transitions
 export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   DRAFT: ["PENDING_MD_TAGGING"],
-  PENDING_MD_TAGGING: ["MD_TAGGED", "REJECTED"],
+  PENDING_MD_TAGGING: ["READY_FOR_NIT", "MD_TAGGED", "REJECTED"],
+  READY_FOR_NIT: ["NIT_UPLOADED", "REJECTED"],
   MD_TAGGED: ["NIT_UPLOADED"],
   REJECTED: ["DRAFT", "PENDING_MD_TAGGING"],
-  NIT_UPLOADED: ["NIT_VERIFIED"],
+  NIT_UPLOADED: ["PENDING_MD_TAGGING", "NIT_VERIFIED"],
   NIT_VERIFIED: ["DOCS_UPLOADED"],
   DOCS_UPLOADED: ["READY_TO_MAIL"],
   READY_TO_MAIL: ["MAIL_SENT"],
@@ -96,12 +98,13 @@ export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
 // Role-based allowed status targets
 export const ROLE_CAN_SET_STATUS: Record<UserRole, TenderStatus[]> = {
   USER: ["DRAFT", "PENDING_MD_TAGGING", "NIT_UPLOADED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"],
-  MD: ["MD_TAGGED", "REJECTED", "NIT_VERIFIED"],
+  MD: ["MD_TAGGED", "REJECTED", "NIT_VERIFIED", "READY_FOR_NIT"],
 };
 
 export const STATUS_COLORS: Record<TenderStatus, string> = {
   DRAFT: "default",
   PENDING_MD_TAGGING: "warning",
+  READY_FOR_NIT: "gold",
   MD_TAGGED: "processing",
   REJECTED: "error",
   NIT_UPLOADED: "purple",
@@ -114,6 +117,7 @@ export const STATUS_COLORS: Record<TenderStatus, string> = {
 export const STATUS_LABELS: Record<TenderStatus, string> = {
   DRAFT: "Draft",
   PENDING_MD_TAGGING: "Pending MD Tagging",
+  READY_FOR_NIT: "Ready for NIT Upload (MD Approved)",
   MD_TAGGED: "MD Tagged",
   REJECTED: "Rejected",
   NIT_UPLOADED: "NIT Uploaded",
@@ -134,16 +138,17 @@ export interface TabConfig {
 export const USER_TABS: TabConfig[] = [
   { key: "draft", label: "Draft", statuses: ["DRAFT", "REJECTED"] },
   { key: "sentToMd", label: "Sent to MD", statuses: ["PENDING_MD_TAGGING"] },
-  { key: "nitPending", label: "NIT Pending", statuses: ["MD_TAGGED", "NIT_UPLOADED"] },
+  { key: "nitPending", label: "NIT Pending", statuses: ["READY_FOR_NIT", "MD_TAGGED", "NIT_UPLOADED"] },
   { key: "docsPending", label: "Docs Pending", statuses: ["NIT_VERIFIED", "DOCS_UPLOADED"] },
   { key: "readyToMail", label: "Ready to Mail", statuses: ["READY_TO_MAIL"] },
   { key: "completed", label: "Completed", statuses: ["MAIL_SENT"] },
 ];
 
 export const MD_TABS: TabConfig[] = [
-  { key: "pendingTagging", label: "Pending Tagging", statuses: ["PENDING_MD_TAGGING"] },
-  { key: "nitVerification", label: "NIT Verification", statuses: ["NIT_UPLOADED"] },
-  { key: "mdCompleted", label: "Completed", statuses: ["MD_TAGGED", "NIT_VERIFIED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"] },
+  { key: "pendingApproval", label: "Pending Approval", statuses: ["PENDING_MD_TAGGING"] },
+  { key: "pendingTagging", label: "Pending Tagging", statuses: ["NIT_UPLOADED"] },
+  { key: "nitVerification", label: "NIT Verification", statuses: ["NIT_VERIFIED"] },
+  { key: "mdCompleted", label: "Completed", statuses: ["MD_TAGGED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"] },
 ];
 
 // Document type options

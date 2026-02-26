@@ -76,6 +76,8 @@ export default function VendorDetailsForm() {
   const isPendingView = searchParams.get('pending') === 'true';
 
   const [saving, setSaving] = useState(false);
+  const [sendToMdLoading, setSendToMdLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [selectedSubMenu, setSelectedSubMenu] = useState<VendorSubMenuItem>('basic');
 
   // Remark modals
@@ -104,18 +106,39 @@ export default function VendorDetailsForm() {
   // Populate form when vendor loads
   useEffect(() => {
     if (vendor) {
+      // Normalize vendor payload to match form expectations. The API may return
+      // fields with different names (e.g. `name`, `type`, `isRailwayLinked`,
+      // `msmeUdyamNumber`) and contact persons may be a flat shape.
+      const normalizedContactPersons = (vendor.contactPersons ?? []).map((cp: any) => {
+        // cp.email may be a string in API; UI expects { mailto: [], cc: [], bcc: [] }
+        const emailField = cp?.email;
+        const emailObj = typeof emailField === 'string'
+          ? { mailto: emailField ? [emailField] : [], cc: [], bcc: [] }
+          : (emailField ?? { mailto: [], cc: [], bcc: [] });
+
+        return {
+          id: cp.id ?? `cp_${Date.now()}`,
+          name: cp.name ?? cp.contactName ?? '',
+          designation: cp.designation ?? '',
+          phone: cp.phone ?? cp.phoneNumber ?? '',
+          email: emailObj,
+        };
+      });
+
+      const tagIds = vendor.tagIds ?? (vendor.tags?.map((t: any) => t.tagId ?? t.id) ?? []);
+
       form.setFieldsValue({
-        companyName: vendor.companyName,
-        isLinkedWithRailways: vendor.isLinkedWithRailways,
-        companyType: vendor.companyType,
+        companyName: vendor.companyName ?? vendor.name,
+        isLinkedWithRailways: vendor.isLinkedWithRailways ?? vendor.isRailwayLinked ?? false,
+        companyType: vendor.companyType ?? vendor.type,
         status: vendor.status,
         address: vendor.address,
-        contactPersons: vendor.contactPersons,
+        contactPersons: normalizedContactPersons,
         gstNumber: vendor.gstNumber,
-        panNumber: vendor.panNumber,
-        msmeNumber: vendor.msmeNumber,
-        cinNumber: vendor.cinNumber,
-        tags: vendor.tagIds,
+        panNumber: vendor.panNumber ?? vendor.pan,
+        msmeNumber: vendor.msmeNumber ?? vendor.msmeUdyamNumber,
+        cinNumber: vendor.cinNumber ?? vendor.cin,
+        tags: tagIds,
       });
     }
   }, [vendor, form]);
@@ -186,7 +209,7 @@ export default function VendorDetailsForm() {
   const handleDeleteConfirm = useCallback(async () => {
     if (!vendor) return;
     try {
-      setSaving(true);
+      setDeleting(true);
       await deleteVendor(vendor.id);
       message.success('Vendor deleted successfully');
       setDeleteConfirmOpen(false);
@@ -195,7 +218,7 @@ export default function VendorDetailsForm() {
       message.error('Failed to delete vendor');
       console.error(error);
     } finally {
-      setSaving(false);
+      setDeleting(false);
     }
   }, [vendor, deleteVendor, navigate, role]);
 
@@ -213,7 +236,7 @@ export default function VendorDetailsForm() {
     async (remark: string) => {
       if (!vendor) return;
       try {
-        setSaving(true);
+        setSendToMdLoading(true);
         await createMdRequest(vendor.id, remark);
         await refetchPending();
         setSendToMdRemarkOpen(false);
@@ -222,7 +245,7 @@ export default function VendorDetailsForm() {
         message.error(error?.message ?? 'Failed to send to MD');
         console.error(error);
       } finally {
-        setSaving(false);
+        setSendToMdLoading(false);
       }
     },
     [vendor, createMdRequest, refetchPending]
@@ -237,7 +260,7 @@ export default function VendorDetailsForm() {
     async (remark: string) => {
       if (!pendingRequest) return;
       try {
-        setSaving(true);
+        setSendToMdLoading(true);
         await resolveMdRequest(pendingRequest.id, remark, true);
         message.success('Request resolved. Vendor updated.');
         setResolveRemarkOpen(false);
@@ -246,7 +269,7 @@ export default function VendorDetailsForm() {
         message.error(error?.message ?? 'Failed to resolve request');
         console.error(error);
       } finally {
-        setSaving(false);
+        setSendToMdLoading(false);
       }
     },
     [pendingRequest, resolveMdRequest, navigate, role]
@@ -335,12 +358,12 @@ export default function VendorDetailsForm() {
 
         {/* Workflow actions remain in header */}
         <Space align="center">
-          {isEditMode && role === 'EMPLOYEE' && (
+          {isEditMode && role === 'EMPLOYEE' && !pendingRequest && (
             <Button
               variant="primary"
               icon={<SendOutlined />}
               onClick={handleSendToMd}
-              loading={saving}
+              loading={sendToMdLoading}
             >
               Send to MD
             </Button>
@@ -350,7 +373,7 @@ export default function VendorDetailsForm() {
               variant="primary"
               icon={<CheckCircleOutlined />}
               onClick={handleResolve}
-              loading={saving}
+              loading={sendToMdLoading}
             >
               Resolve Request
             </Button>
@@ -401,7 +424,7 @@ export default function VendorDetailsForm() {
             cancelLabel="Back"
             cancelIcon={<ArrowLeftOutlined />}
             onDelete={isEditMode ? () => setDeleteConfirmOpen(true) : undefined}
-            deleteLoading={saving}
+            deleteLoading={deleting}
             onOk={handleSaveClick}
             okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
             okLoading={saving}
@@ -430,7 +453,7 @@ export default function VendorDetailsForm() {
         description="Provide context for the MD about why this vendor needs review or status change."
         onConfirm={handleSendToMdConfirm}
         onCancel={() => setSendToMdRemarkOpen(false)}
-        confirmLoading={saving}
+        confirmLoading={sendToMdLoading}
       />
       <RemarkModal
         open={resolveRemarkOpen}
@@ -438,7 +461,7 @@ export default function VendorDetailsForm() {
         description="Add your remark as MD before resolving this request."
         onConfirm={handleResolveConfirm}
         onCancel={() => setResolveRemarkOpen(false)}
-        confirmLoading={saving}
+        confirmLoading={sendToMdLoading}
       />
     </div>
   );

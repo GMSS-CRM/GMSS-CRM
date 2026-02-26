@@ -91,6 +91,7 @@ export const baseTypeDefs = gql`
   enum TenderStatus {
     DRAFT
     PENDING_MD_TAGGING
+    READY_FOR_NIT
     MD_TAGGED
     REJECTED
     NIT_UPLOADED

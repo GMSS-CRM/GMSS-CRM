@@ -35,6 +35,7 @@ export const TenderWorkflowPage: React.FC = () => {
     closeTaggingDrawer,
     mdConfirm,
     mdReject,
+    mdApprove,
     verifyNit,
     uploadNit,
     uploadDocuments,
@@ -59,7 +60,7 @@ export const TenderWorkflowPage: React.FC = () => {
     (target: "USER" | "MD") => {
       if (role === target) return;
       setRole(target);
-      setActiveTab(target === "USER" ? "draft" : "pendingTagging");
+      setActiveTab(target === "USER" ? "draft" : "pendingApproval");
       message.info(`Switched to ${target === "MD" ? "MD" : "User"} view`);
     },
     [role, setRole, setActiveTab]
@@ -67,7 +68,10 @@ export const TenderWorkflowPage: React.FC = () => {
 
   const onView = useCallback(
     (t: Tender) => {
-      if (role === "MD" && t.status === "PENDING_MD_TAGGING") openTaggingDrawer(t);
+      // Open tagging drawer for both approval step and post-NIT tagging step
+      if (role === "MD" && (t.status === "PENDING_MD_TAGGING" || t.status === "NIT_UPLOADED")) {
+        openTaggingDrawer(t);
+      }
     },
     [role, openTaggingDrawer]
   );
@@ -114,10 +118,14 @@ export const TenderWorkflowPage: React.FC = () => {
           sendMail(id);
           message.success("Mail sent");
         }}
-        onVerifyNit={(id) => {
-          verifyNit(id);
-          message.success("NIT verified");
-        }}
+          onVerifyNit={(id) => {
+            verifyNit(id);
+            message.success("NIT verified");
+          }}
+          onApprove={(id) => {
+            mdApprove(id);
+            message.success("Approved for NIT upload");
+          }}
       />
     ),
   }));

@@ -32,6 +32,7 @@ interface Props {
   onMarkReady: (id: string) => void;
   onSendMail: (id: string) => void;
   onVerifyNit: (id: string) => void;
+  onApprove?: (id: string) => void;
 }
 
 const fmtDate = (d?: Date | string) => {
@@ -49,7 +50,8 @@ const EMPTY_HINTS: Record<string, string> = {
   docsPending: "Upload documents for verified tenders.",
   readyToMail: "Mark tenders ready to notify vendors.",
   completed: "Mailed tenders appear here.",
-  pendingTagging: "Tenders from users appear here.",
+  pendingApproval: "Tenders sent by users awaiting MD approval.",
+  pendingTagging: "NIT uploaded tenders awaiting MD tagging.",
   nitVerification: "NIT documents pending verification.",
   mdCompleted: "Processed tenders.",
 };
@@ -67,6 +69,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
   onMarkReady,
   onSendMail,
   onVerifyNit,
+  onApprove,
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
 
@@ -84,7 +87,9 @@ export const WorkspaceGrid: React.FC<Props> = ({
               Resubmit
             </Button>
           ),
-          MD_TAGGED: (
+          // After MD approves the tender for NIT upload, it will be in
+          // `READY_FOR_NIT` state — allow the user to upload NIT then.
+          READY_FOR_NIT: (
             <Button size="small" type="link" icon={<UploadOutlined />} onClick={() => onUploadNit(t)}>
               NIT
             </Button>
@@ -108,22 +113,33 @@ export const WorkspaceGrid: React.FC<Props> = ({
         return actions[t.status] || null;
       }
       if (role === "MD") {
-        if (t.status === "PENDING_MD_TAGGING")
-          return (
-            <Button size="small" type="link" icon={<EyeOutlined />} onClick={() => onView(t)}>
-              Review
-            </Button>
-          );
-        if (t.status === "NIT_UPLOADED")
-          return (
-            <Button size="small" type="link" icon={<CheckCircleOutlined />} onClick={() => onVerifyNit(t.id)}>
-              Verify
-            </Button>
-          );
+          if (t.status === "PENDING_MD_TAGGING")
+            return onApprove ? (
+              <Button
+                size="small"
+                type="link"
+                icon={<CheckCircleOutlined />}
+                onClick={() => onApprove(t.id)}
+              >
+                Approve
+              </Button>
+            ) : null;
+          if (t.status === "NIT_UPLOADED")
+            return (
+              <Button size="small" type="link" icon={<EyeOutlined />} onClick={() => onView(t)}>
+                Tag
+              </Button>
+            );
+          if (t.status === "NIT_VERIFIED")
+            return (
+              <Button size="small" type="link" icon={<CheckCircleOutlined />} onClick={() => onVerifyNit(t.id)}>
+                Verify
+              </Button>
+            );
       }
       return null;
     },
-    [role, onSendToMd, onResubmit, onUploadNit, onUploadDocs, onMarkReady, onSendMail, onView, onVerifyNit]
+    [role, onSendToMd, onResubmit, onUploadNit, onUploadDocs, onMarkReady, onSendMail, onView, onVerifyNit, onApprove]
   );
 
   const moreItems = useCallback(

@@ -132,6 +132,8 @@ export interface UseTenderWorkflowReturn {
   closeTaggingDrawer: () => void;
   mdConfirm: (tenderId: string, tagIds: string[]) => Promise<void>;
   mdReject: (tenderId: string, reason: string) => void;
+  mdApprove: (tenderId: string) => void;
+  mdApprove: (tenderId: string) => void;
   verifyNit: (tenderId: string) => void;
 
   // Document operations
@@ -156,8 +158,15 @@ export interface UseTenderWorkflowReturn {
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useTenderWorkflow(): UseTenderWorkflowReturn {
-  const [role, setRole] = useState<UserRole>("USER");
+  const [role, setRoleState] = useState<UserRole>("USER");
+  // Default active tab depends on role: users see Draft, MDs see Pending Tagging
   const [activeTab, setActiveTab] = useState<string>("draft");
+
+  const setRole = (r: UserRole) => {
+    setRoleState(r);
+    if (r === "MD") setActiveTab("pendingApproval");
+    else setActiveTab("draft");
+  };
 
   const [ui, setUi] = useState<LocalUIState>({
     previewData: [],
@@ -205,7 +214,8 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
         case "mdReject":
           return tender.status === "PENDING_MD_TAGGING" && role === "MD";
         case "uploadNit":
-          return tender.status === "MD_TAGGED" && role === "USER";
+          // Allow upload when MD has tagged or explicitly approved for NIT upload
+          return (tender.status === "MD_TAGGED" || tender.status === "READY_FOR_NIT") && role === "USER";
         case "verifyNit":
           return tender.status === "NIT_UPLOADED" && role === "MD";
         case "uploadDocuments":
@@ -374,6 +384,14 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     [changeStatus, closeTaggingDrawer, refetch],
   );
 
+  const mdApprove = useCallback(
+    (tenderId: string) => {
+      void changeStatus(tenderId, "READY_FOR_NIT");
+      void refetch();
+    },
+    [changeStatus, refetch],
+  );
+
   const mdReject = useCallback(
     (tenderId: string, reason: string) => {
       void changeStatus(tenderId, "REJECTED", { rejectionReason: reason });
@@ -490,6 +508,7 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     closeTaggingDrawer,
     mdConfirm,
     mdReject,
+    mdApprove,
     verifyNit,
     uploadNit,
     uploadDocuments,

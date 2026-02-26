@@ -44,7 +44,7 @@ export class TenderRepository extends Repository<Tender> implements ITenderRepos
 
     if (conditions.length === 0) return [];
 
-    return query.where(conditions.join(' OR '), params).getMany();
+    return query.where(conditions.join(' AND '), params).getMany();
   }
 
   search(params: { search?: string; status?: string; limit?: number; offset?: number }) {

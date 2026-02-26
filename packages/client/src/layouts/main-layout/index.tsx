@@ -25,25 +25,25 @@ import styles from "./styles.module.css";
 const { Header, Sider, Content } = Layout;
 
 const menuItems: MenuProps["items"] = [
-  {
-    key: "dashboard",
-    icon: <DashboardOutlined style={{ fontSize: 22 }} />,
-    label: "Dashboard",
-  },
+  // {
+  //   key: "dashboard",
+  //   icon: <DashboardOutlined style={{ fontSize: 22 }} />,
+  //   label: "Dashboard",
+  // },
   {
     key: "tender-workflow",
     icon: <FileTextOutlined style={{ fontSize: 22 }} />,
     label: "Tenders",
   },
   {
-    key: "vendors",
-    icon: <ShopOutlined style={{ fontSize: 22 }} />,
-    label: "Vendors",
-  },
-  {
     key: "dashboard/tags",
     icon: <TagsOutlined style={{ fontSize: 22 }} />,
     label: "Tags",
+  },
+  {
+    key: "vendors",
+    icon: <ShopOutlined style={{ fontSize: 22 }} />,
+    label: "Vendors",
   },
   {
     key: "security",

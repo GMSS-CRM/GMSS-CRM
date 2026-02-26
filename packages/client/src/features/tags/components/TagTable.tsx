@@ -28,6 +28,25 @@ export default function TagTable({
   onView,
   onDelete,
 }: TagTableProps) {
+  // Parse assorted date values coming from the backend. The API may return
+  // millisecond timestamps as strings (e.g. "1772064155975") or seconds
+  // timestamps (10-digit). This helper normalizes those into a Date object.
+  const parseToDate = (value: unknown): Date => {
+    if (value == null) return new Date(NaN);
+    if (typeof value === 'number') return new Date(value);
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (/^\d+$/.test(trimmed)) {
+        const n = Number(trimmed);
+        // Treat 10-digit numbers as seconds
+        if (trimmed.length === 10) return new Date(n * 1000);
+        return new Date(n);
+      }
+      return new Date(trimmed);
+    }
+    return new Date(String(value));
+  };
+
   const columns = [
     {
       title: 'Tag Name',
@@ -107,16 +126,22 @@ export default function TagTable({
       key: 'createdDate',
       width: 120,
       sorter: (a: TagWithVendorCount, b: TagWithVendorCount) =>
-        new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime(),
-      render: (date: string) => (
-        <span className={styles.dateText}>
-          {new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })}
-        </span>
-      ),
+        parseToDate(a.createdDate).getTime() - parseToDate(b.createdDate).getTime(),
+      render: (date: unknown) => {
+        const d = parseToDate(date);
+        if (isNaN(d.getTime())) {
+          return <span className={styles.dateText}>—</span>;
+        }
+        return (
+          <span className={styles.dateText}>
+            {d.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </span>
+        );
+      },
     },
     {
       title: 'Actions',
