@@ -14,6 +14,7 @@ interface Props {
   onSelectionChange: (keys: Key[]) => void;
   onAddToDraft: () => void;
   onClear: () => void;
+  loading?: boolean;
 }
 
 const getDueClass = (days: number) => {
@@ -28,6 +29,7 @@ export const TenderPreviewTable: React.FC<Props> = ({
   onSelectionChange,
   onAddToDraft,
   onClear,
+  loading = false,
 }) => {
   if (!data.length) return null;
 
@@ -114,11 +116,12 @@ export const TenderPreviewTable: React.FC<Props> = ({
             size="small"
             type="primary"
             icon={<PlusOutlined />}
-            disabled={!selectedKeys.length}
+            disabled={!selectedKeys.length || loading}
+            loading={loading}
             onClick={onAddToDraft}
             className={s.previewAddBtn}
           >
-            Add {selectedKeys.length || ""} to Draft
+            {loading ? 'Adding to Draft…' : `Add ${selectedKeys.length || ''} to Draft`}
           </Button>
         </Space>
       </div>

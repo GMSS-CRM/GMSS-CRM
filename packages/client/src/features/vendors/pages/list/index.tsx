@@ -1,5 +1,5 @@
 ﻿import { useMemo, useCallback } from 'react';
-import { Table, Tag, Space, Tooltip, Badge } from 'antd';
+import { Tag, Space, Tooltip, Badge } from 'antd';
 import {
   EditOutlined,
   PlusOutlined,
@@ -12,6 +12,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import type { Vendor, VendorMdRequest, UserRole } from '../../types';
 import Button from '../../../../components/button';
+import AppTable from '../../../../components/app-table';
 import styles from './styles.module.css';
 
 export type ActiveView = 'all' | 'pending' | 'resolved';
@@ -91,13 +92,26 @@ export default function VendorList({
     },
     {
       title: 'Tags',
-      dataIndex: 'tags',
-      key: 'tags',
-      width: '10%',
-      align: 'center' as const,
-      render: (tags: string[]) => (
-        <span className={styles.tagsCount}>{tags.length > 0 ? tags.length : 'â€”'}</span>
-      ),
+      dataIndex: 'tagNames',
+      key: 'tagNames',
+      width: '16%',
+      render: (tagNames: string[]) => {
+        if (!tagNames?.length) return <span className={styles.tagsCount}>—</span>;
+        const visible = tagNames.slice(0, 2);
+        const rest = tagNames.slice(2);
+        return (
+          <Space size={3} wrap>
+            {visible.map((n) => (
+              <Tag key={n} color="blue" style={{ fontSize: 11, margin: 0, padding: '1px 6px' }}>{n}</Tag>
+            ))}
+            {rest.length > 0 && (
+              <Tooltip title={rest.join(', ')}>
+                <Tag color="default" style={{ fontSize: 11, margin: 0, padding: '1px 6px', cursor: 'default' }}>+{rest.length}</Tag>
+              </Tooltip>
+            )}
+          </Space>
+        );
+      },
     },
     {
       title: 'Status',
@@ -160,7 +174,7 @@ export default function VendorList({
       width: '12%',
       render: (_: unknown, req: VendorMdRequest) => {
         const v = vendorMap.get(req.vendorId);
-        if (!v) return 'â€”';
+        if (!v) return '—';
         const cfg = getStatusConfig(v.status);
         return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
@@ -170,7 +184,7 @@ export default function VendorList({
       key: 'empRemark',
       width: '30%',
       render: (_: unknown, req: VendorMdRequest) => (
-        <span className={styles.remarkText}>{req.empRemark || 'â€”'}</span>
+        <span className={styles.remarkText}>{req.empRemark || '—'}</span>
       ),
     },
     {
@@ -217,7 +231,7 @@ export default function VendorList({
       width: '11%',
       render: (_: unknown, req: VendorMdRequest) => {
         const v = vendorMap.get(req.vendorId);
-        if (!v) return 'â€”';
+        if (!v) return '—';
         const cfg = getStatusConfig(v.status);
         return <Tag color={cfg.color}>{cfg.label}</Tag>;
       },
@@ -227,7 +241,7 @@ export default function VendorList({
       key: 'empRemark',
       width: '24%',
       render: (_: unknown, req: VendorMdRequest) => (
-        <span className={styles.remarkText}>{req.empRemark || 'â€”'}</span>
+        <span className={styles.remarkText}>{req.empRemark || '—'}</span>
       ),
     },
     {
@@ -235,7 +249,7 @@ export default function VendorList({
       key: 'mdRemark',
       width: '24%',
       render: (_: unknown, req: VendorMdRequest) => (
-        <span className={styles.remarkText}>{req.mdRemark || 'â€”'}</span>
+        <span className={styles.remarkText}>{req.mdRemark || '—'}</span>
       ),
     },
     {
@@ -244,7 +258,7 @@ export default function VendorList({
       width: '13%',
       render: (_: unknown, req: VendorMdRequest) => (
         <span className={styles.secondaryText}>
-          {req.resolvedDate ? formatDate(req.resolvedDate) : 'â€”'}
+          {req.resolvedDate ? formatDate(req.resolvedDate) : '—'}
         </span>
       ),
     },
@@ -361,11 +375,12 @@ export default function VendorList({
       {/*  Table  */}
       <div className={styles.tableContainer}>
         {activeView === 'all' && (
-          <Table
+          <AppTable<Vendor>
             columns={allColumns}
             dataSource={activeVendors}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               pageSize: 10, showSizeChanger: true, position: ['bottomCenter'],
               showTotal: (t) => `Total ${t} vendor${t !== 1 ? 's' : ''}`,
@@ -375,11 +390,12 @@ export default function VendorList({
           />
         )}
         {activeView === 'pending' && (
-          <Table
+          <AppTable<VendorMdRequest>
             columns={pendingColumns}
             dataSource={pendingRequests}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               pageSize: 10, showSizeChanger: true, position: ['bottomCenter'],
               showTotal: (t) => `${t} pending request${t !== 1 ? 's' : ''}`,
@@ -389,11 +405,12 @@ export default function VendorList({
           />
         )}
         {activeView === 'resolved' && role === 'EMPLOYEE' && (
-          <Table
+          <AppTable<VendorMdRequest>
             columns={resolvedColumns}
             dataSource={resolvedRequests}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               pageSize: 10, showSizeChanger: true, position: ['bottomCenter'],
               showTotal: (t) => `${t} resolved request${t !== 1 ? 's' : ''}`,

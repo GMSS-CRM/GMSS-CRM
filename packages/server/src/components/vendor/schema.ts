@@ -79,6 +79,7 @@ export const vendorTypeDefs = gql`
 
     contactPersons: [CreateVendorContactPersonInput!]
     documents: [CreateVendorDocumentInput!]
+    tagIds: [ID!]
   }
 
   input UpdateVendorInput {
@@ -93,6 +94,7 @@ export const vendorTypeDefs = gql`
 
     contactPersons: [UpdateVendorContactPersonInput!]
     documents: [UpdateVendorDocumentInput!]
+    tagIds: [ID!]
   }
 
   extend type Query {

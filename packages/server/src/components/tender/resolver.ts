@@ -17,6 +17,9 @@ export const tenderResolvers = {
     createTender: (_: unknown, { input }: any) =>
       getService().createTender(input as any),
 
+    createTendersBatch: (_: unknown, { inputs }: any) =>
+      getService().createTendersBatch(inputs as any[]),
+
     updateTender: (_: unknown, { id, input }: any) =>
       getService().updateTender(id, input as any),
 
@@ -31,5 +34,9 @@ export const tenderResolvers = {
   Tender: {
     documents: (parent: any) => parent.documents || [],
     tags: (parent: any) => parent.tags || [],
+    submissionDeadline: (parent: any) =>
+      parent.submissionDeadline instanceof Date
+        ? parent.submissionDeadline.toISOString()
+        : parent.submissionDeadline ?? null,
   },
 };

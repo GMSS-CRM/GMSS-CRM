@@ -6,6 +6,7 @@ import type {
   UpdateTenderInput,
   SearchTenderInput,
   ChangeTenderStatusInput,
+  CreateTendersBatchResult,
 } from '@gmss/types';
 
 // ─── Fragments ────────────────────────────────────────────────────────────────
@@ -107,6 +108,24 @@ export const CHANGE_TENDER_STATUS = gql`
   }
 `;
 
+export const CREATE_TENDERS_BATCH = gql`
+  mutation CreateTendersBatch($inputs: [CreateTenderInput!]!) {
+    createTendersBatch(inputs: $inputs) {
+      created {
+        id
+        name
+        referenceNumber
+        status
+      }
+      skipped {
+        name
+        referenceNumber
+        reason
+      }
+    }
+  }
+`;
+
 export const CREATE_TENDER_DOCUMENT = gql`
   mutation CreateTenderDocument($input: CreateTenderDocumentInput!) {
     createTenderDocument(input: $input) {
@@ -159,6 +178,12 @@ export const useChangeTenderStatus = () =>
     CHANGE_TENDER_STATUS,
     { refetchQueries: [{ query: SEARCH_TENDERS }] },
   );
+
+export const useCreateTendersBatch = () =>
+  useMutation<
+    { createTendersBatch: CreateTendersBatchResult },
+    { inputs: CreateTenderInput[] }
+  >(CREATE_TENDERS_BATCH);
 
 export const useCreateTenderDocument = () =>
   useMutation<

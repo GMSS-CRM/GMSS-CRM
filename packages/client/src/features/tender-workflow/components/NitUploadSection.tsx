@@ -125,7 +125,7 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
                 return false;
               }}
             >
-              <FileTextOutlined style={{ fontSize: 24, color: "var(--tw-accent)" }} />
+              <FileTextOutlined style={{ fontSize: 24, color: "var(--accent)" }} />
               <p className={s.draggerText}>
                 Drop PDF or <span>browse</span>
               </p>

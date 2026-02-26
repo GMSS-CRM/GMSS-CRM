@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Form,
@@ -53,6 +53,7 @@ import {
   useUploadVendorDocument,
 } from '../../services/vendors.service';
 import { useSearchTags } from '../../../tags/services/tags.service';
+import { useCreateTag } from '../../../tags/services/tags.service';
 import { uploadFileToS3, useGenerateUploadUrl } from '../../../tender-workflow/services/upload.service';
 import styles from './styles.module.css';
 
@@ -96,6 +97,7 @@ export default function VendorDetailsForm() {
   const { deleteVendor } = useDeleteVendor();
   const { createMdRequest } = useCreateMdRequest();
   const { resolveMdRequest } = useResolveMdRequest();
+  const [createTag] = useCreateTag();
 
   const loading = vendorLoading;
 
@@ -113,7 +115,7 @@ export default function VendorDetailsForm() {
         panNumber: vendor.panNumber,
         msmeNumber: vendor.msmeNumber,
         cinNumber: vendor.cinNumber,
-        tags: vendor.tags,
+        tags: vendor.tagIds,
       });
     }
   }, [vendor, form]);
@@ -135,6 +137,22 @@ export default function VendorDetailsForm() {
     try {
       const values = await form.validateFields();
       setSaving(true);
+
+      // Separate newly-typed tags (prefixed __new__:) from existing IDs
+      const tagValues: string[] = values.tags ?? [];
+      const newTagNames = tagValues
+        .filter((v) => v.startsWith('__new__:'))
+        .map((v) => v.replace('__new__:', '').trim());
+      const existingTagIds = tagValues.filter((v) => !v.startsWith('__new__:'));
+
+      // Create new tags and collect their IDs
+      const createdTagIds: string[] = [];
+      for (const name of newTagNames) {
+        const result = await createTag({ variables: { input: { name } } });
+        const newId = result.data?.createTag?.id;
+        if (newId) createdTagIds.push(newId);
+      }
+
       const payload = {
         companyName: values.companyName,
         companyType: values.companyType as CompanyType,
@@ -146,7 +164,7 @@ export default function VendorDetailsForm() {
         panNumber: values.panNumber,
         msmeNumber: values.msmeNumber,
         cinNumber: values.cinNumber,
-        tags: values.tags ?? [],
+        tagIds: [...existingTagIds, ...createdTagIds],
       };
 
       if (isEditMode && vendor) {
@@ -162,7 +180,7 @@ export default function VendorDetailsForm() {
     } finally {
       setSaving(false);
     }
-  }, [form, isEditMode, vendor, rawStatus, updateVendor, createVendor, navigate, role]);
+  }, [form, isEditMode, vendor, rawStatus, updateVendor, createVendor, createTag, navigate, role]);
 
   // ── Delete ────────────────────────────────────────────────────────────────
   const handleDeleteConfirm = useCallback(async () => {
@@ -351,43 +369,45 @@ export default function VendorDetailsForm() {
           />
         </div>
 
-        {/* Main Content */}
-        <div className={styles.mainContent}>
-          {selectedSubMenu === 'basic' && (
-            <BasicInfoSection
-              form={form}
-              tags={tagOptions}
-              vendor={vendor}
-              pendingRequest={pendingRequest}
-              isReadOnly={isFormReadOnly}
-              role={role}
-              isPendingView={isPendingView}
-            />
-          )}
-          {selectedSubMenu === 'documents' && (
-            <DocumentsSection
-              vendorId={id}
-              documents={documents}
-              documentColumns={documentColumns}
-              onUploadSuccess={refetchDocs}
-              isReadOnly={isFormReadOnly}
-              vendorStatus={vendor?.status ?? form.getFieldValue('status') ?? 'New'}
-            />
-          )}
+        {/* Main Content + Footer */}
+        <div className={styles.mainColumn}>
+          <div className={styles.mainContent}>
+            {selectedSubMenu === 'basic' && (
+              <BasicInfoSection
+                form={form}
+                tags={tagOptions}
+                vendor={vendor}
+                pendingRequest={pendingRequest}
+                isReadOnly={isFormReadOnly}
+                role={role}
+                isPendingView={isPendingView}
+              />
+            )}
+            {selectedSubMenu === 'documents' && (
+              <DocumentsSection
+                vendorId={id}
+                documents={documents}
+                documentColumns={documentColumns}
+                onUploadSuccess={refetchDocs}
+                isReadOnly={isFormReadOnly}
+                vendorStatus={vendor?.status ?? form.getFieldValue('status') ?? 'New'}
+              />
+            )}
+          </div>
+
+          {/* Footer Actions — scoped under form content, matching user form layout */}
+          <FormActionsBar
+            onCancel={handleBack}
+            cancelLabel="Back"
+            cancelIcon={<ArrowLeftOutlined />}
+            onDelete={isEditMode ? () => setDeleteConfirmOpen(true) : undefined}
+            deleteLoading={saving}
+            onOk={handleSaveClick}
+            okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
+            okLoading={saving}
+          />
         </div>
       </div>
-
-      {/* Footer Actions — Delete / Back / Save (same layout as user form) */}
-      <FormActionsBar
-        onCancel={handleBack}
-        cancelLabel="Back"
-        cancelIcon={<ArrowLeftOutlined />}
-        onDelete={isEditMode ? () => setDeleteConfirmOpen(true) : undefined}
-        deleteLoading={saving}
-        onOk={handleSaveClick}
-        okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
-        okLoading={saving}
-      />
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -437,6 +457,20 @@ interface BasicInfoSectionProps {
 }
 
 function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPendingView }: BasicInfoSectionProps) {
+  const [tagSearch, setTagSearch] = useState('');
+
+  // Build options: real tags + synthetic "create" option when search has no exact match
+  const tagSelectOptions = useMemo(() => {
+    const opts = tags.map((t) => ({ value: t.id, label: t.name }));
+    if (
+      tagSearch.trim() &&
+      !tags.find((t) => t.name.toLowerCase() === tagSearch.toLowerCase().trim())
+    ) {
+      opts.unshift({ value: `__new__:${tagSearch.trim()}`, label: `+ Create "${tagSearch.trim()}"` });
+    }
+    return opts;
+  }, [tags, tagSearch]);
+
   const handleUppercaseInput = (fieldName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     form.setFieldValue(fieldName, e.target.value.toUpperCase());
   };
@@ -547,36 +581,37 @@ function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPend
             {/* Row 3: Tags */}
             <Col span={24}>
               <Form.Item label="Tags / Categories" name="tags">
-                <Select mode="multiple" placeholder="Select tags" allowClear>
-                  {tags.map((tag) => (
-                    <Select.Option key={tag.id} value={tag.id}>
-                      {tag.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-
-            {/* Tags preview */}
-            <Col span={24}>
-              <Form.Item noStyle dependencies={['tags']}>
-                {() => {
-                  const selectedTags = form.getFieldValue('tags') || [];
-                  if (!selectedTags.length || !tags.length) return null;
-                  return (
-                    <div className={styles.tagsPreview}>
-                      <div className={styles.tagsPreviewLabel}>Selected Tags:</div>
-                      <div className={styles.selectedTags}>
-                        {selectedTags.map((tagId: string) => {
-                          const t = tags.find((x) => x.id === tagId);
-                          return t ? (
-                            <Tag key={t.id} color={t.color} className={styles.tag}>{t.name}</Tag>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  );
-                }}
+                <Select
+                  mode="multiple"
+                  showSearch
+                  allowClear
+                  placeholder="Select existing tags or type a name to create new"
+                  options={tagSelectOptions}
+                  filterOption={(input, option) => {
+                    if (String(option?.value ?? '').startsWith('__new__:')) return true;
+                    return String(option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+                  }}
+                  onSearch={setTagSearch}
+                  onChange={() => setTagSearch('')}
+                  disabled={isReadOnly}
+                  tagRender={(props) => {
+                    const { value, closable, onClose } = props;
+                    const isNew = String(value).startsWith('__new__:');
+                    const displayName = isNew
+                      ? String(value).replace('__new__:', '')
+                      : (tags.find((t) => t.id === value)?.name ?? String(value));
+                    return (
+                      <Tag
+                        color={isNew ? 'orange' : 'blue'}
+                        closable={closable}
+                        onClose={onClose}
+                        style={{ marginRight: 4 }}
+                      >
+                        {isNew ? `✦ ${displayName}` : displayName}
+                      </Tag>
+                    );
+                  }}
+                />
               </Form.Item>
             </Col>
 

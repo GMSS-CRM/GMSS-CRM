@@ -27,6 +27,26 @@ export class TenderRepository extends Repository<Tender> implements ITenderRepos
     });
   }
 
+  async findExisting(referenceNumbers: string[], names: string[]): Promise<Tender[]> {
+    const query = this.createQueryBuilder('tender');
+    const conditions: string[] = [];
+    const params: Record<string, any> = {};
+
+    if (referenceNumbers.length > 0) {
+      conditions.push('tender.referenceNumber IN (:...refNums)');
+      params.refNums = referenceNumbers;
+    }
+
+    if (names.length > 0) {
+      conditions.push('tender.name IN (:...names)');
+      params.names = names;
+    }
+
+    if (conditions.length === 0) return [];
+
+    return query.where(conditions.join(' OR '), params).getMany();
+  }
+
   search(params: { search?: string; status?: string; limit?: number; offset?: number }) {
     const query = this.createQueryBuilder('tender');
 

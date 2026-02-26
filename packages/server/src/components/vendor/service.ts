@@ -5,6 +5,7 @@ import ErrorInfo from '../common/error-info';
 import { VendorStatus } from '../../entities/enums/VendorStatus';
 import { getCurrentEmail } from '../common/utils';
 import { VendorWorkflow } from '../../entities/VendorWorkflow';
+import { VendorTag } from '../../entities/VendorTag';
 import { DataSource } from 'typeorm';
 import { Vendor } from '../../entities/Vendor';
 import { IVendorAgreementRepository } from '../vendor-agreement/types';
@@ -96,6 +97,19 @@ export class VendorService implements IVendorService {
       }
     }
 
+    /* ------------------ CREATE TAG ASSOCIATION(S) ------------------ */
+
+    if (Array.isArray(input.tagIds) && input.tagIds.length > 0) {
+      for (const tagId of input.tagIds) {
+        await manager.insert('vendor_tag', {
+          vendorId: savedVendor.id,
+          tagId,
+          enableMail: true,
+          createdBy: getCurrentEmail(),
+        });
+      }
+    }
+
     /* ------------------ RETURN FULL OBJECT ------------------ */
 
     return vendorRepo.findOne({
@@ -109,6 +123,8 @@ export class VendorService implements IVendorService {
         'agreements',
         'followUps',
         'tenders',
+        'tags',
+        'tags.tag',
       ],
     }) as Promise<Vendor>;
   });
@@ -127,7 +143,7 @@ export class VendorService implements IVendorService {
     /* ------------------ UPDATE BASIC INFO ------------------ */
 
     // Extract relationship fields that shouldn't be in UPDATE query
-    const { contactPersons, documents, ...basicInfo } = input;
+    const { contactPersons, documents, tagIds, ...basicInfo } = input;
 
     await vendorRepo.update(id, {
       ...basicInfo,
@@ -224,6 +240,21 @@ export class VendorService implements IVendorService {
       }
     }
 
+    /* ------------------ TAG SYNC (replace all tags) ------------------ */
+
+    // Always replace: delete existing, optionally insert new ones
+    await manager.delete('vendor_tag', { vendorId: id });
+    if (Array.isArray(tagIds) && tagIds.length > 0) {
+      for (const tagId of tagIds) {
+        await manager.insert('vendor_tag', {
+          vendorId: id,
+          tagId,
+          enableMail: true,
+          createdBy: getCurrentEmail(),
+        });
+      }
+    }
+
     /* ------------------ RETURN UPDATED ------------------ */
 
     return vendorRepo.findOne({
@@ -237,6 +268,8 @@ export class VendorService implements IVendorService {
         'agreements',
         'followUps',
         'tenders',
+        'tags',
+        'tags.tag',
       ],
     }) as Promise<Vendor>;
   });

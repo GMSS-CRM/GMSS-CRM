@@ -23,4 +23,15 @@ export const vendorMdRequestResolvers = {
     resolveMdRequest: (_: unknown, { input }: any) =>
       getService().resolveMdRequest(input),
   },
+
+  VendorMdRequest: {
+    createdDate: (parent: any) =>
+      parent.createdDate instanceof Date
+        ? parent.createdDate.toISOString()
+        : parent.createdDate ?? null,
+    updatedDate: (parent: any) =>
+      parent.updatedDate instanceof Date
+        ? parent.updatedDate.toISOString()
+        : parent.updatedDate ?? null,
+  },
 };

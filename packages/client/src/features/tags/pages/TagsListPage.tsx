@@ -1,13 +1,14 @@
 // packages/client/src/features/tags/pages/TagsListPage.tsx
 import { useState, useMemo } from 'react';
-import { Button, Typography, Modal } from 'antd';
-import { 
-  PlusOutlined, 
+import { Button, Modal } from 'antd';
+import {
+  PlusOutlined,
   TagsOutlined,
-  ExclamationCircleOutlined 
+  TeamOutlined,
+  MailOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import TagTable from '../components/TagTable';
-import TagStatsCards from '../components/TagStatsCards';
 import TagSearchBar from '../components/TagSearchBar';
 import CreateTagModal from './CreateTagModal';
 import DeleteTagModal from './DeleteTagModal';
@@ -16,45 +17,30 @@ import { useTagsData, useTagMutations } from '../hooks/useTagData';
 import styles from '../styles/tags.module.css';
 import TagTendersDrawer from './TagTenderDrawer';
 
-const { Title } = Typography;
-
 export default function TagsListPage() {
   const { tags, loading, refetch, stats } = useTagsData();
   const [searchText, setSearchText] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  
-  // Modal states
+
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<TagWithVendorCount | null>(null);
-  
-  // Drawer state
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTag, setDrawerTag] = useState<TagWithVendorCount | null>(null);
 
-  const { createTag, deleteTag, deleteTags } = useTagMutations(() => {
+  const { createTag, deleteTag, deleteTags, loading: mutationLoading } = useTagMutations(() => {
     refetch();
   });
 
-  // Filter tags based on search
   const filteredTags = useMemo(() => {
     if (!searchText.trim()) return tags;
     const search = searchText.toLowerCase();
-    return tags.filter(tag => 
-      tag.name.toLowerCase().includes(search)
-    );
+    return tags.filter((tag) => tag.name.toLowerCase().includes(search));
   }, [tags, searchText]);
 
-  // Handlers
-  const handleView = (tag: TagWithVendorCount) => {
-    setDrawerTag(tag);
-    setDrawerOpen(true);
-  };
-
-  const handleDelete = (tag: TagWithVendorCount) => {
-    setSelectedTag(tag);
-    setDeleteModalOpen(true);
-  };
+  const handleView = (tag: TagWithVendorCount) => { setDrawerTag(tag); setDrawerOpen(true); };
+  const handleDelete = (tag: TagWithVendorCount) => { setSelectedTag(tag); setDeleteModalOpen(true); };
 
   const handleConfirmDelete = async () => {
     if (!selectedTag) return;
@@ -80,24 +66,44 @@ export default function TagsListPage() {
 
   const handleCreateTag = async (values: { name: string }) => {
     const success = await createTag(values);
-    if (success) {
-      setCreateModalOpen(false);
-    }
+    if (success) setCreateModalOpen(false);
   };
 
   return (
     <div className={styles.pageContainer}>
-      {/* Header */}
+      {/* ── Compact Header with inline stats ── */}
       <div className={styles.pageHeader}>
         <div className={styles.titleSection}>
-          <Title level={4} className={styles.pageTitle}>
+          <h2 className={styles.pageTitle}>
             <TagsOutlined className={styles.titleIcon} />
             Tag Management
-          </Title>
+          </h2>
           <p className={styles.pageSubtitle}>
             Organize and manage vendor tags for efficient categorization
           </p>
         </div>
+
+        {/* Inline stat pills */}
+        <div className={styles.headerStats}>
+          <div className={styles.headerStatItem}>
+            <TagsOutlined className={styles.headerStatIcon} style={{ color: '#1677ff' }} />
+            <span className={styles.headerStatValue}>{loading ? '–' : stats.totalTags}</span>
+            <span className={styles.headerStatLabel}>Total Tags</span>
+          </div>
+          <div className={styles.headerStatDivider} />
+          <div className={styles.headerStatItem}>
+            <TeamOutlined className={styles.headerStatIcon} style={{ color: '#52c41a' }} />
+            <span className={styles.headerStatValue}>{loading ? '–' : stats.totalAssignments}</span>
+            <span className={styles.headerStatLabel}>Assigned Vendors</span>
+          </div>
+          <div className={styles.headerStatDivider} />
+          <div className={styles.headerStatItem}>
+            <MailOutlined className={styles.headerStatIcon} style={{ color: '#722ed1' }} />
+            <span className={styles.headerStatValue}>{loading ? '–' : stats.totalEmailEnabled}</span>
+            <span className={styles.headerStatLabel}>Email Enabled</span>
+          </div>
+        </div>
+
         <div className={styles.headerActions}>
           <Button
             type="primary"
@@ -110,17 +116,8 @@ export default function TagsListPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <TagStatsCards
-        totalTags={stats.totalTags}
-        totalAssignments={stats.totalAssignments}
-        totalEmailEnabled={stats.totalEmailEnabled}
-        loading={loading}
-      />
-
-      {/* Table Section */}
+      {/* ── Table Section (directly below header) ── */}
       <div className={styles.tableSection}>
-        {/* Search & Actions Bar */}
         <TagSearchBar
           searchText={searchText}
           onSearchChange={setSearchText}
@@ -129,8 +126,6 @@ export default function TagsListPage() {
           onBulkDelete={handleBulkDelete}
           loading={loading}
         />
-
-        {/* Table */}
         <TagTable
           data={filteredTags}
           loading={loading}
@@ -141,32 +136,24 @@ export default function TagsListPage() {
         />
       </div>
 
-      {/* Create Modal */}
       <CreateTagModal
         open={createModalOpen}
         onCancel={() => setCreateModalOpen(false)}
         onSubmit={handleCreateTag}
+        loading={mutationLoading}
       />
 
-      {/* Delete Modal */}
       <DeleteTagModal
         open={deleteModalOpen}
         tag={selectedTag}
-        onCancel={() => {
-          setDeleteModalOpen(false);
-          setSelectedTag(null);
-        }}
+        onCancel={() => { setDeleteModalOpen(false); setSelectedTag(null); }}
         onConfirm={handleConfirmDelete}
       />
 
-      {/* Tenders Drawer */}
       <TagTendersDrawer
         open={drawerOpen}
         tag={drawerTag}
-        onClose={() => {
-          setDrawerOpen(false);
-          setDrawerTag(null);
-        }}
+        onClose={() => { setDrawerOpen(false); setDrawerTag(null); }}
       />
     </div>
   );

@@ -37,7 +37,8 @@ export interface Vendor {
   panNumber?: string;
   msmeNumber?: string;
   cinNumber?: string;
-  tags: string[];
+  tagIds: string[];
+  tagNames: string[];
   status: CompanyStatus;
   createdDate: string;
   createdBy?: string;

@@ -32,7 +32,9 @@ export class VendorRepository
         'followUps',
         'tenders',
         'contactPersons',
-        'documents'
+        'documents',
+        'tags',
+        'tags.tag',
       ],
     });
   }
@@ -53,6 +55,8 @@ export class VendorRepository
     } = {}
   ) {
     const query = this.createQueryBuilder('vendor')
+      .leftJoinAndSelect('vendor.tags', 'vendorTag')
+      .leftJoinAndSelect('vendorTag.tag', 'tag')
       .where('vendor.isDeleted = false');
 
     if (params.search) {

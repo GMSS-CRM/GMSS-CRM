@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Table, Button, Space, Tooltip, Tag, Dropdown, message } from "antd";
+import { Button, Space, Tooltip, Tag, Dropdown, message } from "antd";
 import type { MenuProps } from "antd";
 import {
   SendOutlined,
@@ -16,6 +16,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import type { Tender, TenderStatus, UserRole, TenderTag } from "../types/tender.types";
 import { StatusBadge } from "./StatusBadge";
+import AppTable from "../../../components/app-table";
 import s from "../styles/tender-workflow.module.css";
 
 interface Props {
@@ -33,8 +34,13 @@ interface Props {
   onVerifyNit: (id: string) => void;
 }
 
-const fmtDate = (d?: Date) =>
-  d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "—";
+const fmtDate = (d?: Date | string) => {
+  if (!d) return "—";
+  const dt = new Date(d);
+  return isNaN(dt.getTime())
+    ? "—"
+    : dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
 
 const EMPTY_HINTS: Record<string, string> = {
   draft: "Upload an Excel file to get started.",
@@ -229,7 +235,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
       dataIndex: "updatedAt",
       width: 90,
       render: (d: Date) => (
-        <span style={{ fontSize: 11, color: "var(--tw-text-muted)" }}>{fmtDate(d)}</span>
+        <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{fmtDate(d)}</span>
       ),
       sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
       defaultSortOrder: "descend",
@@ -293,7 +299,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
       )}
 
       <div className={s.tableArea}>
-        <Table
+        <AppTable<Tender>
           rowSelection={
             canSelect
               ? {

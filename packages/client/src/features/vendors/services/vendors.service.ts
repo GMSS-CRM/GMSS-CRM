@@ -49,7 +49,8 @@ function mapGqlVendor(v: any): Vendor {
     panNumber: v.panNumber,
     msmeNumber: v.msmeUdyamNumber,
     cinNumber: v.cinNumber,
-    tags: (v.tags ?? []).map((t: any) => t.tagId as string),
+    tagIds: (v.tags ?? []).map((t: any) => t.tagId as string),
+    tagNames: (v.tags ?? []).map((t: any) => t.tag?.name ?? ''),
     status: gqlStatusToFrontend(v.status),
     createdDate: v.createdDate ?? new Date().toISOString(),
     updatedDate: v.updatedDate,
@@ -383,6 +384,7 @@ export const useCreateVendor = () => {
     panNumber?: string;
     msmeNumber?: string;
     cinNumber?: string;
+    tagIds?: string[];
   }) => {
     const result = await mutate({
       variables: {
@@ -395,6 +397,7 @@ export const useCreateVendor = () => {
           panNumber: values.panNumber,
           msmeUdyamNumber: values.msmeNumber,
           cinNumber: values.cinNumber,
+          tagIds: values.tagIds ?? [],
           contactPersons: (values.contactPersons ?? [])
             .filter((cp) => cp.name)
             .map(cpToGqlInput),
@@ -426,6 +429,7 @@ export const useUpdateVendor = () => {
       panNumber?: string;
       msmeNumber?: string;
       cinNumber?: string;
+      tagIds?: string[];
     },
     currentGqlStatus: string,
   ) => {
@@ -442,6 +446,7 @@ export const useUpdateVendor = () => {
           panNumber: values.panNumber,
           msmeUdyamNumber: values.msmeNumber,
           cinNumber: values.cinNumber,
+          tagIds: values.tagIds ?? [],
           contactPersons: (values.contactPersons ?? [])
             .filter((cp) => cp.name)
             .map((cp) => ({
