@@ -15,6 +15,7 @@ import { VendorApproval } from './VendorApproval';
 import { VendorTender } from './VendorTender';
 import { VendorContactPerson } from './VendorContactPerson';
 import { VendorDocument } from './VendorDocument';
+import { VendorTag } from './VendorTag';
 
 export enum CompanyType {
   NEW = 'NEW',
@@ -109,4 +110,7 @@ export class Vendor {
 
   @OneToMany(() => VendorDocument, doc => doc.vendor, { cascade: false })
   documents!: VendorDocument[];
+
+  @OneToMany(() => VendorTag, (vt) => vt.vendor, { cascade: false })
+  tags!: VendorTag[];
 }

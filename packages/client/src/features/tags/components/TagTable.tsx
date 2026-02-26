@@ -1,6 +1,6 @@
 // packages/client/src/features/tags/components/TagTable.tsx
 import React from 'react';
-import { Table, Button, Badge, Tooltip, Empty } from 'antd';
+import { Button, Badge, Tooltip, Empty } from 'antd';
 import { 
   EyeOutlined, 
   DeleteOutlined, 
@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons';
 import type { TagWithVendorCount } from '../types/tagTypes';
 import styles from '../styles/tags.module.css';
+import AppTable from '../../../components/app-table';
 
 interface TagTableProps {
   data: TagWithVendorCount[];
@@ -148,43 +149,41 @@ export default function TagTable({
   ];
 
   return (
-    <div className={styles.tableContainer}>
-      <Table
-        rowSelection={{
-          selectedRowKeys,
-          onChange: onSelectChange,
-        }}
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        rowKey="id"
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          pageSizeOptions: ['10', '20', '50'],
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} tags`,
-          size: 'small',
-        }}
-        scroll={{ y: 'calc(100vh - 400px)' }}
-        size="middle"
-        locale={{
-          emptyText: (
-            <Empty
-              className={styles.emptyState}
-              image={<InboxOutlined className={styles.emptyIcon} />}
-              description={
-                <div>
-                  <div className={styles.emptyTitle}>No tags found</div>
-                  <div className={styles.emptySubtitle}>
-                    Create your first tag to start organizing vendors
-                  </div>
+    <AppTable<TagWithVendorCount>
+      rowSelection={{
+        selectedRowKeys,
+        onChange: onSelectChange,
+      }}
+      columns={columns}
+      dataSource={data}
+      loading={loading}
+      rowKey="id"
+      pagination={{
+        pageSize: 10,
+        showSizeChanger: true,
+        pageSizeOptions: ['10', '20', '50'],
+          showTotal: (total: number, range: [number, number]) =>
+          `${range[0]}-${range[1]} of ${total} tags`,
+        size: 'small',
+      }}
+      scroll={{ x: 'max-content' }}
+      size="middle"
+      locale={{
+        emptyText: (
+          <Empty
+            className={styles.emptyState}
+            image={<InboxOutlined className={styles.emptyIcon} />}
+            description={
+              <div>
+                <div className={styles.emptyTitle}>No tags found</div>
+                <div className={styles.emptySubtitle}>
+                  Create your first tag to start organizing vendors
                 </div>
-              }
-            />
-          ),
-        }}
-      />
-    </div>
+              </div>
+            }
+          />
+        ),
+      }}
+    />
   );
 }

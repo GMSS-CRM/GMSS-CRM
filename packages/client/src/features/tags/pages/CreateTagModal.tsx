@@ -7,12 +7,14 @@ interface CreateTagModalProps {
   open: boolean;
   onCancel: () => void;
   onSubmit: (values: { name: string }) => Promise<void>;
+  loading?: boolean;
 }
 
 export default function CreateTagModal({
   open,
   onCancel,
   onSubmit,
+  loading = false,
 }: CreateTagModalProps) {
   const [form] = Form.useForm();
 
@@ -43,6 +45,7 @@ export default function CreateTagModal({
       onOk={handleOk}
       onCancel={handleCancel}
       okText="Create Tag"
+      confirmLoading={loading}
       destroyOnClose
     >
       <div className={styles.formContainer}>

@@ -71,8 +71,20 @@ export const tenderTypeDefs = gql`
     searchTenders(searchInput: SearchTenderInput): [Tender!]!
   }
 
+  type SkippedTenderInfo {
+    name: String!
+    referenceNumber: String
+    reason: String!
+  }
+
+  type CreateTendersBatchResult {
+    created: [Tender!]!
+    skipped: [SkippedTenderInfo!]!
+  }
+
   extend type Mutation {
     createTender(input: CreateTenderInput!): Tender!
+    createTendersBatch(inputs: [CreateTenderInput!]!): CreateTendersBatchResult!
     updateTender(id: ID!, input: UpdateTenderInput!): Tender!
     deleteTender(id: ID!): Boolean!
     deleteTenders(ids: [ID!]!): Boolean!

@@ -38,7 +38,7 @@ const antdTheme: ThemeConfig = {
     
     // Background Colors - From theme.css
     colorBgBase: getCssVar('--bg-panel') || '#ffffff',
-    colorBgContainer: getCssVar('--bg-muted') || '#f5f7ff',
+    colorBgContainer: getCssVar('--bg-panel') || '#ffffff',
     colorBgElevated: getCssVar('--bg-panel') || '#ffffff',
     colorBgLayout: getCssVar('--bg-app') || '#f5f7ff',
     
@@ -136,8 +136,8 @@ const antdTheme: ThemeConfig = {
       fontSize: 14,
       borderRadius: 8,
       boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.05)',
-      colorBgContainer: '#ffffff',
-      colorBorder: '#d1d5db',
+      colorBgContainer: getCssVar('--bg-panel') || '#ffffff',
+      colorBorder: getCssVar('--border-input') || '#d1d5db',
     },
     
     // Card Components
@@ -152,11 +152,11 @@ const antdTheme: ThemeConfig = {
     
     // Table - Data display
     Table: {
-      headerBg: '#f9fafb',
-      headerColor: '#1f2937',
+      headerBg: getCssVar('--bg-muted') || '#f9fafb',
+      headerColor: getCssVar('--text-primary') || '#1f2937',
       borderRadius: 12,
       boxShadow: 'none',
-      rowHoverBg: '#f3f4f6',
+      rowHoverBg: getCssVar('--bg-hover') || '#f3f4f6',
       cellPaddingBlock: 12,
       cellPaddingInline: 16,
     },
@@ -180,7 +180,7 @@ const antdTheme: ThemeConfig = {
     
     // Form
     Form: {
-      labelColor: '#374151',
+      labelColor: getCssVar('--text-primary') || '#374151',
       labelFontSize: 14,
       labelHeight: 32,
       itemMarginBottom: 24,
@@ -203,13 +203,13 @@ const antdTheme: ThemeConfig = {
     // Pagination
     Pagination: {
       controlHeight: 40,
-      itemLinkBg: '#ffffff',
-      itemActiveBg: '#0066cc',
+      itemLinkBg: getCssVar('--bg-panel') || '#ffffff',
+      itemActiveBg: getCssVar('--accent') || '#0066cc',
     },
     
     // Badge
     Badge: {
-      colorPrimary: '#0066cc',
+      colorPrimary: getCssVar('--color-error') || '#ff4d4f',
     },
     
     // Tag

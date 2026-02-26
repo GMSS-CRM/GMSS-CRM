@@ -1,8 +1,8 @@
 // packages/client/src/features/tender-workflow/hooks/useTenderWorkflow.ts
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, createElement } from "react";
 import type { Key } from "react";
-import { message } from "antd";
+import { message, notification } from "antd";
 import type {
   Tender as GqlTender,
   TenderStatus as GqlTenderStatus,
@@ -21,7 +21,7 @@ import {
 } from "../types/tender.types";
 import {
   useSearchTenders,
-  useCreateTender,
+  useCreateTendersBatch,
   useDeleteTender,
   useDeleteTenders,
   useChangeTenderStatus,
@@ -93,6 +93,7 @@ interface LocalUIState {
   selectedPreviewKeys: Key[];
   activeDrawerTender: import("../types/tender.types").Tender | null;
   isDrawerOpen: boolean;
+  isAddingToDraft: boolean;
 }
 
 // ─── Public return type ───────────────────────────────────────────────────────
@@ -104,6 +105,7 @@ export interface UseTenderWorkflowReturn {
     previewData: TenderWorkflowItem[];
     selectedPreviewKeys: Key[];
     isLoading: boolean;
+    isAddingToDraft: boolean;
     activeDrawerTender: import("../types/tender.types").Tender | null;
     isDrawerOpen: boolean;
   };
@@ -118,7 +120,7 @@ export interface UseTenderWorkflowReturn {
   parseExcelData: (data: TenderWorkflowItem[]) => void;
   clearPreviewData: () => void;
   setSelectedPreviewKeys: (keys: Key[]) => void;
-  addSelectedToDraft: () => void;
+  addSelectedToDraft: () => Promise<void>;
 
   // Tender CRUD
   deleteTender: (id: string) => void;
@@ -128,7 +130,7 @@ export interface UseTenderWorkflowReturn {
   // MD operations
   openTaggingDrawer: (tender: import("../types/tender.types").Tender) => void;
   closeTaggingDrawer: () => void;
-  mdConfirm: (tenderId: string, tagIds: string[]) => void;
+  mdConfirm: (tenderId: string, tagIds: string[]) => Promise<void>;
   mdReject: (tenderId: string, reason: string) => void;
   verifyNit: (tenderId: string) => void;
 
@@ -162,12 +164,13 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     selectedPreviewKeys: [],
     activeDrawerTender: null,
     isDrawerOpen: false,
+    isAddingToDraft: false,
   });
 
   // ─── GraphQL ────────────────────────────────────────────────────────────────
 
   const { data, loading, refetch } = useSearchTenders();
-  const [createTenderMut] = useCreateTender();
+  const [createTendersBatchMut] = useCreateTendersBatch();
   const [deleteTenderMut] = useDeleteTender();
   const [_deleteTendersMut] = useDeleteTenders();
   const [changeStatusMut] = useChangeTenderStatus();
@@ -255,38 +258,73 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     setUi((prev) => ({ ...prev, selectedPreviewKeys: keys }));
   }, []);
 
-  const addSelectedToDraft = useCallback(() => {
+  const addSelectedToDraft = useCallback(async () => {
     const selectedRows = ui.previewData.filter((row) =>
       ui.selectedPreviewKeys.includes(row.id),
     );
 
-    // Create each tender via GraphQL
-    const promises = selectedRows.map((row) =>
-      createTenderMut({
-        variables: {
-          input: {
-            name: row.tenderTitle,
-            referenceNumber: row.tenderNo || generateRefNumber(),
-            issuingDepartment: row.department,
-            description: `Opening: ${row.openingDateTime} | Due: ${row.dueDateTime} (${row.dueDays} days)`,
-            submissionDeadline:
-              row.dueDateTime !== "NOT OPENED" && row.dueDateTime
-                ? parseDateString(row.dueDateTime)
-                : undefined,
-          },
-        },
-      }).catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : "Create failed";
-        message.error(msg);
-      }),
-    );
+    if (selectedRows.length === 0) return;
 
-    void Promise.all(promises).then(() => {
+    setUi((prev) => ({ ...prev, isAddingToDraft: true }));
+
+    const inputs = selectedRows.map((row) => ({
+      name: row.tenderTitle,
+      referenceNumber: row.tenderNo || generateRefNumber(),
+      issuingDepartment: row.department,
+      description: `Opening: ${row.openingDateTime} | Due: ${row.dueDateTime} (${row.dueDays} days)`,
+      submissionDeadline:
+        row.dueDateTime !== "NOT OPENED" && row.dueDateTime
+          ? parseDateString(row.dueDateTime)
+          : undefined,
+    }));
+
+    try {
+      const result = await createTendersBatchMut({ variables: { inputs } });
+      const { created = [], skipped = [] } = result.data?.createTendersBatch ?? {};
+
+      if (created.length > 0) {
+        notification.success({
+          message: `${created.length} tender${created.length > 1 ? 's' : ''} added to Draft`,
+          placement: 'topRight',
+          duration: 4,
+        });
+      }
+
+      if (skipped.length > 0) {
+        const descriptionNode = createElement(
+          'ul',
+          { style: { margin: 0, paddingLeft: 16 } },
+          ...skipped.map((s, i) =>
+            createElement(
+              'li',
+              { key: i },
+              createElement('strong', null, s.name),
+              s.referenceNumber ? ` (${s.referenceNumber})` : '',
+              ' \u2014 ',
+              s.reason,
+            ),
+          ),
+        );
+        notification.warning({
+          message: `${skipped.length} duplicate${skipped.length > 1 ? 's' : ''} skipped`,
+          description: descriptionNode,
+          placement: 'topRight',
+          duration: 8,
+        });
+      }
+
+      if (created.length === 0 && skipped.length === 0) {
+        message.info('No tenders were processed.');
+      }
+
       void refetch();
-    });
-
-    setUi((prev) => ({ ...prev, previewData: [], selectedPreviewKeys: [] }));
-  }, [ui.previewData, ui.selectedPreviewKeys, createTenderMut, refetch]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add tenders to draft';
+      message.error(msg);
+    } finally {
+      setUi((prev) => ({ ...prev, previewData: [], selectedPreviewKeys: [], isAddingToDraft: false }));
+    }
+  }, [ui.previewData, ui.selectedPreviewKeys, createTendersBatchMut, refetch]);
 
   // ─── Tender CRUD ───────────────────────────────────────────────────────────
 
@@ -328,11 +366,12 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
   }, []);
 
   const mdConfirm = useCallback(
-    (tenderId: string, tagIds: string[]) => {
-      void changeStatus(tenderId, "MD_TAGGED", { tagIds });
+    async (tenderId: string, tagIds: string[]): Promise<void> => {
+      await changeStatus(tenderId, "MD_TAGGED", { tagIds });
       closeTaggingDrawer();
+      void refetch();
     },
-    [changeStatus, closeTaggingDrawer],
+    [changeStatus, closeTaggingDrawer, refetch],
   );
 
   const mdReject = useCallback(
@@ -427,6 +466,7 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
       previewData: ui.previewData,
       selectedPreviewKeys: ui.selectedPreviewKeys,
       isLoading: loading,
+      isAddingToDraft: ui.isAddingToDraft,
       activeDrawerTender: ui.activeDrawerTender,
       isDrawerOpen: ui.isDrawerOpen,
     }),

@@ -305,3 +305,120 @@ a:hover {
 .ant-spin-dot-item {
   background-color: var(--accent) !important;
 }
+
+/* ===================================
+   Form element backgrounds — dynamic CSS var overrides
+   (Ant Design tokens are static at load; these update on theme change)
+   =================================== */
+
+/* Input / TextArea / Select trigger */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-input-number-input,
+.ant-select:not(.ant-select-disabled) .ant-select-selector,
+.ant-picker {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-input) !important;
+}
+
+/* Select dropdown popup */
+.ant-select-dropdown {
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--border-color);
+}
+
+.ant-select-item {
+  color: var(--text-primary) !important;
+}
+
+.ant-select-item:hover,
+.ant-select-item-option-active {
+  background: var(--bg-hover) !important;
+}
+
+.ant-select-item-option-selected {
+  background: var(--accent-light) !important;
+  color: var(--accent) !important;
+  font-weight: 600;
+}
+
+/* DatePicker / TimePicker popup */
+.ant-picker-dropdown .ant-picker-panel-container {
+  background: var(--bg-panel) !important;
+}
+
+.ant-picker-panel {
+  background: var(--bg-panel) !important;
+  border-color: var(--border-color) !important;
+}
+
+.ant-picker-header {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-picker-cell {
+  color: var(--text-secondary) !important;
+}
+
+.ant-picker-cell-in-view {
+  color: var(--text-primary) !important;
+}
+
+.ant-picker-cell-selected .ant-picker-cell-inner {
+  background: var(--accent) !important;
+}
+
+/* Dropdown menu background */
+.ant-dropdown .ant-dropdown-menu,
+.ant-dropdown-menu {
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--border-color);
+}
+
+.ant-dropdown-menu-item {
+  color: var(--text-primary) !important;
+}
+
+/* Modal background */
+.ant-modal-content {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-modal-header {
+  background: var(--bg-panel) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ant-modal-title {
+  color: var(--text-primary) !important;
+}
+
+/* Drawer background */
+.ant-drawer-content {
+  background: var(--bg-panel) !important;
+}
+
+.ant-drawer-header {
+  background: var(--bg-panel) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ant-drawer-title {
+  color: var(--text-primary) !important;
+}
+
+/* Card background */
+.ant-card {
+  background: var(--bg-panel) !important;
+  border-color: var(--border-color) !important;
+}
+
+.ant-card-head {
+  background: var(--bg-panel) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}

@@ -158,7 +158,7 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
               multiple
               accept=".pdf,.doc,.docx"
             >
-              <PlusOutlined style={{ fontSize: 20, color: "var(--tw-accent)" }} />
+              <PlusOutlined style={{ fontSize: 20, color: "var(--accent)" }} />
               <p className={s.draggerText}>
                 Drop files or <span>browse</span>
               </p>

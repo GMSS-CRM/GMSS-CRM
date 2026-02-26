@@ -134,6 +134,12 @@ export type CreateTenderInput = {
   submissionDeadline?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CreateTendersBatchResult = {
+  __typename?: 'CreateTendersBatchResult';
+  created: Array<Tender>;
+  skipped: Array<SkippedTenderInfo>;
+};
+
 export type CreateUserInput = {
   email: Scalars['String']['input'];
   firstName: Scalars['String']['input'];
@@ -176,6 +182,7 @@ export type CreateVendorInput = {
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   panNumber?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -217,6 +224,7 @@ export type Mutation = {
   createTag: Tag;
   createTender: Tender;
   createTenderDocument: TenderDocument;
+  createTendersBatch: CreateTendersBatchResult;
   createUser: User;
   createVendor: Vendor;
   createVendorAgreement: VendorAgreement;
@@ -303,6 +311,11 @@ export type MutationCreateTenderArgs = {
 
 export type MutationCreateTenderDocumentArgs = {
   input: CreateTenderDocumentInput;
+};
+
+
+export type MutationCreateTendersBatchArgs = {
+  inputs: Array<CreateTenderInput>;
 };
 
 
@@ -825,6 +838,13 @@ export const SignatureStatus = {
 } as const;
 
 export type SignatureStatus = typeof SignatureStatus[keyof typeof SignatureStatus];
+export type SkippedTenderInfo = {
+  __typename?: 'SkippedTenderInfo';
+  name: Scalars['String']['output'];
+  reason: Scalars['String']['output'];
+  referenceNumber?: Maybe<Scalars['String']['output']>;
+};
+
 export type Tag = {
   __typename?: 'Tag';
   createdBy: Scalars['String']['output'];
@@ -986,6 +1006,7 @@ export type UpdateVendorInput = {
   msmeUdyamNumber?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   panNumber?: InputMaybe<Scalars['String']['input']>;
+  tagIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1284,6 +1305,7 @@ export type ResolversTypes = {
   CreateTagInput: CreateTagInput;
   CreateTenderDocumentInput: CreateTenderDocumentInput;
   CreateTenderInput: CreateTenderInput;
+  CreateTendersBatchResult: ResolverTypeWrapper<CreateTendersBatchResult>;
   CreateUserInput: CreateUserInput;
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
   CreateVendorContactPersonStandaloneInput: CreateVendorContactPersonStandaloneInput;
@@ -1312,6 +1334,7 @@ export type ResolversTypes = {
   SearchUserInput: SearchUserInput;
   SearchVendorDocumentInput: SearchVendorDocumentInput;
   SignatureStatus: SignatureStatus;
+  SkippedTenderInfo: ResolverTypeWrapper<SkippedTenderInfo>;
   Tag: ResolverTypeWrapper<Tag>;
   Tender: ResolverTypeWrapper<Tender>;
   TenderDocument: ResolverTypeWrapper<TenderDocument>;
@@ -1369,6 +1392,7 @@ export type ResolversParentTypes = {
   CreateTagInput: CreateTagInput;
   CreateTenderDocumentInput: CreateTenderDocumentInput;
   CreateTenderInput: CreateTenderInput;
+  CreateTendersBatchResult: CreateTendersBatchResult;
   CreateUserInput: CreateUserInput;
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
   CreateVendorContactPersonStandaloneInput: CreateVendorContactPersonStandaloneInput;
@@ -1392,6 +1416,7 @@ export type ResolversParentTypes = {
   SearchTenderInput: SearchTenderInput;
   SearchUserInput: SearchUserInput;
   SearchVendorDocumentInput: SearchVendorDocumentInput;
+  SkippedTenderInfo: SkippedTenderInfo;
   Tag: Tag;
   Tender: Tender;
   TenderDocument: TenderDocument;
@@ -1432,6 +1457,11 @@ export type CommissionBreakdownResolvers<ContextType = any, ParentType extends R
   totalAmount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
 };
 
+export type CreateTendersBatchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTendersBatchResult'] = ResolversParentTypes['CreateTendersBatchResult']> = {
+  created?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType>;
+  skipped?: Resolver<Array<ResolversTypes['SkippedTenderInfo']>, ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   assignPermissions?: Resolver<ResolversTypes['RolePermissionResult'], ParentType, ContextType, RequireFields<MutationAssignPermissionsArgs, 'input'>>;
   changeTenderStatus?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationChangeTenderStatusArgs, 'input'>>;
@@ -1442,6 +1472,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'input'>>;
   createTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationCreateTenderArgs, 'input'>>;
   createTenderDocument?: Resolver<ResolversTypes['TenderDocument'], ParentType, ContextType, RequireFields<MutationCreateTenderDocumentArgs, 'input'>>;
+  createTendersBatch?: Resolver<ResolversTypes['CreateTendersBatchResult'], ParentType, ContextType, RequireFields<MutationCreateTendersBatchArgs, 'inputs'>>;
   createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   createVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationCreateVendorArgs, 'input'>>;
   createVendorAgreement?: Resolver<ResolversTypes['VendorAgreement'], ParentType, ContextType, RequireFields<MutationCreateVendorAgreementArgs, 'input'>>;
@@ -1548,6 +1579,12 @@ export type RolePermissionResultResolvers<ContextType = any, ParentType extends 
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   permissions?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType>;
   roleId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type SkippedTenderInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['SkippedTenderInfo'] = ResolversParentTypes['SkippedTenderInfo']> = {
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  reason?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  referenceNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
 export type TagResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tag'] = ResolversParentTypes['Tag']> = {
@@ -1762,12 +1799,14 @@ export type VendorWorkflowResolvers<ContextType = any, ParentType extends Resolv
 
 export type Resolvers<ContextType = any> = {
   CommissionBreakdown?: CommissionBreakdownResolvers<ContextType>;
+  CreateTendersBatchResult?: CreateTendersBatchResultResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   PaymentScheduleItem?: PaymentScheduleItemResolvers<ContextType>;
   PaymentScheduleResponse?: PaymentScheduleResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Role?: RoleResolvers<ContextType>;
   RolePermissionResult?: RolePermissionResultResolvers<ContextType>;
+  SkippedTenderInfo?: SkippedTenderInfoResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
   Tender?: TenderResolvers<ContextType>;
   TenderDocument?: TenderDocumentResolvers<ContextType>;

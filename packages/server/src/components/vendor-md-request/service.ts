@@ -2,8 +2,6 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { IVendorMdRequestService, IVendorMdRequestRepository } from './types';
 import { IVendorRepository } from '../vendor/types';
-import { IVendorWorkflowService } from '../vendor-workflow/types';
-import { VendorStatus } from '../../entities/enums/VendorStatus';
 import ErrorInfo from '../common/error-info';
 import { getCurrentEmail } from '../common/utils';
 
@@ -15,9 +13,6 @@ export class VendorMdRequestService implements IVendorMdRequestService {
 
     @inject(TYPES.IVendorRepository)
     private readonly vendorRepository: IVendorRepository,
-
-    @inject(TYPES.IVendorWorkflowService)
-    private readonly workflowService: IVendorWorkflowService,
   ) {}
 
   async createMdRequest(input: any) {
@@ -49,12 +44,8 @@ export class VendorMdRequestService implements IVendorMdRequestService {
       empRemark: input.empRemark || null,
     });
 
-    // Transition vendor to PENDING_MD_APPROVAL
-    await this.workflowService.changeStatus(
-      input.vendorId,
-      VendorStatus.PENDING_MD_APPROVAL,
-      input.empRemark || 'Sent to MD for approval',
-    );
+    // NOTE: Vendor status is intentionally NOT changed here.
+    // Status changes only happen when the user explicitly edits and saves the vendor form.
 
     return this.repository.findById(saved.id);
   }
@@ -81,16 +72,8 @@ export class VendorMdRequestService implements IVendorMdRequestService {
       mdRemark: input.mdRemark || null,
     });
 
-    // Transition vendor based on MD decision
-    const newStatus = input.approved
-      ? VendorStatus.APPROVED
-      : VendorStatus.NOT_INTERESTED;
-
-    await this.workflowService.changeStatus(
-      request.vendorId,
-      newStatus,
-      input.mdRemark || (input.approved ? 'Approved by MD' : 'Rejected by MD'),
-    );
+    // NOTE: Vendor status is intentionally NOT changed here.
+    // Status changes only happen when the user explicitly edits and saves the vendor form.
 
     return this.repository.findById(request.id);
   }

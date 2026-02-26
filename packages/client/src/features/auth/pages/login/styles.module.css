@@ -253,7 +253,7 @@
 }
 
 .formCard {
-  background: #fff;
+  background: var(--bg-panel);
   border-radius: 24px;
   padding: 3.5rem 3rem;
   box-shadow: 

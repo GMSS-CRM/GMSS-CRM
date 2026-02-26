@@ -4,7 +4,6 @@
 .pageContainer {
   display: flex;
   flex-direction: column;
-  height: 100%;
   background: var(--bg-app, #f5f5f5);
 }
 
@@ -12,12 +11,11 @@
 .pageHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 20px 24px;
+  align-items: center;
+  padding: 16px 24px;
   background: var(--bg-panel, #fff);
   border-bottom: 1px solid var(--border-color, #f0f0f0);
   flex-shrink: 0;
-  flex-wrap: wrap;
   gap: 16px;
 }
 
@@ -30,7 +28,7 @@
 .pageTitle {
   margin: 0 !important;
   font-weight: 600;
-  font-size: 22px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -52,6 +50,59 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-shrink: 0;
+}
+
+/* ============ Inline Stats in Header ============ */
+.headerStats {
+  display: flex;
+  align-items: center;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-color, #f0f0f0);
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.headerStatItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 20px;
+  gap: 2px;
+  transition: background 0.15s ease;
+}
+
+.headerStatItem:hover {
+  background: var(--bg-hover, #f0f0f0);
+}
+
+.headerStatIcon {
+  font-size: 14px;
+  margin-bottom: 1px;
+}
+
+.headerStatValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #1d2129);
+  line-height: 1.2;
+}
+
+.headerStatLabel {
+  font-size: 10px;
+  color: var(--text-secondary, #8c8c8c);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 500;
+}
+
+.headerStatDivider {
+  width: 1px;
+  height: 36px;
+  background: var(--border-color, #f0f0f0);
+  flex-shrink: 0;
 }
 
 .createButton {
@@ -80,7 +131,7 @@
 }
 
 .statCard {
-  background: var(--bg-secondary, #fafafa);
+  background: var(--bg-muted);
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -108,18 +159,18 @@
 }
 
 .statIconBlue {
-  background: linear-gradient(135deg, #e6f4ff 0%, #d6e8ff 100%);
-  color: #1677ff;
+  background: rgba(0, 102, 204, 0.12);
+  color: var(--accent);
 }
 
 .statIconGreen {
-  background: linear-gradient(135deg, #f6ffed 0%, #e6ffe0 100%);
-  color: #52c41a;
+  background: rgba(82, 196, 26, 0.12);
+  color: var(--color-success);
 }
 
 .statIconPurple {
-  background: linear-gradient(135deg, #f9f0ff 0%, #f0e0ff 100%);
-  color: #722ed1;
+  background: rgba(114, 46, 209, 0.12);
+  color: #9b59b6;
 }
 
 .statContent {
@@ -144,15 +195,13 @@
 
 /* ============ Table Section ============ */
 .tableSection {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
   background: var(--bg-panel, #fff);
   margin: 16px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
 }
 
 .tableHeader {
@@ -195,14 +244,12 @@
 
 /* ============ Table Container with Scroll ============ */
 .tableContainer {
-  flex: 1;
-  overflow: auto;
-  min-height: 0;
+  overflow-x: auto;
 }
 
 /* Table Styles */
 .tableContainer :global(.ant-table-wrapper) {
-  height: 100%;
+  width: 100%;
 }
 
 .tableContainer :global(.ant-table) {
@@ -211,13 +258,11 @@
 
 .tableContainer :global(.ant-spin-nested-loading),
 .tableContainer :global(.ant-spin-container) {
-  height: 100%;
+  width: 100%;
 }
 
 .tableContainer :global(.ant-table-container) {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
 }
 
 .tableContainer :global(.ant-table-header) {
@@ -225,12 +270,11 @@
 }
 
 .tableContainer :global(.ant-table-body) {
-  flex: 1;
   overflow: auto !important;
 }
 
 .tableContainer :global(.ant-table-thead > tr > th) {
-  background: var(--bg-secondary, #fafafa) !important;
+  background: var(--bg-muted) !important;
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
@@ -250,7 +294,7 @@
 }
 
 .tableContainer :global(.ant-table-row-selected > td) {
-  background: #e6f4ff !important;
+  background: var(--accent-light) !important;
 }
 
 /* ============ Table Cell Styles ============ */
@@ -307,7 +351,7 @@
 }
 
 .actionBtnDanger:hover {
-  background: #fff1f0;
+  background: rgba(255, 77, 79, 0.12);
   color: #ff4d4f;
 }
 
@@ -363,7 +407,7 @@
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  background: var(--bg-secondary, #fafafa);
+  background: var(--bg-muted);
   border-bottom: 1px solid var(--border-color, #f0f0f0);
   margin: -24px -24px 0;
 }
@@ -475,21 +519,21 @@
 }
 
 .tenderStatusActive {
-  background: #f6ffed;
+  background: rgba(82, 196, 26, 0.12);
   color: #52c41a;
-  border: 1px solid #b7eb8f;
+  border: 1px solid rgba(82, 196, 26, 0.3);
 }
 
 .tenderStatusClosed {
-  background: #fff1f0;
+  background: rgba(255, 77, 79, 0.12);
   color: #ff4d4f;
-  border: 1px solid #ffa39e;
+  border: 1px solid rgba(255, 77, 79, 0.3);
 }
 
 .tenderStatusDraft {
-  background: #fffbe6;
+  background: rgba(250, 173, 20, 0.12);
   color: #faad14;
-  border: 1px solid #ffe58f;
+  border: 1px solid rgba(250, 173, 20, 0.3);
 }
 
 .tenderCardMeta {
@@ -536,7 +580,7 @@
 
 .vendorCard:hover {
   border-color: #d9d9d9;
-  background: var(--bg-secondary, #fafafa);
+  background: var(--bg-muted);
 }
 
 .vendorInfo {
@@ -646,8 +690,8 @@
 }
 
 .warningBox {
-  background: #fffbe6;
-  border: 1px solid #ffe58f;
+  background: rgba(250, 173, 20, 0.1);
+  border: 1px solid rgba(250, 173, 20, 0.3);
   border-radius: 8px;
   padding: 12px 16px;
   margin-top: 16px;
@@ -701,35 +745,22 @@
 /* ============ Responsive ============ */
 @media (max-width: 768px) {
   .pageHeader {
-    padding: 16px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .statsSection {
     padding: 12px 16px;
+    flex-wrap: wrap;
   }
 
-  .statsGrid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+  .headerStats {
+    order: 3;
+    width: 100%;
+    justify-content: space-around;
   }
 
-  .statCard {
-    padding: 12px;
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
+  .headerStatItem {
+    padding: 8px 12px;
   }
 
-  .statIconWrapper {
-    width: 36px;
-    height: 36px;
+  .headerStatValue {
     font-size: 16px;
-  }
-
-  .statValue {
-    font-size: 20px;
   }
 
   .tableSection {

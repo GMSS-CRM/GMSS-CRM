@@ -21,7 +21,7 @@ function ThemedApp() {
       colorTextSecondary: currentTheme.colors.textSecondary,
       colorTextTertiary: currentTheme.colors.textTertiary,
       colorBgBase: currentTheme.colors.bgPanel,
-      colorBgContainer: currentTheme.colors.bgMuted,
+      colorBgContainer: currentTheme.colors.bgPanel,
       colorBgLayout: currentTheme.colors.bgApp,
       colorBorder: currentTheme.colors.borderColor,
       
@@ -96,6 +96,7 @@ function ThemedApp() {
         borderRadius: 8,
         paddingBlock: 6,
         paddingInline: 12,
+        colorBgContainer: currentTheme.colors.bgPanel,
       },
       Select: {
         controlHeight: 36,
@@ -103,6 +104,7 @@ function ThemedApp() {
         controlHeightSM: 28,
         fontSize: 13,
         borderRadius: 8,
+        colorBgContainer: currentTheme.colors.bgPanel,
       },
       Card: {
         borderRadius: 10,

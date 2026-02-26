@@ -33,5 +33,13 @@ export const vendorResolvers = {
     tags: (parent: any) => parent.tags || [],
     contactPersons: (parent: any) => parent.contactPersons || [],
     documents: (parent: any) => parent.documents || [],
+    createdDate: (parent: any) =>
+      parent.createdDate instanceof Date
+        ? parent.createdDate.toISOString()
+        : parent.createdDate ?? null,
+    updatedDate: (parent: any) =>
+      parent.updatedDate instanceof Date
+        ? parent.updatedDate.toISOString()
+        : parent.updatedDate ?? null,
   },
 };

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Tabs, Button, message } from "antd";
+import { Tabs, Button, Badge, message } from "antd";
 import {
   FileTextOutlined,
   UserOutlined,
@@ -78,11 +78,11 @@ export const TenderWorkflowPage: React.FC = () => {
       <span className={s.tabLabel}>
         {tab.label}
         {counts[tab.key] > 0 && (
-          <span
-            className={`${s.tabCount} ${activeTab === tab.key ? s.tabCountActive : ""}`}
-          >
-            {counts[tab.key]}
-          </span>
+          <Badge
+            count={counts[tab.key]}
+            size="small"
+            style={{ marginLeft: 4 }}
+          />
         )}
       </span>
     ),
@@ -164,10 +164,10 @@ export const TenderWorkflowPage: React.FC = () => {
                     selectedKeys={state.selectedPreviewKeys}
                     onSelectionChange={setSelectedPreviewKeys}
                     onAddToDraft={() => {
-                      addSelectedToDraft();
-                      message.success("Added to drafts");
+                      void addSelectedToDraft();
                     }}
                     onClear={clearPreviewData}
+                    loading={state.isAddingToDraft}
                   />
                 )}
               </>

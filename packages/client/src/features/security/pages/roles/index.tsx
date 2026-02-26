@@ -13,7 +13,7 @@ interface RolesPageProps {
   onEdit: (role: Role) => void;
   onCreate: () => void;
   onDelete: (roleId: string) => void;
-  onSave: (role: CreateRoleInput | UpdateRoleInput) => void;
+  onSave: (role: CreateRoleInput | UpdateRoleInput) => Promise<void>;
   onCancel: () => void;
   visible: boolean;
   selectedRole: Role | null;
@@ -77,13 +77,13 @@ export default function RolesPage({
           name: values.name.trim(),
           description: values.description?.trim() || undefined,
         };
-        onSave(input);
+        await onSave(input);
       } else {
         const input: CreateRoleInput = {
           name: values.name.trim(),
           description: values.description?.trim() || undefined,
         };
-        onSave(input);
+        await onSave(input);
       }
 
       form.resetFields();

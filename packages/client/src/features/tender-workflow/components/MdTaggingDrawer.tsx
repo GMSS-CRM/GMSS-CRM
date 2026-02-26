@@ -15,7 +15,7 @@ interface Props {
   tender: Tender | null;
   open: boolean;
   onClose: () => void;
-  onConfirm: (tenderId: string, tagIds: string[]) => void;
+  onConfirm: (tenderId: string, tagIds: string[]) => Promise<void>;
   onReject: (tenderId: string, reason: string) => void;
 }
 
@@ -52,8 +52,11 @@ export const MdTaggingDrawer: React.FC<Props> = ({
   const handleConfirm = async () => {
     if (!tags.length) return;
     setLoading(true);
-    onConfirm(tender.id, tags);
-    setLoading(false);
+    try {
+      await onConfirm(tender.id, tags);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReject = async () => {
