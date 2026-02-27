@@ -49,7 +49,6 @@ const EMPTY_HINTS: Record<string, string> = {
   nitPending: "Tenders appear here after MD tagging.",
   docsPending: "Upload documents for verified tenders.",
   readyToMail: "Mark tenders ready to notify vendors.",
-  completed: "Mailed tenders appear here.",
   pendingApproval: "Tenders sent by users awaiting MD approval.",
   pendingTagging: "NIT uploaded tenders awaiting MD tagging.",
   completed: "Mailed tenders appear here.",
@@ -67,7 +66,6 @@ export const WorkspaceGrid: React.FC<Props> = ({
   onUploadDocs,
   onMarkReady,
   onSendMail,
-  onVerifyNit,
   onApprove,
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
