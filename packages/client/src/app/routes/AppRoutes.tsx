@@ -34,7 +34,7 @@ export default function AppRoutes() {
       >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route
-          path="/dashboard/tags"
+          path="/tags"
           element={
             <ProtectedRoute>
               <TagsListPage />
@@ -48,7 +48,7 @@ export default function AppRoutes() {
         <Route path="tender-workflow" element={<TenderWorkflowPage />} />
 
         {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/tender-workflow" />} />
       </Route>
 
       {/* 404 Not Found - Must be last */}

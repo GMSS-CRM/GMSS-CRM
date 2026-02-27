@@ -32,7 +32,7 @@ export default function LoginPage() {
       setLoading(true);
       await loginWithEmailPassword(values.email, values.password);
       message.success("Login successful!");
-      navigate("/dashboard", { replace: true });
+      navigate("/tender-workflow", { replace: true });
     } catch (err: any) {
       message.error(err.message || "Login failed");
     } finally {
@@ -68,7 +68,7 @@ export default function LoginPage() {
     return <Loader />;
   }
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to="/tender-workflow" replace />;
 
   return (
     <div className={styles.loginContainer}>

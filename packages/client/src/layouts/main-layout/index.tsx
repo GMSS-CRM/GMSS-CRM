@@ -35,7 +35,7 @@ const menuItems: MenuProps["items"] = [
     label: "Tenders",
   },
   {
-    key: "dashboard/tags",
+    key: "tags",
     icon: <TagsOutlined style={{ fontSize: 22 }} />,
     label: "Tags",
   },
@@ -59,8 +59,8 @@ export default function MainLayout() {
   // Get the current route to highlight the correct menu item
   // Highlight correct menu item for nested routes
   let selectedKey = location.pathname.replace(/^\//, "");
-  if (selectedKey.startsWith("dashboard/tags")) selectedKey = "dashboard/tags";
-  else selectedKey = selectedKey.split("/")[0] || "dashboard";
+  if (selectedKey.startsWith("tags")) selectedKey = "/tags";
+  else selectedKey = selectedKey.split("/")[0] || "tender-workflow";
 
   const handleLogout = () => {
     showConfirmModal({
@@ -92,8 +92,8 @@ export default function MainLayout() {
 
   const handleMenuClick = (key: string) => {
     // For nested dashboard routes
-    if (key === "dashboard/tags") {
-      navigate("/dashboard/tags");
+    if (key === "tags") {
+      navigate("/tags");
     } else {
       navigate(`/${key}`);
     }
@@ -123,7 +123,7 @@ export default function MainLayout() {
 
           {/* Sidebar Footer */}
           <div className={styles.sidebarFooter}>
-            © 2025 GMSS CRM
+            © {new Date().getFullYear()} GMSS CRM
           </div>
         </div>
       </Sider>
