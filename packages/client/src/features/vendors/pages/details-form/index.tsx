@@ -125,19 +125,20 @@ export default function VendorDetailsForm() {
         };
       });
 
-      const tagIds = vendor.tagIds ?? (vendor.tags?.map((t: any) => t.tagId ?? t.id) ?? []);
+      const v = vendor as any;
+      const tagIds = v.tagIds ?? (v.tags?.map((t: any) => t.tagId ?? t.id) ?? []);
 
       form.setFieldsValue({
-        companyName: vendor.companyName ?? vendor.name,
-        isLinkedWithRailways: vendor.isLinkedWithRailways ?? vendor.isRailwayLinked ?? false,
-        companyType: vendor.companyType ?? vendor.type,
+        companyName: vendor.companyName ?? v.name,
+        isLinkedWithRailways: vendor.isLinkedWithRailways ?? v.isRailwayLinked ?? false,
+        companyType: vendor.companyType ?? v.type,
         status: vendor.status,
         address: vendor.address,
         contactPersons: normalizedContactPersons,
         gstNumber: vendor.gstNumber,
-        panNumber: vendor.panNumber ?? vendor.pan,
-        msmeNumber: vendor.msmeNumber ?? vendor.msmeUdyamNumber,
-        cinNumber: vendor.cinNumber ?? vendor.cin,
+        panNumber: vendor.panNumber ?? v.pan,
+        msmeNumber: vendor.msmeNumber ?? v.msmeUdyamNumber,
+        cinNumber: vendor.cinNumber ?? v.cin,
         tags: tagIds,
       });
     }

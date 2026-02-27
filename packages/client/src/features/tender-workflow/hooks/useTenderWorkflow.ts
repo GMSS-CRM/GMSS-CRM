@@ -133,7 +133,6 @@ export interface UseTenderWorkflowReturn {
   mdConfirm: (tenderId: string, tagIds: string[]) => Promise<void>;
   mdReject: (tenderId: string, reason: string) => void;
   mdApprove: (tenderId: string) => void;
-  mdApprove: (tenderId: string) => void;
   verifyNit: (tenderId: string) => void;
 
   // Document operations

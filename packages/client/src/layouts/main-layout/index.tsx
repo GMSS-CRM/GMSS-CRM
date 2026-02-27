@@ -8,7 +8,6 @@ import {
 } from "antd";
 import {
   LogoutOutlined,
-  DashboardOutlined,
   SafetyOutlined,
   ShopOutlined,
   FileTextOutlined,

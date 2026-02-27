@@ -16,6 +16,7 @@ import s from "../styles/tender-workflow.module.css";
 
 const ICONS: Record<TenderStatus, React.ReactNode> = {
   DRAFT: <EditOutlined />,
+  READY_FOR_NIT: <EditOutlined />,
   PENDING_MD_TAGGING: <ClockCircleOutlined />,
   MD_TAGGED: <CheckCircleOutlined />,
   REJECTED: <CloseCircleOutlined />,
