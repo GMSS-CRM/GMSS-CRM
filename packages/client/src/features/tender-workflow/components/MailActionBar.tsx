@@ -17,8 +17,6 @@ export const MailActionBar: React.FC<Props> = ({ tenders, onSendMail, onSendMail
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const ready = tenders.filter((t) => t.status === "READY_TO_MAIL");
-  if (!ready.length) return null;
-
   const totalVendors = ready.reduce((sum, t) => sum + t.tags.length * 15, 0);
 
   const openConfirm = () => {
@@ -35,6 +33,8 @@ export const MailActionBar: React.FC<Props> = ({ tenders, onSendMail, onSendMail
 
   const toggle = (id: string, checked: boolean) =>
     setSelectedIds((p) => (checked ? [...p, id] : p.filter((x) => x !== id)));
+
+  if (!ready.length) return null;
 
   return (
     <>

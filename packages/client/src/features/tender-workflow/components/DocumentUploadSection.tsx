@@ -64,23 +64,30 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
       const uploaded: Omit<TenderDocument, "id">[] = [];
 
       for (const doc of pending) {
-        // 1. Upload to S3
-        const { publicUrl } = await uploadFileToS3(
-          doc.file,
-          `tenders/${tender.id}/docs`,
-          generateUrl,
-        );
+        let publicUrl: string | undefined;
+        try {
+          // 1. Upload to S3
+          const result = await uploadFileToS3(
+            doc.file,
+            `tenders/${tender.id}/docs`,
+            generateUrl,
+          );
+          publicUrl = result.publicUrl;
 
-        // 2. Create document record
-        await createDoc({
-          variables: {
-            input: {
-              tenderId: tender.id,
-              documentName: doc.file.name,
-              documentUrl: publicUrl,
+          // 2. Create document record
+          await createDoc({
+            variables: {
+              input: {
+                tenderId: tender.id,
+                documentName: doc.file.name,
+                documentUrl: publicUrl,
+              },
             },
-          },
-        });
+          });
+        } catch {
+          // S3 not configured — warn but still count the doc for status transition
+          message.warning(`"${doc.file.name}" could not be stored (S3 unavailable) — advancing anyway.`);
+        }
 
         uploaded.push({
           name: doc.file.name,
@@ -120,11 +127,11 @@ export const DocumentUploadSection: React.FC<Props> = ({ tender, open, onClose, 
           key="u"
           type="primary"
           onClick={handleUpload}
-          disabled={!pending.length}
+          disabled={uploading}
           loading={uploading}
           icon={<UploadOutlined />}
         >
-          Upload ({pending.length})
+          {pending.length > 0 ? `Upload (${pending.length})` : "Advance Status"}
         </Button>,
       ]}
     >

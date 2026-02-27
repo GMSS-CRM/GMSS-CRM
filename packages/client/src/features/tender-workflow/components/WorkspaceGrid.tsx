@@ -31,7 +31,7 @@ interface Props {
   onUploadDocs: (tender: Tender) => void;
   onMarkReady: (id: string) => void;
   onSendMail: (id: string) => void;
-  onVerifyNit: (id: string) => void;
+  onVerifyNit?: (id: string) => void;
   onApprove?: (id: string) => void;
 }
 
@@ -52,8 +52,7 @@ const EMPTY_HINTS: Record<string, string> = {
   completed: "Mailed tenders appear here.",
   pendingApproval: "Tenders sent by users awaiting MD approval.",
   pendingTagging: "NIT uploaded tenders awaiting MD tagging.",
-  nitVerification: "NIT documents pending verification.",
-  mdCompleted: "Processed tenders.",
+  completed: "Mailed tenders appear here.",
 };
 
 export const WorkspaceGrid: React.FC<Props> = ({
@@ -127,19 +126,13 @@ export const WorkspaceGrid: React.FC<Props> = ({
           if (t.status === "NIT_UPLOADED")
             return (
               <Button size="small" type="link" icon={<EyeOutlined />} onClick={() => onView(t)}>
-                Tag
-              </Button>
-            );
-          if (t.status === "NIT_VERIFIED")
-            return (
-              <Button size="small" type="link" icon={<CheckCircleOutlined />} onClick={() => onVerifyNit(t.id)}>
-                Verify
+                Tag & Verify
               </Button>
             );
       }
       return null;
     },
-    [role, onSendToMd, onResubmit, onUploadNit, onUploadDocs, onMarkReady, onSendMail, onView, onVerifyNit, onApprove]
+    [role, onSendToMd, onResubmit, onUploadNit, onUploadDocs, onMarkReady, onSendMail, onView, onApprove]
   );
 
   const moreItems = useCallback(
@@ -147,7 +140,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
       const items: MenuProps["items"] = [
         { key: "view", icon: <EyeOutlined />, label: "View", onClick: () => onView(t) },
       ];
-      if (role === "USER" && t.status === "DRAFT") {
+      if (role === "USER") {
         items.push({
           key: "del",
           icon: <DeleteOutlined />,

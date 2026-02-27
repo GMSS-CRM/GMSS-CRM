@@ -204,7 +204,7 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     (action: string, tender: import("../types/tender.types").Tender): boolean => {
       switch (action) {
         case "delete":
-          return tender.status === "DRAFT" && role === "USER";
+          return role === "USER";
         case "sendToMd":
           return tender.status === "DRAFT" && role === "USER";
         case "resubmit":
@@ -339,29 +339,30 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
   const deleteTender = useCallback(
     (id: string) => {
-      void deleteTenderMut({ variables: { id } }).catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : "Delete failed";
-        message.error(msg);
-      });
+      void deleteTenderMut({ variables: { id } })
+        .then(() => refetch())
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : "Delete failed";
+          message.error(msg);
+        });
     },
-    [deleteTenderMut],
+    [deleteTenderMut, refetch],
   );
 
   const sendToMd = useCallback(
-    (ids: string[]) => {
-      const promises = ids.map((id) =>
-        changeStatus(id, "PENDING_MD_TAGGING"),
-      );
-      void Promise.all(promises);
+    async (ids: string[]) => {
+      await Promise.all(ids.map((id) => changeStatus(id, "PENDING_MD_TAGGING")));
+      void refetch();
     },
-    [changeStatus],
+    [changeStatus, refetch],
   );
 
   const resubmitRejected = useCallback(
-    (id: string) => {
-      void changeStatus(id, "PENDING_MD_TAGGING");
+    async (id: string) => {
+      await changeStatus(id, "PENDING_MD_TAGGING");
+      void refetch();
     },
-    [changeStatus],
+    [changeStatus, refetch],
   );
 
   // ─── MD operations ─────────────────────────────────────────────────────────
@@ -376,11 +377,14 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
   const mdConfirm = useCallback(
     async (tenderId: string, tagIds: string[]): Promise<void> => {
-      await changeStatus(tenderId, "MD_TAGGED", { tagIds });
+      // When reviewing NIT (NIT_UPLOADED), verify + tag in one step
+      const targetStatus: TenderStatus =
+        ui.activeDrawerTender?.status === "NIT_UPLOADED" ? "NIT_VERIFIED" : "MD_TAGGED";
+      await changeStatus(tenderId, targetStatus, { tagIds });
       closeTaggingDrawer();
       void refetch();
     },
-    [changeStatus, closeTaggingDrawer, refetch],
+    [changeStatus, closeTaggingDrawer, refetch, ui.activeDrawerTender],
   );
 
   const mdApprove = useCallback(
@@ -393,10 +397,15 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
   const mdReject = useCallback(
     (tenderId: string, reason: string) => {
-      void changeStatus(tenderId, "REJECTED", { rejectionReason: reason });
+      // From NIT_UPLOADED, REJECTED is not valid — send back to PENDING_MD_TAGGING instead
+      if (ui.activeDrawerTender?.status === "NIT_UPLOADED") {
+        void changeStatus(tenderId, "PENDING_MD_TAGGING");
+      } else {
+        void changeStatus(tenderId, "REJECTED", { rejectionReason: reason });
+      }
       closeTaggingDrawer();
     },
-    [changeStatus, closeTaggingDrawer],
+    [changeStatus, closeTaggingDrawer, ui.activeDrawerTender],
   );
 
   const verifyNit = useCallback(
@@ -418,8 +427,8 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
   const uploadDocuments = useCallback(
     (tenderId: string, _documents: Omit<TenderDocument, "id">[]) => {
-      // TODO: S3 upload integration (Step 6) — for now just transition status
-      void changeStatus(tenderId, "DOCS_UPLOADED");
+      // Skip DOCS_UPLOADED intermediate step — go straight to READY_TO_MAIL
+      void changeStatus(tenderId, "READY_TO_MAIL");
     },
     [changeStatus],
   );
@@ -427,25 +436,27 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
   // ─── Mail operations ───────────────────────────────────────────────────────
 
   const markReadyToMail = useCallback(
-    (tenderId: string) => {
-      void changeStatus(tenderId, "READY_TO_MAIL");
+    async (tenderId: string) => {
+      await changeStatus(tenderId, "READY_TO_MAIL");
+      void refetch();
     },
-    [changeStatus],
+    [changeStatus, refetch],
   );
 
   const sendMail = useCallback(
-    (tenderId: string) => {
-      void changeStatus(tenderId, "MAIL_SENT");
+    async (tenderId: string) => {
+      await changeStatus(tenderId, "MAIL_SENT");
+      void refetch();
     },
-    [changeStatus],
+    [changeStatus, refetch],
   );
 
   const sendMailBulk = useCallback(
-    (ids: string[]) => {
-      const promises = ids.map((id) => changeStatus(id, "MAIL_SENT"));
-      void Promise.all(promises);
+    async (ids: string[]) => {
+      await Promise.all(ids.map((id) => changeStatus(id, "MAIL_SENT")));
+      void refetch();
     },
-    [changeStatus],
+    [changeStatus, refetch],
   );
 
   // ─── Data accessors ────────────────────────────────────────────────────────

@@ -71,9 +71,11 @@ export const MdTaggingDrawer: React.FC<Props> = ({
     value: t.id,
   }));
 
+  const isNitReview = tender.status === "NIT_UPLOADED";
+
   return (
     <Drawer
-      title="Review Tender"
+      title={isNitReview ? "Verify NIT & Tag" : "Review Tender"}
       placement="right"
       width={520}
       open={open}
@@ -108,7 +110,7 @@ export const MdTaggingDrawer: React.FC<Props> = ({
             <Space>
               <Button onClick={onClose}>Cancel</Button>
               <Button danger icon={<CloseCircleOutlined />} onClick={() => setRejecting(true)}>
-                Reject
+                {isNitReview ? "Send Back" : "Reject"}
               </Button>
               <Button
                 type="primary"
@@ -117,7 +119,7 @@ export const MdTaggingDrawer: React.FC<Props> = ({
                 loading={loading}
                 disabled={!tags.length}
               >
-                Confirm & Tag
+                {isNitReview ? "Verify & Tag" : "Confirm & Tag"}
               </Button>
             </Space>
           )}

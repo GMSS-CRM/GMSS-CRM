@@ -21,7 +21,7 @@ export const VALID_TENDER_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   [TenderStatus.REJECTED]: [TenderStatus.DRAFT, TenderStatus.PENDING_MD_TAGGING],
   // Allow NIT upload to transition back to MD for tagging.
   [TenderStatus.NIT_UPLOADED]: [TenderStatus.PENDING_MD_TAGGING, TenderStatus.NIT_VERIFIED],
-  [TenderStatus.NIT_VERIFIED]: [TenderStatus.DOCS_UPLOADED],
+  [TenderStatus.NIT_VERIFIED]: [TenderStatus.DOCS_UPLOADED, TenderStatus.READY_TO_MAIL],
   [TenderStatus.DOCS_UPLOADED]: [TenderStatus.READY_TO_MAIL],
   [TenderStatus.READY_TO_MAIL]: [TenderStatus.MAIL_SENT],
   [TenderStatus.MAIL_SENT]: [],

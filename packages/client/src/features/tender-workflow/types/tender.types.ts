@@ -89,7 +89,7 @@ export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   MD_TAGGED: ["NIT_UPLOADED"],
   REJECTED: ["DRAFT", "PENDING_MD_TAGGING"],
   NIT_UPLOADED: ["PENDING_MD_TAGGING", "NIT_VERIFIED"],
-  NIT_VERIFIED: ["DOCS_UPLOADED"],
+  NIT_VERIFIED: ["DOCS_UPLOADED", "READY_TO_MAIL"],
   DOCS_UPLOADED: ["READY_TO_MAIL"],
   READY_TO_MAIL: ["MAIL_SENT"],
   MAIL_SENT: [],
@@ -116,7 +116,7 @@ export const STATUS_COLORS: Record<TenderStatus, string> = {
 
 export const STATUS_LABELS: Record<TenderStatus, string> = {
   DRAFT: "Draft",
-  PENDING_MD_TAGGING: "Pending MD Tagging",
+  PENDING_MD_TAGGING: "Pending MD Approval",
   READY_FOR_NIT: "Ready for NIT Upload (MD Approved)",
   MD_TAGGED: "MD Tagged",
   REJECTED: "Rejected",
@@ -147,8 +147,7 @@ export const USER_TABS: TabConfig[] = [
 export const MD_TABS: TabConfig[] = [
   { key: "pendingApproval", label: "Pending Approval", statuses: ["PENDING_MD_TAGGING"] },
   { key: "pendingTagging", label: "Pending Tagging", statuses: ["NIT_UPLOADED"] },
-  { key: "nitVerification", label: "NIT Verification", statuses: ["NIT_VERIFIED"] },
-  { key: "mdCompleted", label: "Completed", statuses: ["MD_TAGGED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"] },
+  { key: "completed", label: "Completed", statuses: ["MAIL_SENT"] },
 ];
 
 // Document type options

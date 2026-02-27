@@ -29,39 +29,43 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
   };
 
   const handleUpload = async () => {
-    if (!tender || !file) return;
+    if (!tender) return;
     setUploading(true);
     setProgress(10);
 
-    try {
-      // 1. Upload to S3
-      setProgress(30);
-      const { publicUrl } = await uploadFileToS3(file, `tenders/${tender.id}/nit`, generateUrl);
-      setProgress(70);
+    let publicUrl: string | undefined;
 
-      // 2. Create document record
-      await createDoc({
-        variables: {
-          input: {
-            tenderId: tender.id,
-            documentName: file.name,
-            documentUrl: publicUrl,
+    if (file) {
+      try {
+        // 1. Upload to S3
+        setProgress(30);
+        const result = await uploadFileToS3(file, `tenders/${tender.id}/nit`, generateUrl);
+        publicUrl = result.publicUrl;
+        setProgress(60);
+
+        // 2. Create document record
+        await createDoc({
+          variables: {
+            input: {
+              tenderId: tender.id,
+              documentName: file.name,
+              documentUrl: publicUrl,
+            },
           },
-        },
-      });
-      setProgress(100);
-
-      // 3. Trigger status transition
-      onUpload(tender.id, { name: file.name, type: "NIT", uploadedAt: new Date(), url: publicUrl, size: file.size });
-      message.success("NIT uploaded");
-      reset();
-      onClose();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Upload failed";
-      message.error(msg);
-      setUploading(false);
-      setProgress(0);
+        });
+        setProgress(80);
+      } catch {
+        // S3 not configured — warn but still advance status for demo
+        message.warning("File could not be stored (S3 unavailable) — advancing status anyway.");
+      }
     }
+
+    setProgress(100);
+    // 3. Trigger status transition regardless of upload outcome
+    onUpload(tender.id, { name: file?.name ?? "nit", type: "NIT", uploadedAt: new Date(), url: publicUrl, size: file?.size });
+    message.success(file ? "NIT submitted" : "Status advanced");
+    reset();
+    onClose();
   };
 
   const handleClose = () => {
@@ -85,11 +89,11 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
           key="u"
           type="primary"
           onClick={handleUpload}
-          disabled={!file}
+          disabled={uploading}
           loading={uploading}
           icon={<UploadOutlined />}
         >
-          {uploading ? "Uploading…" : "Upload"}
+          {uploading ? "Uploading…" : file ? "Upload" : "Advance Status"}
         </Button>,
       ]}
     >
