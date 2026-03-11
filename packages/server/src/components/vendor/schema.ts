@@ -8,6 +8,7 @@ export const vendorTypeDefs = gql`
     type: String
     status: VendorStatus!
     isRailwayLinked: Boolean!
+    agreementWith: String
     gstNumber: String
     panNumber: String
     cinNumber: String
@@ -17,6 +18,7 @@ export const vendorTypeDefs = gql`
     tags: [VendorTag!]
     contactPersons: [VendorContactPerson!]
     documents: [VendorDocument!]
+    paymentTerms: [PaymentTerm!]
 
     workflows: [VendorWorkflow!]
     approvals: [VendorApproval!]
@@ -27,6 +29,8 @@ export const vendorTypeDefs = gql`
 
     createdDate: String!
     updatedDate: String!
+    createdBy: String
+    updatedBy: String
   }
 
   # ---------- Nested Contact Person ----------
@@ -71,6 +75,7 @@ export const vendorTypeDefs = gql`
     name: String!
     type: String
     isRailwayLinked: Boolean
+    agreementWith: String
     gstNumber: String
     panNumber: String
     cinNumber: String
@@ -86,6 +91,7 @@ export const vendorTypeDefs = gql`
     name: String
     type: String
     isRailwayLinked: Boolean
+    agreementWith: String
     gstNumber: String
     panNumber: String
     cinNumber: String
@@ -100,6 +106,7 @@ export const vendorTypeDefs = gql`
   extend type Query {
     getVendorById(id: ID!): Vendor
     searchVendors(search: String, status: VendorStatus): [Vendor!]!
+    getPaymentTermsByVendor(vendorId: ID!): [PaymentTerm!]!
   }
 
   extend type Mutation {

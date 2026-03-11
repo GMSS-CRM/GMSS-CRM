@@ -33,6 +33,7 @@ interface Props {
   onSendMail: (id: string) => void;
   onVerifyNit?: (id: string) => void;
   onApprove?: (id: string) => void;
+  onBulkApprove?: (ids: string[]) => void;
 }
 
 const fmtDate = (d?: Date | string) => {
@@ -44,13 +45,12 @@ const fmtDate = (d?: Date | string) => {
 };
 
 const EMPTY_HINTS: Record<string, string> = {
-  draft: "Upload an Excel file to get started.",
-  sentToMd: "Send drafts to MD for tagging.",
-  nitPending: "Tenders appear here after MD tagging.",
-  docsPending: "Upload documents for verified tenders.",
-  readyToMail: "Mark tenders ready to notify vendors.",
-  pendingApproval: "Tenders sent by users awaiting MD approval.",
-  pendingTagging: "NIT uploaded tenders awaiting MD tagging.",
+  rejected: "Rejected tenders will appear here.",
+  nitPending: "Tenders appear here after MD approves them for NIT upload.",
+  docsPending: "Tenders awaiting document upload appear here.",
+  readyToMail: "Tenders ready to notify vendors appear here.",
+  pendingApproval: "Tenders sent by users awaiting your approval.",
+  pendingTagging: "Uploaded NITs awaiting MD tagging and verification.",
   completed: "Mailed tenders appear here.",
 };
 
@@ -67,6 +67,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
   onMarkReady,
   onSendMail,
   onApprove,
+  onBulkApprove,
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
 
@@ -75,7 +76,13 @@ export const WorkspaceGrid: React.FC<Props> = ({
       if (role === "USER") {
         const actions: Partial<Record<TenderStatus, React.ReactNode>> = {
           DRAFT: (
-            <Button size="small" type="link" icon={<SendOutlined />} onClick={() => onSendToMd([t.id])}>
+            <Button
+              size="small"
+              type="link"
+              icon={<SendOutlined />}
+              onClick={() => onSendToMd([t.id])}
+              style={{ color: "#ffffff" }}
+            >
               Send
             </Button>
           ),
@@ -221,6 +228,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
       title: "Due Date/Time",
       dataIndex: "submissionDeadline",
       width: 120,
+      defaultSortOrder: "ascend",
       render: (d?: Date) => {
         if (!d) return <span className={s.noTags}>—</span>;
         const days = Math.ceil((new Date(d).getTime() - Date.now()) / 864e5);
@@ -238,6 +246,37 @@ export const WorkspaceGrid: React.FC<Props> = ({
       },
     },
     {
+      title: "NIT",
+      key: "nit",
+      width: 60,
+      render: (_: unknown, record: Tender) => {
+        const nitDoc = record.documents.find((d) => d.type === "NIT" || d.name?.toLowerCase().includes("nit"));
+        if (!nitDoc?.url) return <span className={s.noTags}>—</span>;
+        return (
+          <Tooltip title="View NIT Document">
+            <a href={nitDoc.url} target="_blank" rel="noopener noreferrer">
+              <FileTextOutlined style={{ color: "var(--primary-color, #1677ff)", fontSize: 14 }} />
+            </a>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: "Created By",
+      key: "createdBy",
+      width: 100,
+      ellipsis: true,
+      render: (_: unknown, record: Tender) => {
+        const email = (record as any).createdBy ?? "—";
+        const short = email.includes("@") ? email.split("@")[0] : email;
+        return (
+          <Tooltip title={email}>
+            <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{short}</span>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: "Updated",
       dataIndex: "updatedAt",
       width: 90,
@@ -245,7 +284,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
         <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>{fmtDate(d)}</span>
       ),
       sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
-      defaultSortOrder: "descend",
+      defaultSortOrder: "descend" as const,
     },
     {
       title: "",
@@ -263,7 +302,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
     },
   ];
 
-  const canSelect = role === "USER" && ["draft", "readyToMail"].includes(tabKey);
+  const canSelect = (role === "USER" && tabKey === "readyToMail") || (role === "MD" && tabKey === "pendingApproval");
 
   const handleBulk = useCallback(
     (action: string) => {
@@ -278,6 +317,11 @@ export const WorkspaceGrid: React.FC<Props> = ({
         setSelectedKeys([]);
         message.success("Mail sent");
       }
+      if (action === "bulkApprove" && onBulkApprove) {
+        onBulkApprove(selectedKeys as string[]);
+        setSelectedKeys([]);
+        message.success(`${selectedKeys.length} approved`);
+      }
     },
     [selectedKeys, onSendToMd, onSendMail]
   );
@@ -288,14 +332,14 @@ export const WorkspaceGrid: React.FC<Props> = ({
         <div className={s.bulkBar}>
           <span className={s.bulkInfo}>{selectedKeys.length} selected</span>
           <Space size={4}>
-            {tabKey === "draft" && (
-              <Button size="small" type="primary" icon={<SendOutlined />} onClick={() => handleBulk("sendToMd")}>
-                Send to MD
-              </Button>
-            )}
             {tabKey === "readyToMail" && (
               <Button size="small" type="primary" icon={<MailOutlined />} onClick={() => handleBulk("sendMail")} className={s.sendAllBtn}>
                 Send Mail
+              </Button>
+            )}
+            {tabKey === "pendingApproval" && role === "MD" && (
+              <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={() => handleBulk("bulkApprove")}>
+                Approve Selected
               </Button>
             )}
             <Button size="small" onClick={() => setSelectedKeys([])}>
@@ -313,7 +357,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
                   selectedRowKeys: selectedKeys,
                   onChange: setSelectedKeys,
                   getCheckboxProps: (r) => ({
-                    disabled: tabKey === "draft" ? r.status !== "DRAFT" : r.status !== "READY_TO_MAIL",
+                    disabled: tabKey === "readyToMail" ? r.status !== "READY_TO_MAIL" : r.status !== "PENDING_MD_TAGGING",
                   }),
                 }
               : undefined
@@ -322,10 +366,10 @@ export const WorkspaceGrid: React.FC<Props> = ({
           dataSource={tenders}
           rowKey="id"
           size="small"
-          scroll={{ x: 1060 }}
+          scroll={{ x: 1200 }}
           pagination={
-            tenders.length > 10
-              ? { pageSize: 10, size: "small", showTotal: (t, r) => `${r[0]}–${r[1]} of ${t}` }
+            tenders.length > 50
+              ? { pageSize: 50, size: "small", showTotal: (t, r) => `${r[0]}–${r[1]} of ${t}` }
               : false
           }
           locale={{

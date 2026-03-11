@@ -15,9 +15,12 @@ export interface IVendorFollowUpRepository
     id: string,
     data: Partial<VendorFollowUp>
   ): Promise<VendorFollowUp>;
+
+  deleteFollowUp(id: string): Promise<boolean>;
 }
 
 export interface IVendorFollowUpService {
   createFollowUp(input: any): Promise<VendorFollowUp>;
-  completeFollowUp(input: any): Promise<VendorFollowUp>;
+  updateFollowUp(input: any): Promise<VendorFollowUp>;
+  deleteFollowUp(id: string): Promise<boolean>;
 }

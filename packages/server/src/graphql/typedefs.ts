@@ -9,6 +9,7 @@ import { vendorTypeDefs } from "../components/vendor";
 import { vendorTagTypeDefs } from "../components/vendor-tag";
 import { vendorContactPersonTypeDefs } from "../components/vendor-contact-person";
 import { vendorDocumentTypeDefs } from "../components/vendor-document";
+import { paymentTermTypeDefs } from "../components/payment-term";
 import { tenderTypeDefs } from "../components/tender";
 import { tenderDocumentTypeDefs } from "../components/tender-document";
 import { vendorAgreementTypeDefs } from "../components/vendor-agreement";
@@ -40,6 +41,7 @@ export const mergedTypeDefs = [
   vendorTagTypeDefs,
   vendorContactPersonTypeDefs,
   vendorDocumentTypeDefs,
+  paymentTermTypeDefs,
   tenderTypeDefs,
   tenderDocumentTypeDefs,
   vendorAgreementTypeDefs,

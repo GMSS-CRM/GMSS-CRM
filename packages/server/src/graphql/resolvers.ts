@@ -6,6 +6,7 @@ import { vendorResolvers } from "../components/vendor";
 import { vendorTagResolvers } from "../components/vendor-tag";
 import { vendorContactPersonResolvers } from "../components/vendor-contact-person";
 import { vendorDocumentResolvers } from "../components/vendor-document";
+import { paymentTermResolvers } from "../components/payment-term";
 import { tenderResolvers } from "../components/tender";
 import { tenderDocumentResolvers } from "../components/tender-document";
 import { vendorAgreementResolvers } from "../components/vendor-agreement";
@@ -28,6 +29,7 @@ export const resolvers = [
   vendorTagResolvers,
   vendorContactPersonResolvers,
   vendorDocumentResolvers,
+  paymentTermResolvers,
   tenderResolvers,
   tenderDocumentResolvers,
   vendorAgreementResolvers,

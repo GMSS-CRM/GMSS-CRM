@@ -103,6 +103,9 @@ import {
 import { VendorMdRequestRepository } from '../components/vendor-md-request/repository';
 import { VendorMdRequestService } from '../components/vendor-md-request/service';
 
+import { PaymentTermRepository, IPaymentTermRepository } from '../components/payment-term/repository';
+import { PaymentTermService, IPaymentTermService } from '../components/payment-term/service';
+
 import { S3Service } from '../components/upload/service';
 import { IS3Service } from '../components/upload/types';
 
@@ -234,6 +237,14 @@ container
   container
     .bind<IVendorMdRequestService>(TYPES.IVendorMdRequestService)
     .to(VendorMdRequestService);
+
+  container
+    .bind<IPaymentTermRepository>(TYPES.IPaymentTermRepository)
+    .to(PaymentTermRepository);
+
+  container
+    .bind<IPaymentTermService>(TYPES.IPaymentTermService)
+    .to(PaymentTermService);
 
   container
     .bind<IS3Service>(TYPES.IS3Service)

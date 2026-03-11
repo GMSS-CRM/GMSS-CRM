@@ -1,4 +1,5 @@
 // packages/client/src/features/tags/pages/CreateTagModal.tsx
+import React from 'react';
 import { Modal, Form, Input } from 'antd';
 import { TagOutlined } from '@ant-design/icons';
 import styles from '../styles/tags.module.css';
@@ -8,6 +9,8 @@ interface CreateTagModalProps {
   onCancel: () => void;
   onSubmit: (values: { name: string }) => Promise<void>;
   loading?: boolean;
+  initialValue?: string;
+  isEdit?: boolean;
 }
 
 export default function CreateTagModal({
@@ -15,6 +18,8 @@ export default function CreateTagModal({
   onCancel,
   onSubmit,
   loading = false,
+  initialValue = '',
+  isEdit = false,
 }: CreateTagModalProps) {
   const [form] = Form.useForm();
 
@@ -33,18 +38,26 @@ export default function CreateTagModal({
     onCancel();
   };
 
+  React.useEffect(() => {
+    if (open && initialValue) {
+      form.setFieldsValue({ name: initialValue });
+    } else if (open) {
+      form.resetFields();
+    }
+  }, [open, initialValue, form]);
+
   return (
     <Modal
       title={
         <span className={styles.modalTitle}>
           <TagOutlined className={styles.modalIcon} />
-          Create New Tag
+          {isEdit ? 'Edit Tag' : 'Create New Tag'}
         </span>
       }
       open={open}
       onOk={handleOk}
       onCancel={handleCancel}
-      okText="Create Tag"
+      okText={isEdit ? 'Save Changes' : 'Create Tag'}
       confirmLoading={loading}
       destroyOnClose
     >

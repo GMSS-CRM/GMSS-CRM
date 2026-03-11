@@ -127,13 +127,49 @@ export default function VendorList({
       title: 'Created Date',
       dataIndex: 'createdDate',
       key: 'createdDate',
-      width: '16%',
+      width: '12%',
       render: (date: string) => <span className={styles.secondaryText}>{formatDate(date)}</span>,
+      sorter: (a: Vendor, b: Vendor) => {
+        const dateA = a.updatedDate ? new Date(a.updatedDate).getTime() : 0;
+        const dateB = b.updatedDate ? new Date(b.updatedDate).getTime() : 0;
+        return dateB - dateA;
+      },
+      defaultSortOrder: 'descend' as const,
+    },
+    {
+      title: 'Created By',
+      dataIndex: 'createdBy',
+      key: 'createdBy',
+      width: '12%',
+      render: (email?: string) => {
+        if (!email) return <span className={styles.secondaryText}>—</span>;
+        const display = email.includes('@') ? email.split('@')[0] : email;
+        return (
+          <Tooltip title={email}>
+            <span className={styles.secondaryText}>{display}</span>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: 'Updated By',
+      dataIndex: 'updatedBy',
+      key: 'updatedBy',
+      width: '12%',
+      render: (email?: string) => {
+        if (!email) return <span className={styles.secondaryText}>—</span>;
+        const display = email.includes('@') ? email.split('@')[0] : email;
+        return (
+          <Tooltip title={email}>
+            <span className={styles.secondaryText}>{display}</span>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Actions',
       key: 'actions',
-      width: '10%',
+      width: '8%',
       align: 'center' as const,
       render: (_: unknown, record: Vendor) => (
         <Space size="small">

@@ -84,11 +84,11 @@ export interface TenderWorkflowState {
 // Status transition map - defines valid transitions
 export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   DRAFT: ["PENDING_MD_TAGGING"],
-  PENDING_MD_TAGGING: ["READY_FOR_NIT", "MD_TAGGED", "REJECTED"],
+  PENDING_MD_TAGGING: ["READY_FOR_NIT", "REJECTED"],
   READY_FOR_NIT: ["NIT_UPLOADED", "REJECTED"],
   MD_TAGGED: ["NIT_UPLOADED"],
   REJECTED: ["DRAFT", "PENDING_MD_TAGGING"],
-  NIT_UPLOADED: ["PENDING_MD_TAGGING", "NIT_VERIFIED"],
+  NIT_UPLOADED: ["NIT_VERIFIED"],
   NIT_VERIFIED: ["DOCS_UPLOADED", "READY_TO_MAIL"],
   DOCS_UPLOADED: ["READY_TO_MAIL"],
   READY_TO_MAIL: ["MAIL_SENT"],
@@ -136,9 +136,7 @@ export interface TabConfig {
 }
 
 export const USER_TABS: TabConfig[] = [
-  { key: "draft", label: "Draft", statuses: ["DRAFT", "REJECTED"] },
-  { key: "sentToMd", label: "Sent to MD", statuses: ["PENDING_MD_TAGGING"] },
-  { key: "nitPending", label: "NIT Pending", statuses: ["READY_FOR_NIT", "MD_TAGGED", "NIT_UPLOADED"] },
+  { key: "nitPending", label: "NIT Pending", statuses: ["READY_FOR_NIT", "MD_TAGGED"] },
   { key: "docsPending", label: "Docs Pending", statuses: ["NIT_VERIFIED", "DOCS_UPLOADED"] },
   { key: "readyToMail", label: "Ready to Mail", statuses: ["READY_TO_MAIL"] },
   { key: "completed", label: "Completed", statuses: ["MAIL_SENT"] },

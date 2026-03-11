@@ -16,6 +16,7 @@ import { VendorTender } from './VendorTender';
 import { VendorContactPerson } from './VendorContactPerson';
 import { VendorDocument } from './VendorDocument';
 import { VendorTag } from './VendorTag';
+import { PaymentTerm } from './PaymentTerm';
 
 export enum CompanyType {
   NEW = 'NEW',
@@ -60,6 +61,9 @@ export class Vendor {
 
   @Column({ nullable: true })
   address?: string;
+
+  @Column({ nullable: true })
+  agreementWith?: string; // GMSS, Nisnik International, Nishhant Om Gupta, Pooja Gupta, Vandana Gupta, Gupta Engineering
 
   @Column({ default: 'SYSTEM' })
   createdBy!: string;
@@ -110,6 +114,9 @@ export class Vendor {
 
   @OneToMany(() => VendorDocument, doc => doc.vendor, { cascade: false })
   documents!: VendorDocument[];
+
+  @OneToMany(() => PaymentTerm, (paymentTerm) => paymentTerm.vendor)
+  paymentTerms!: PaymentTerm[];
 
   @OneToMany(() => VendorTag, (vt) => vt.vendor, { cascade: false })
   tags!: VendorTag[];

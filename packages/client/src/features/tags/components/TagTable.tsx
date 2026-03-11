@@ -6,6 +6,7 @@ import {
   DeleteOutlined, 
   TagOutlined,
   InboxOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
 import type { TagWithVendorCount } from '../types/tagTypes';
 import styles from '../styles/tags.module.css';
@@ -17,6 +18,7 @@ interface TagTableProps {
   selectedRowKeys: React.Key[];
   onSelectChange: (keys: React.Key[]) => void;
   onView: (tag: TagWithVendorCount) => void;
+  onEdit?: (tag: TagWithVendorCount) => void;
   onDelete: (tag: TagWithVendorCount) => void;
 }
 
@@ -26,6 +28,7 @@ export default function TagTable({
   selectedRowKeys,
   onSelectChange,
   onView,
+  onEdit,
   onDelete,
 }: TagTableProps) {
   // Parse assorted date values coming from the backend. The API may return
@@ -126,7 +129,8 @@ export default function TagTable({
       key: 'createdDate',
       width: 120,
       sorter: (a: TagWithVendorCount, b: TagWithVendorCount) =>
-        parseToDate(a.createdDate).getTime() - parseToDate(b.createdDate).getTime(),
+        parseToDate(b.updatedDate).getTime() - parseToDate(a.updatedDate).getTime(),
+      defaultSortOrder: 'descend' as const,
       render: (date: unknown) => {
         const d = parseToDate(date);
         if (isNaN(d.getTime())) {
@@ -140,6 +144,36 @@ export default function TagTable({
               year: 'numeric',
             })}
           </span>
+        );
+      },
+    },
+    {
+      title: 'Created By',
+      dataIndex: 'createdBy',
+      key: 'createdBy',
+      width: 120,
+      render: (email: string) => {
+        if (!email) return <span className={styles.dateText}>—</span>;
+        const display = email.includes('@') ? email.split('@')[0] : email;
+        return (
+          <Tooltip title={email}>
+            <span className={styles.dateText}>{display}</span>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: 'Updated By',
+      dataIndex: 'updatedBy',
+      key: 'updatedBy',
+      width: 120,
+      render: (email?: string) => {
+        if (!email) return <span className={styles.dateText}>—</span>;
+        const display = email.includes('@') ? email.split('@')[0] : email;
+        return (
+          <Tooltip title={email}>
+            <span className={styles.dateText}>{display}</span>
+          </Tooltip>
         );
       },
     },
@@ -159,6 +193,16 @@ export default function TagTable({
               disabled={record.tenderCount === 0}
             />
           </Tooltip>
+          {onEdit && (
+            <Tooltip title="Edit Tag">
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                className={styles.actionBtn}
+                onClick={() => onEdit(record)}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Delete Tag">
             <Button
               type="text"

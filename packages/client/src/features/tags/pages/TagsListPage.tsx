@@ -25,11 +25,12 @@ export default function TagsListPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<TagWithVendorCount | null>(null);
+  const [editingTag, setEditingTag] = useState<TagWithVendorCount | null>(null);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTag, setDrawerTag] = useState<TagWithVendorCount | null>(null);
 
-  const { createTag, deleteTag, deleteTags, loading: mutationLoading } = useTagMutations(() => {
+  const { createTag, updateTag, deleteTag, deleteTags, loading: mutationLoading } = useTagMutations(() => {
     refetch();
   });
 
@@ -41,6 +42,7 @@ export default function TagsListPage() {
 
   const handleView = (tag: TagWithVendorCount) => { setDrawerTag(tag); setDrawerOpen(true); };
   const handleDelete = (tag: TagWithVendorCount) => { setSelectedTag(tag); setDeleteModalOpen(true); };
+  const handleEdit = (tag: TagWithVendorCount) => { setEditingTag(tag); setCreateModalOpen(true); };
 
   const handleConfirmDelete = async () => {
     if (!selectedTag) return;
@@ -65,8 +67,16 @@ export default function TagsListPage() {
   };
 
   const handleCreateTag = async (values: { name: string }) => {
-    const success = await createTag(values);
-    if (success) setCreateModalOpen(false);
+    if (editingTag) {
+      const success = await updateTag(editingTag.id, { name: values.name });
+      if (success) {
+        setCreateModalOpen(false);
+        setEditingTag(null);
+      }
+    } else {
+      const success = await createTag(values);
+      if (success) setCreateModalOpen(false);
+    }
   };
 
   return (
@@ -132,15 +142,18 @@ export default function TagsListPage() {
           selectedRowKeys={selectedRowKeys}
           onSelectChange={setSelectedRowKeys}
           onView={handleView}
+          onEdit={handleEdit}
           onDelete={handleDelete}
         />
       </div>
 
       <CreateTagModal
         open={createModalOpen}
-        onCancel={() => setCreateModalOpen(false)}
+        onCancel={() => { setCreateModalOpen(false); setEditingTag(null); }}
         onSubmit={handleCreateTag}
         loading={mutationLoading}
+        initialValue={editingTag?.name}
+        isEdit={!!editingTag}
       />
 
       <DeleteTagModal

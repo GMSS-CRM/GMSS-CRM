@@ -5,22 +5,42 @@ export const vendorFollowUpTypeDefs = gql`
   id: ID!
   vendorId: ID!
   type: FollowUpType!
-  nextFollowUpDate: String!
+  followUpStatus: FollowUpStatus!
+  nextFollowUpDate: String
   remarks: String
+  documentUrl: String
+  documentName: String
+  courierTrackingNumber: String
+  courierProvider: String
+  courierDeliveryRemarks: String
+  autoMailSent: Boolean!
   isCompleted: Boolean!
-  reminderSent: Boolean!
   createdDate: String!
+  updatedDate: String!
+  createdBy: String!
 }
 
 input CreateFollowUpInput {
   vendorId: ID!
   type: FollowUpType!
-  nextFollowUpDate: String!
   remarks: String
+  nextFollowUpDate: String
+  courierTrackingNumber: String
+  courierProvider: String
+  courierDeliveryRemarks: String
 }
 
-input CompleteFollowUpInput {
+input UpdateFollowUpInput {
   followUpId: ID!
+  followUpStatus: FollowUpStatus
+  remarks: String
+  nextFollowUpDate: String
+  documentUrl: String
+  documentName: String
+  courierTrackingNumber: String
+  courierProvider: String
+  courierDeliveryRemarks: String
+  isCompleted: Boolean
 }
 
 extend type Query {
@@ -29,7 +49,8 @@ extend type Query {
 
 extend type Mutation {
   createVendorFollowUp(input: CreateFollowUpInput!): VendorFollowUp!
-  completeVendorFollowUp(input: CompleteFollowUpInput!): VendorFollowUp!
+  updateVendorFollowUp(input: UpdateFollowUpInput!): VendorFollowUp!
+  deleteVendorFollowUp(id: ID!): Boolean!
 }
 
 `;

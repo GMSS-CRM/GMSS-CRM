@@ -11,6 +11,9 @@ export const tenderTypeDefs = gql`
     submissionDeadline: String
     rejectionReason: String
     mailSentAt: String
+    isDeleted: Boolean
+    deletedBy: String
+    deletedDate: String
     createdBy: String!
     createdDate: String!
     updatedBy: String

@@ -27,7 +27,10 @@ export const vendorFollowUpResolvers = {
     createVendorFollowUp: (_: unknown, { input }: any) =>
       getService().createFollowUp(input),
 
-    completeVendorFollowUp: (_: unknown, { input }: any) =>
-      getService().completeFollowUp(input),
+    updateVendorFollowUp: (_: unknown, { input }: any) =>
+      getService().updateFollowUp(input),
+
+    deleteVendorFollowUp: (_: unknown, { id }: any) =>
+      getService().deleteFollowUp(id),
   },
 };

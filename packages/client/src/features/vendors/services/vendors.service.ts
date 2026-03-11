@@ -53,7 +53,9 @@ function mapGqlVendor(v: any): Vendor {
     tagNames: (v.tags ?? []).map((t: any) => t.tag?.name ?? ''),
     status: gqlStatusToFrontend(v.status),
     createdDate: v.createdDate ?? new Date().toISOString(),
+    createdBy: v.createdBy ?? undefined,
     updatedDate: v.updatedDate,
+    updatedBy: v.updatedBy ?? undefined,
     isDeleted: v.status === 'DELETED',
     contactPersons: (v.contactPersons ?? []).map(mapGqlContactPerson),
   };
@@ -68,6 +70,8 @@ function mapGqlDocument(d: any): VendorDocument {
     status: 'Pending',
     uploadedDate: d.createdDate,
     uploadedBy: d.createdBy,
+    expiryDate: d.expiresOn ?? undefined,
+    expired: d.expiresOn ? new Date(d.expiresOn) < new Date() : false,
   };
 }
 
@@ -112,6 +116,8 @@ const VENDOR_FIELDS = gql`
     address
     createdDate
     updatedDate
+    createdBy
+    updatedBy
     tags {
       id
       tagId
@@ -274,6 +280,12 @@ export const UPLOAD_VENDOR_DOCUMENT = gql`
     uploadVendorDocument(input: $input) {
       ...VendorDocumentFields
     }
+  }
+`;
+
+const DELETE_VENDOR_DOCUMENT = gql`
+  mutation DeleteVendorDocument($id: ID!) {
+    deleteVendorDocument(id: $id)
   }
 `;
 
@@ -446,7 +458,7 @@ export const useUpdateVendor = () => {
           panNumber: values.panNumber,
           msmeUdyamNumber: values.msmeNumber,
           cinNumber: values.cinNumber,
-          tagIds: values.tagIds ?? [],
+          tagIds: values.tagIds ?? undefined,
           contactPersons: (values.contactPersons ?? [])
             .filter((cp) => cp.name)
             .map((cp) => ({
@@ -541,4 +553,272 @@ export const useUploadVendorDocument = () => {
   };
 
   return { uploadVendorDocument, loading };
+};
+
+export const useDeleteVendorDocument = () => {
+  const [mutate, { loading }] = useMutation<{ deleteVendorDocument: boolean }>(DELETE_VENDOR_DOCUMENT);
+
+  const deleteVendorDocument = async (id: string) => {
+    await mutate({ variables: { id } });
+  };
+
+  return { deleteVendorDocument, loading };
+};
+
+// ─── Follow Up GQL ────────────────────────────────────────────────────────────
+
+const FOLLOW_UP_FIELDS = gql`
+  fragment FollowUpFields on VendorFollowUp {
+    id
+    vendorId
+    type
+    followUpStatus
+    nextFollowUpDate
+    remarks
+    documentUrl
+    documentName
+    courierTrackingNumber
+    courierProvider
+    courierDeliveryRemarks
+    autoMailSent
+    isCompleted
+    createdDate
+    updatedDate
+    createdBy
+  }
+`;
+
+const GET_VENDOR_FOLLOW_UPS = gql`
+  ${FOLLOW_UP_FIELDS}
+  query GetVendorFollowUps($vendorId: ID!) {
+    getVendorFollowUps(vendorId: $vendorId) {
+      ...FollowUpFields
+    }
+  }
+`;
+
+const GET_SHARED_TENDERS = gql`
+  query GetSharedTenders($vendorId: ID!) {
+    getSharedTenders(vendorId: $vendorId) {
+      id
+      vendorId
+      tenderId
+      participationStatus
+      quotedAmount
+      sharedDate
+      createdDate
+      tender {
+        id
+        name
+        referenceNumber
+        description
+        status
+        submissionDeadline
+        issuingDepartment
+        mailSentAt
+        createdBy
+        createdDate
+        tags {
+          id
+          tenderId
+          tagId
+          tag {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+const CREATE_VENDOR_FOLLOW_UP = gql`
+  ${FOLLOW_UP_FIELDS}
+  mutation CreateVendorFollowUp($input: CreateFollowUpInput!) {
+    createVendorFollowUp(input: $input) {
+      ...FollowUpFields
+    }
+  }
+`;
+
+const UPDATE_VENDOR_FOLLOW_UP = gql`
+  ${FOLLOW_UP_FIELDS}
+  mutation UpdateVendorFollowUp($input: UpdateFollowUpInput!) {
+    updateVendorFollowUp(input: $input) {
+      ...FollowUpFields
+    }
+  }
+`;
+
+const DELETE_VENDOR_FOLLOW_UP = gql`
+  mutation DeleteVendorFollowUp($id: ID!) {
+    deleteVendorFollowUp(id: $id)
+  }
+`;
+
+// ─── Follow Up Types ──────────────────────────────────────────────────────────
+
+export type FollowUpType = 'EMAIL' | 'HARD_COPY_COURIER' | 'DIGITAL_SIGNATURE_COURIER';
+export type FollowUpStatus = 'PENDING' | 'YES_RECEIVED' | 'COURIER_DISPATCHED' | 'COMPLETED';
+
+export interface VendorFollowUp {
+  id: string;
+  vendorId: string;
+  type: FollowUpType;
+  followUpStatus: FollowUpStatus;
+  nextFollowUpDate?: string;
+  remarks?: string;
+  documentUrl?: string;
+  documentName?: string;
+  courierTrackingNumber?: string;
+  courierDeliveryRemarks?: string;
+  autoMailSent: boolean;
+  isCompleted: boolean;
+  createdDate: string;
+  updatedDate: string;
+  createdBy: string;
+}
+
+function mapGqlFollowUp(f: any): VendorFollowUp {
+  return {
+    id: f.id,
+    vendorId: f.vendorId,
+    type: f.type as FollowUpType,
+    followUpStatus: f.followUpStatus as FollowUpStatus,
+    nextFollowUpDate: f.nextFollowUpDate ?? undefined,
+    remarks: f.remarks ?? undefined,
+    documentUrl: f.documentUrl ?? undefined,
+    documentName: f.documentName ?? undefined,
+    courierTrackingNumber: f.courierTrackingNumber ?? undefined,
+    courierProvider: f.courierProvider ?? undefined,
+    courierDeliveryRemarks: f.courierDeliveryRemarks ?? undefined,
+    autoMailSent: f.autoMailSent ?? false,
+    isCompleted: f.isCompleted ?? false,
+    createdDate: f.createdDate,
+    updatedDate: f.updatedDate,
+    createdBy: f.createdBy,
+  };
+}
+
+// ─── Follow Up Hooks ──────────────────────────────────────────────────────────
+
+export const useGetVendorFollowUps = (vendorId: string | undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ getVendorFollowUps: any[] }>(
+    GET_VENDOR_FOLLOW_UPS,
+    { variables: { vendorId }, skip: !vendorId, fetchPolicy: 'cache-and-network' }
+  );
+
+  return {
+    followUps: (data?.getVendorFollowUps ?? []).map(mapGqlFollowUp) as VendorFollowUp[],
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useCreateVendorFollowUp = () => {
+  const [mutate, { loading }] = useMutation<{ createVendorFollowUp: any }>(
+    CREATE_VENDOR_FOLLOW_UP
+  );
+
+  const createFollowUp = async (input: {
+    vendorId: string;
+    type: FollowUpType;
+    remarks?: string;
+    nextFollowUpDate?: string;
+    courierTrackingNumber?: string;
+    courierProvider?: string;
+    courierDeliveryRemarks?: string;
+  }) => {
+    const result = await mutate({ variables: { input } });
+    return result.data?.createVendorFollowUp
+      ? mapGqlFollowUp(result.data.createVendorFollowUp)
+      : null;
+  };
+
+  return { createFollowUp, loading };
+};
+
+export const useUpdateVendorFollowUp = () => {
+  const [mutate, { loading }] = useMutation<{ updateVendorFollowUp: any }>(
+    UPDATE_VENDOR_FOLLOW_UP
+  );
+
+  const updateFollowUp = async (input: {
+    followUpId: string;
+    followUpStatus?: FollowUpStatus;
+    remarks?: string;
+    nextFollowUpDate?: string;
+    documentUrl?: string;
+    documentName?: string;
+    courierTrackingNumber?: string;
+    courierDeliveryRemarks?: string;
+    isCompleted?: boolean;
+  }) => {
+    const result = await mutate({ variables: { input } });
+    return result.data?.updateVendorFollowUp
+      ? mapGqlFollowUp(result.data.updateVendorFollowUp)
+      : null;
+  };
+
+  return { updateFollowUp, loading };
+};
+
+export const useDeleteVendorFollowUp = () => {
+  const [mutate, { loading }] = useMutation<{ deleteVendorFollowUp: boolean }>(
+    DELETE_VENDOR_FOLLOW_UP
+  );
+
+  const deleteFollowUp = async (id: string) => {
+    await mutate({ variables: { id } });
+  };
+
+  return { deleteFollowUp, loading };
+};
+
+// ─── Shared Tenders Hook ──────────────────────────────────────────────────────
+
+export interface SharedTender {
+  id: string;
+  vendorId: string;
+  tenderId: string;
+  participationStatus: string;
+  quotedAmount?: number;
+  sharedDate?: string;
+  createdDate: string;
+  tender?: {
+    id: string;
+    name: string;
+    referenceNumber: string;
+    description?: string;
+    status: string;
+    submissionDeadline?: string;
+    issuingDepartment?: string;
+    mailSentAt?: string;
+    createdBy: string;
+    createdDate: string;
+    tags?: Array<{
+      id: string;
+      tenderId: string;
+      tagId: string;
+      tag?: {
+        id: string;
+        name: string;
+      };
+    }>;
+  };
+}
+
+export const useGetSharedTenders = (vendorId: string | undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ getSharedTenders: SharedTender[] }>(
+    GET_SHARED_TENDERS,
+    { variables: { vendorId }, skip: !vendorId, fetchPolicy: 'cache-and-network' }
+  );
+
+  return {
+    sharedTenders: (data?.getSharedTenders ?? []) as SharedTender[],
+    loading,
+    error,
+    refetch,
+  };
 };

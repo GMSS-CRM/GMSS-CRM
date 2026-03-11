@@ -50,8 +50,11 @@ export class TenderRepository extends Repository<Tender> implements ITenderRepos
   search(params: { search?: string; status?: string; limit?: number; offset?: number }) {
     const query = this.createQueryBuilder('tender');
 
+    // Exclude soft-deleted tenders
+    query.where('tender.isDeleted = :isDeleted', { isDeleted: false });
+
     if (params.search) {
-      query.where('tender.name ILIKE :search', { search: `%${params.search}%` });
+      query.andWhere('tender.name ILIKE :search', { search: `%${params.search}%` });
     }
 
     if (params.status) {

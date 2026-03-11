@@ -55,6 +55,15 @@ export class Tender {
   @UpdateDateColumn()
   updatedDate!: Date;
 
+  @Column({ default: false })
+  isDeleted!: boolean;
+
+  @Column({ nullable: true })
+  deletedBy?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedDate?: Date;
+
   @OneToMany('TenderDocument', 'tender', { cascade: true })
   documents!: TenderDocument[];
 

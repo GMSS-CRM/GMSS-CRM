@@ -42,6 +42,7 @@ export const TenderWorkflowPage: React.FC = () => {
     markReadyToMail,
     sendMail,
     sendMailBulk,
+    mdBulkApprove,
     getTendersByTab,
     getTabCounts,
     getCurrentTabs,
@@ -53,14 +54,14 @@ export const TenderWorkflowPage: React.FC = () => {
   const counts = getTabCounts();
   const tabs = getCurrentTabs();
   const hasPreview = state.previewData.length > 0;
-  const isDraft = role === "USER" && activeTab === "draft";
+  const isUserRole = role === "USER";
   const isMailTab = role === "USER" && activeTab === "readyToMail";
 
   const switchRole = useCallback(
     (target: "USER" | "MD") => {
       if (role === target) return;
       setRole(target);
-      setActiveTab(target === "USER" ? "draft" : "pendingApproval");
+      setActiveTab(target === "USER" ? "nitPending" : "pendingApproval");
       message.info(`Switched to ${target === "MD" ? "MD" : "User"} view`);
     },
     [role, setRole, setActiveTab]
@@ -114,9 +115,8 @@ export const TenderWorkflowPage: React.FC = () => {
           markReadyToMail(id);
           message.success("Marked ready");
         }}
-        onSendMail={(id) => {
+          onSendMail={(id) => {
           sendMail(id);
-          message.success("Mail sent");
         }}
           onVerifyNit={(id) => {
             verifyNit(id);
@@ -125,6 +125,9 @@ export const TenderWorkflowPage: React.FC = () => {
           onApprove={(id) => {
             mdApprove(id);
             message.success("Approved for NIT upload");
+          }}
+          onBulkApprove={(ids) => {
+            mdBulkApprove(ids);
           }}
       />
     ),
@@ -157,9 +160,9 @@ export const TenderWorkflowPage: React.FC = () => {
       </header>
 
       <div className={s.body}>
-        {(isDraft || isMailTab) && (
+        {(isUserRole || isMailTab) && (
           <div className={s.topBar}>
-            {isDraft && (
+            {isUserRole && (
               <>
                 <ExcelUploadSection
                   onDataParsed={parseExcelData}

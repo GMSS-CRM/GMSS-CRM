@@ -9,6 +9,8 @@ export interface IVendorTenderRepository
 
   findByVendor(vendorId: string): Promise<VendorTender[]>;
 
+  findByVendorWithTender(vendorId: string): Promise<VendorTender[]>;
+
   findByTender(tenderId: string): Promise<VendorTender[]>;
 
   findById(id: string): Promise<VendorTender | null>;

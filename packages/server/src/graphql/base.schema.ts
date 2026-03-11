@@ -59,11 +59,16 @@ export const baseTypeDefs = gql`
   }
 
   enum FollowUpType {
-    PROPOSAL
-    AGREEMENT
-    DOCUMENT
-    RENEWAL
-    PAYMENT
+    EMAIL
+    HARD_COPY_COURIER
+    DIGITAL_SIGNATURE_COURIER
+  }
+
+  enum FollowUpStatus {
+    PENDING
+    YES_RECEIVED
+    COURIER_DISPATCHED
+    COMPLETED
   }
 
   enum PaymentFrequency {

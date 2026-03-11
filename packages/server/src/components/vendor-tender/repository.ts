@@ -22,6 +22,13 @@ export class VendorTenderRepository
     return this.find({ where: { vendorId } });
   }
 
+  findByVendorWithTender(vendorId: string) {
+    return this.find({
+      where: { vendorId },
+      relations: ['tender'],
+    });
+  }
+
   findByTender(tenderId: string) {
     return this.find({ where: { tenderId } });
   }

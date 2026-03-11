@@ -6,6 +6,7 @@ export * from "./Vendor";
 export * from "./VendorTag";
 export * from "./VendorContactPerson";
 export * from "./VendorDocument";
+export * from "./PaymentTerm";
 export * from "./Tender";
 export * from "./TenderDocument";
 export * from "./TenderTag";

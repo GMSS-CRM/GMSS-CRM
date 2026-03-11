@@ -21,7 +21,7 @@ export class VendorFollowUpRepository
   findByVendorId(vendorId: string) {
     return this.find({
       where: { vendorId },
-      order: { nextFollowUpDate: 'ASC' },
+      order: { createdDate: 'DESC' },
     });
   }
 
@@ -42,5 +42,10 @@ export class VendorFollowUpRepository
     }
 
     return updated;
+  }
+
+  async deleteFollowUp(id: string): Promise<boolean> {
+    const result = await this.delete(id);
+    return (result.affected ?? 0) > 0;
   }
 }

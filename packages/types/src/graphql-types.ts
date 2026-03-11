@@ -70,10 +70,6 @@ export const CompanyType = {
 } as const;
 
 export type CompanyType = typeof CompanyType[keyof typeof CompanyType];
-export type CompleteFollowUpInput = {
-  followUpId: Scalars['ID']['input'];
-};
-
 export type CreateAgreementInput = {
   agreementEndDate: Scalars['String']['input'];
   agreementStartDate: Scalars['String']['input'];
@@ -93,7 +89,10 @@ export type CreateApprovalInput = {
 };
 
 export type CreateFollowUpInput = {
-  nextFollowUpDate: Scalars['String']['input'];
+  courierDeliveryRemarks?: InputMaybe<Scalars['String']['input']>;
+  courierProvider?: InputMaybe<Scalars['String']['input']>;
+  courierTrackingNumber?: InputMaybe<Scalars['String']['input']>;
+  nextFollowUpDate?: InputMaybe<Scalars['String']['input']>;
   remarks?: InputMaybe<Scalars['String']['input']>;
   type: FollowUpType;
   vendorId: Scalars['ID']['input'];
@@ -102,6 +101,17 @@ export type CreateFollowUpInput = {
 export type CreateMdRequestInput = {
   empId?: InputMaybe<Scalars['String']['input']>;
   empRemark?: InputMaybe<Scalars['String']['input']>;
+  vendorId: Scalars['ID']['input'];
+};
+
+export type CreatePaymentTermInput = {
+  agreementDate?: InputMaybe<Scalars['String']['input']>;
+  benefitDetails?: InputMaybe<Scalars['String']['input']>;
+  commissionStructure?: InputMaybe<Scalars['String']['input']>;
+  companyType: Scalars['String']['input'];
+  fillAmount?: InputMaybe<Scalars['String']['input']>;
+  otherBenefits?: InputMaybe<Scalars['Boolean']['input']>;
+  paymentTermType: Scalars['String']['input'];
   vendorId: Scalars['ID']['input'];
 };
 
@@ -174,6 +184,7 @@ export type CreateVendorDocumentInput = {
 
 export type CreateVendorInput = {
   address?: InputMaybe<Scalars['String']['input']>;
+  agreementWith?: InputMaybe<Scalars['String']['input']>;
   cinNumber?: InputMaybe<Scalars['String']['input']>;
   contactPersons?: InputMaybe<Array<CreateVendorContactPersonInput>>;
   documents?: InputMaybe<Array<CreateVendorDocumentInput>>;
@@ -198,12 +209,18 @@ export type DecideApprovalInput = {
   status: ApprovalStatus;
 };
 
+export const FollowUpStatus = {
+  COMPLETED: 'COMPLETED',
+  COURIER_DISPATCHED: 'COURIER_DISPATCHED',
+  PENDING: 'PENDING',
+  YES_RECEIVED: 'YES_RECEIVED'
+} as const;
+
+export type FollowUpStatus = typeof FollowUpStatus[keyof typeof FollowUpStatus];
 export const FollowUpType = {
-  AGREEMENT: 'AGREEMENT',
-  DOCUMENT: 'DOCUMENT',
-  PAYMENT: 'PAYMENT',
-  PROPOSAL: 'PROPOSAL',
-  RENEWAL: 'RENEWAL'
+  DIGITAL_SIGNATURE_COURIER: 'DIGITAL_SIGNATURE_COURIER',
+  EMAIL: 'EMAIL',
+  HARD_COPY_COURIER: 'HARD_COPY_COURIER'
 } as const;
 
 export type FollowUpType = typeof FollowUpType[keyof typeof FollowUpType];
@@ -218,8 +235,8 @@ export type Mutation = {
   assignPermissions: RolePermissionResult;
   changeTenderStatus: Tender;
   changeVendorStatus: Vendor;
-  completeVendorFollowUp: VendorFollowUp;
   createMdRequest: VendorMdRequest;
+  createPaymentTerm: PaymentTerm;
   createRole: Role;
   createTag: Tag;
   createTender: Tender;
@@ -233,6 +250,7 @@ export type Mutation = {
   createVendorProposal: VendorProposal;
   createVendorTag: VendorTag;
   decideVendorApproval: Vendor;
+  deletePaymentTerm: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteTag: Scalars['Boolean']['output'];
   deleteTags: Scalars['Boolean']['output'];
@@ -247,6 +265,7 @@ export type Mutation = {
   deleteVendorContactPersons: Scalars['Boolean']['output'];
   deleteVendorDocument: Scalars['Boolean']['output'];
   deleteVendorDocuments: Scalars['Boolean']['output'];
+  deleteVendorFollowUp: Scalars['Boolean']['output'];
   deleteVendorTag: Scalars['Boolean']['output'];
   deleteVendors: Scalars['Boolean']['output'];
   generatePresignedUploadUrl: UploadUrlResult;
@@ -254,6 +273,7 @@ export type Mutation = {
   requestVendorApproval: VendorApproval;
   resolveMdRequest: VendorMdRequest;
   updateAgreementSignature: VendorAgreement;
+  updatePaymentTerm: PaymentTerm;
   updateRole: Role;
   updateTag: Tag;
   updateTender: Tender;
@@ -263,6 +283,7 @@ export type Mutation = {
   updateVendor: Vendor;
   updateVendorContactPerson: VendorContactPerson;
   updateVendorDocument: VendorDocument;
+  updateVendorFollowUp: VendorFollowUp;
   updateVendorProposalStatus: VendorProposal;
   updateVendorTagEmail: VendorTag;
   uploadVendorDocument: VendorDocument;
@@ -284,13 +305,13 @@ export type MutationChangeVendorStatusArgs = {
 };
 
 
-export type MutationCompleteVendorFollowUpArgs = {
-  input: CompleteFollowUpInput;
+export type MutationCreateMdRequestArgs = {
+  input: CreateMdRequestInput;
 };
 
 
-export type MutationCreateMdRequestArgs = {
-  input: CreateMdRequestInput;
+export type MutationCreatePaymentTermArgs = {
+  input: CreatePaymentTermInput;
 };
 
 
@@ -356,6 +377,11 @@ export type MutationCreateVendorTagArgs = {
 
 export type MutationDecideVendorApprovalArgs = {
   input: DecideApprovalInput;
+};
+
+
+export type MutationDeletePaymentTermArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -429,6 +455,11 @@ export type MutationDeleteVendorDocumentsArgs = {
 };
 
 
+export type MutationDeleteVendorFollowUpArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteVendorTagArgs = {
   id: Scalars['ID']['input'];
 };
@@ -461,6 +492,11 @@ export type MutationResolveMdRequestArgs = {
 
 export type MutationUpdateAgreementSignatureArgs = {
   input: UpdateSignatureInput;
+};
+
+
+export type MutationUpdatePaymentTermArgs = {
+  input: UpdatePaymentTermInput;
 };
 
 
@@ -516,6 +552,11 @@ export type MutationUpdateVendorDocumentArgs = {
 };
 
 
+export type MutationUpdateVendorFollowUpArgs = {
+  input: UpdateFollowUpInput;
+};
+
+
 export type MutationUpdateVendorProposalStatusArgs = {
   input: UpdateProposalStatusInput;
 };
@@ -560,6 +601,22 @@ export type PaymentScheduleResponse = {
   totalInstallments: Scalars['Int']['output'];
 };
 
+export type PaymentTerm = {
+  __typename?: 'PaymentTerm';
+  agreementDate?: Maybe<Scalars['String']['output']>;
+  benefitDetails?: Maybe<Scalars['String']['output']>;
+  commissionStructure?: Maybe<Scalars['String']['output']>;
+  companyType: Scalars['String']['output'];
+  createdBy?: Maybe<Scalars['String']['output']>;
+  createdDate: Scalars['String']['output'];
+  fillAmount?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  otherBenefits: Scalars['Boolean']['output'];
+  paymentTermType: Scalars['String']['output'];
+  vendorId: Scalars['ID']['output'];
+};
+
 export const Permission = {
   CREATE_ROLE: 'CREATE_ROLE',
   CREATE_USER: 'CREATE_USER',
@@ -589,10 +646,12 @@ export type Query = {
   generateVendorPaymentSchedule: PaymentScheduleResponse;
   getActivePendingRequest?: Maybe<VendorMdRequest>;
   getMdRequestsByVendor: Array<VendorMdRequest>;
+  getPaymentTermsByVendor: Array<PaymentTerm>;
   getPendingMdRequests: Array<VendorMdRequest>;
   getPermissionsByRoleId: Array<Permission>;
   getResolvedMdRequests: Array<VendorMdRequest>;
   getRoleById?: Maybe<Role>;
+  getSharedTenders: Array<VendorTender>;
   getTagById?: Maybe<Tag>;
   getTenderById?: Maybe<Tender>;
   getTenderDocumentById?: Maybe<TenderDocument>;
@@ -644,6 +703,11 @@ export type QueryGetMdRequestsByVendorArgs = {
 };
 
 
+export type QueryGetPaymentTermsByVendorArgs = {
+  vendorId: Scalars['ID']['input'];
+};
+
+
 export type QueryGetPermissionsByRoleIdArgs = {
   roleId: Scalars['ID']['input'];
 };
@@ -651,6 +715,11 @@ export type QueryGetPermissionsByRoleIdArgs = {
 
 export type QueryGetRoleByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetSharedTendersArgs = {
+  vendorId: Scalars['ID']['input'];
 };
 
 
@@ -862,9 +931,12 @@ export type Tender = {
   __typename?: 'Tender';
   createdBy: Scalars['String']['output'];
   createdDate: Scalars['String']['output'];
+  deletedBy?: Maybe<Scalars['String']['output']>;
+  deletedDate?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   documents?: Maybe<Array<TenderDocument>>;
   id: Scalars['ID']['output'];
+  isDeleted?: Maybe<Scalars['Boolean']['output']>;
   issuingDepartment?: Maybe<Scalars['String']['output']>;
   mailSentAt?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
@@ -915,6 +987,30 @@ export type TenderTag = {
   tag?: Maybe<Tag>;
   tagId: Scalars['ID']['output'];
   tenderId: Scalars['ID']['output'];
+};
+
+export type UpdateFollowUpInput = {
+  courierDeliveryRemarks?: InputMaybe<Scalars['String']['input']>;
+  courierProvider?: InputMaybe<Scalars['String']['input']>;
+  courierTrackingNumber?: InputMaybe<Scalars['String']['input']>;
+  documentName?: InputMaybe<Scalars['String']['input']>;
+  documentUrl?: InputMaybe<Scalars['String']['input']>;
+  followUpId: Scalars['ID']['input'];
+  followUpStatus?: InputMaybe<FollowUpStatus>;
+  isCompleted?: InputMaybe<Scalars['Boolean']['input']>;
+  nextFollowUpDate?: InputMaybe<Scalars['String']['input']>;
+  remarks?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdatePaymentTermInput = {
+  agreementDate?: InputMaybe<Scalars['String']['input']>;
+  benefitDetails?: InputMaybe<Scalars['String']['input']>;
+  commissionStructure?: InputMaybe<Scalars['String']['input']>;
+  fillAmount?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  otherBenefits?: InputMaybe<Scalars['Boolean']['input']>;
+  paymentTermType?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateProposalStatusInput = {
@@ -999,6 +1095,7 @@ export type UpdateVendorDocumentStandaloneInput = {
 
 export type UpdateVendorInput = {
   address?: InputMaybe<Scalars['String']['input']>;
+  agreementWith?: InputMaybe<Scalars['String']['input']>;
   cinNumber?: InputMaybe<Scalars['String']['input']>;
   contactPersons?: InputMaybe<Array<UpdateVendorContactPersonInput>>;
   documents?: InputMaybe<Array<UpdateVendorDocumentInput>>;
@@ -1042,10 +1139,12 @@ export type User = {
 export type Vendor = {
   __typename?: 'Vendor';
   address?: Maybe<Scalars['String']['output']>;
+  agreementWith?: Maybe<Scalars['String']['output']>;
   agreements?: Maybe<Array<VendorAgreement>>;
   approvals?: Maybe<Array<VendorApproval>>;
   cinNumber?: Maybe<Scalars['String']['output']>;
   contactPersons?: Maybe<Array<VendorContactPerson>>;
+  createdBy?: Maybe<Scalars['String']['output']>;
   createdDate: Scalars['String']['output'];
   documents?: Maybe<Array<VendorDocument>>;
   followUps?: Maybe<Array<VendorFollowUp>>;
@@ -1055,11 +1154,13 @@ export type Vendor = {
   msmeUdyamNumber?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   panNumber?: Maybe<Scalars['String']['output']>;
+  paymentTerms?: Maybe<Array<PaymentTerm>>;
   proposals?: Maybe<Array<VendorProposal>>;
   status: VendorStatus;
   tags?: Maybe<Array<VendorTag>>;
   tenders?: Maybe<Array<VendorTender>>;
   type?: Maybe<Scalars['String']['output']>;
+  updatedBy?: Maybe<Scalars['String']['output']>;
   updatedDate: Scalars['String']['output'];
   workflows?: Maybe<Array<VendorWorkflow>>;
 };
@@ -1127,13 +1228,21 @@ export type VendorDocument = {
 
 export type VendorFollowUp = {
   __typename?: 'VendorFollowUp';
+  autoMailSent: Scalars['Boolean']['output'];
+  courierDeliveryRemarks?: Maybe<Scalars['String']['output']>;
+  courierProvider?: Maybe<Scalars['String']['output']>;
+  courierTrackingNumber?: Maybe<Scalars['String']['output']>;
+  createdBy: Scalars['String']['output'];
   createdDate: Scalars['String']['output'];
+  documentName?: Maybe<Scalars['String']['output']>;
+  documentUrl?: Maybe<Scalars['String']['output']>;
+  followUpStatus: FollowUpStatus;
   id: Scalars['ID']['output'];
   isCompleted: Scalars['Boolean']['output'];
-  nextFollowUpDate: Scalars['String']['output'];
+  nextFollowUpDate?: Maybe<Scalars['String']['output']>;
   remarks?: Maybe<Scalars['String']['output']>;
-  reminderSent: Scalars['Boolean']['output'];
   type: FollowUpType;
+  updatedDate: Scalars['String']['output'];
   vendorId: Scalars['ID']['output'];
 };
 
@@ -1190,6 +1299,8 @@ export type VendorTender = {
   id: Scalars['ID']['output'];
   participationStatus: TenderParticipationStatus;
   quotedAmount?: Maybe<Scalars['Float']['output']>;
+  sharedDate?: Maybe<Scalars['String']['output']>;
+  tender?: Maybe<Tender>;
   tenderId: Scalars['ID']['output'];
   vendorId: Scalars['ID']['output'];
 };
@@ -1295,12 +1406,12 @@ export type ResolversTypes = {
   CommissionStructure: CommissionStructure;
   CommissionType: CommissionType;
   CompanyType: CompanyType;
-  CompleteFollowUpInput: CompleteFollowUpInput;
   CreateAgreementInput: CreateAgreementInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CreateApprovalInput: CreateApprovalInput;
   CreateFollowUpInput: CreateFollowUpInput;
   CreateMdRequestInput: CreateMdRequestInput;
+  CreatePaymentTermInput: CreatePaymentTermInput;
   CreateProposalInput: CreateProposalInput;
   CreateRoleInput: CreateRoleInput;
   CreateTagInput: CreateTagInput;
@@ -1314,6 +1425,7 @@ export type ResolversTypes = {
   CreateVendorInput: CreateVendorInput;
   CreateVendorTagInput: CreateVendorTagInput;
   DecideApprovalInput: DecideApprovalInput;
+  FollowUpStatus: FollowUpStatus;
   FollowUpType: FollowUpType;
   GenerateUploadUrlInput: GenerateUploadUrlInput;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
@@ -1322,6 +1434,7 @@ export type ResolversTypes = {
   PaymentScheduleItem: ResolverTypeWrapper<PaymentScheduleItem>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   PaymentScheduleResponse: ResolverTypeWrapper<PaymentScheduleResponse>;
+  PaymentTerm: ResolverTypeWrapper<PaymentTerm>;
   Permission: Permission;
   ProposalStatus: ProposalStatus;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
@@ -1342,6 +1455,8 @@ export type ResolversTypes = {
   TenderParticipationStatus: TenderParticipationStatus;
   TenderStatus: TenderStatus;
   TenderTag: ResolverTypeWrapper<TenderTag>;
+  UpdateFollowUpInput: UpdateFollowUpInput;
+  UpdatePaymentTermInput: UpdatePaymentTermInput;
   UpdateProposalStatusInput: UpdateProposalStatusInput;
   UpdateRoleInput: UpdateRoleInput;
   UpdateSignatureInput: UpdateSignatureInput;
@@ -1382,12 +1497,12 @@ export type ResolversParentTypes = {
   ChangeVendorStatusInput: ChangeVendorStatusInput;
   CommissionBreakdown: CommissionBreakdown;
   Float: Scalars['Float']['output'];
-  CompleteFollowUpInput: CompleteFollowUpInput;
   CreateAgreementInput: CreateAgreementInput;
   Boolean: Scalars['Boolean']['output'];
   CreateApprovalInput: CreateApprovalInput;
   CreateFollowUpInput: CreateFollowUpInput;
   CreateMdRequestInput: CreateMdRequestInput;
+  CreatePaymentTermInput: CreatePaymentTermInput;
   CreateProposalInput: CreateProposalInput;
   CreateRoleInput: CreateRoleInput;
   CreateTagInput: CreateTagInput;
@@ -1407,6 +1522,7 @@ export type ResolversParentTypes = {
   PaymentScheduleItem: PaymentScheduleItem;
   Int: Scalars['Int']['output'];
   PaymentScheduleResponse: PaymentScheduleResponse;
+  PaymentTerm: PaymentTerm;
   Query: Record<PropertyKey, never>;
   ResolveMdRequestInput: ResolveMdRequestInput;
   Role: Role;
@@ -1422,6 +1538,8 @@ export type ResolversParentTypes = {
   Tender: Tender;
   TenderDocument: TenderDocument;
   TenderTag: TenderTag;
+  UpdateFollowUpInput: UpdateFollowUpInput;
+  UpdatePaymentTermInput: UpdatePaymentTermInput;
   UpdateProposalStatusInput: UpdateProposalStatusInput;
   UpdateRoleInput: UpdateRoleInput;
   UpdateSignatureInput: UpdateSignatureInput;
@@ -1467,8 +1585,8 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   assignPermissions?: Resolver<ResolversTypes['RolePermissionResult'], ParentType, ContextType, RequireFields<MutationAssignPermissionsArgs, 'input'>>;
   changeTenderStatus?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationChangeTenderStatusArgs, 'input'>>;
   changeVendorStatus?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationChangeVendorStatusArgs, 'input'>>;
-  completeVendorFollowUp?: Resolver<ResolversTypes['VendorFollowUp'], ParentType, ContextType, RequireFields<MutationCompleteVendorFollowUpArgs, 'input'>>;
   createMdRequest?: Resolver<ResolversTypes['VendorMdRequest'], ParentType, ContextType, RequireFields<MutationCreateMdRequestArgs, 'input'>>;
+  createPaymentTerm?: Resolver<ResolversTypes['PaymentTerm'], ParentType, ContextType, RequireFields<MutationCreatePaymentTermArgs, 'input'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'input'>>;
   createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'input'>>;
   createTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationCreateTenderArgs, 'input'>>;
@@ -1482,6 +1600,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createVendorProposal?: Resolver<ResolversTypes['VendorProposal'], ParentType, ContextType, RequireFields<MutationCreateVendorProposalArgs, 'input'>>;
   createVendorTag?: Resolver<ResolversTypes['VendorTag'], ParentType, ContextType, RequireFields<MutationCreateVendorTagArgs, 'input'>>;
   decideVendorApproval?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationDecideVendorApprovalArgs, 'input'>>;
+  deletePaymentTerm?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeletePaymentTermArgs, 'id'>>;
   deleteRole?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteRoleArgs, 'id'>>;
   deleteTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagArgs, 'id'>>;
   deleteTags?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagsArgs, 'ids'>>;
@@ -1496,6 +1615,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteVendorContactPersons?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorContactPersonsArgs, 'ids'>>;
   deleteVendorDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorDocumentArgs, 'id'>>;
   deleteVendorDocuments?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorDocumentsArgs, 'ids'>>;
+  deleteVendorFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorFollowUpArgs, 'id'>>;
   deleteVendorTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorTagArgs, 'id'>>;
   deleteVendors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorsArgs, 'ids'>>;
   generatePresignedUploadUrl?: Resolver<ResolversTypes['UploadUrlResult'], ParentType, ContextType, RequireFields<MutationGeneratePresignedUploadUrlArgs, 'input'>>;
@@ -1503,6 +1623,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   requestVendorApproval?: Resolver<ResolversTypes['VendorApproval'], ParentType, ContextType, RequireFields<MutationRequestVendorApprovalArgs, 'input'>>;
   resolveMdRequest?: Resolver<ResolversTypes['VendorMdRequest'], ParentType, ContextType, RequireFields<MutationResolveMdRequestArgs, 'input'>>;
   updateAgreementSignature?: Resolver<ResolversTypes['VendorAgreement'], ParentType, ContextType, RequireFields<MutationUpdateAgreementSignatureArgs, 'input'>>;
+  updatePaymentTerm?: Resolver<ResolversTypes['PaymentTerm'], ParentType, ContextType, RequireFields<MutationUpdatePaymentTermArgs, 'input'>>;
   updateRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationUpdateRoleArgs, 'input'>>;
   updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id' | 'input'>>;
   updateTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationUpdateTenderArgs, 'id' | 'input'>>;
@@ -1512,6 +1633,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationUpdateVendorArgs, 'id' | 'input'>>;
   updateVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationUpdateVendorContactPersonArgs, 'id' | 'input'>>;
   updateVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationUpdateVendorDocumentArgs, 'id' | 'input'>>;
+  updateVendorFollowUp?: Resolver<ResolversTypes['VendorFollowUp'], ParentType, ContextType, RequireFields<MutationUpdateVendorFollowUpArgs, 'input'>>;
   updateVendorProposalStatus?: Resolver<ResolversTypes['VendorProposal'], ParentType, ContextType, RequireFields<MutationUpdateVendorProposalStatusArgs, 'input'>>;
   updateVendorTagEmail?: Resolver<ResolversTypes['VendorTag'], ParentType, ContextType, RequireFields<MutationUpdateVendorTagEmailArgs, 'enableMail' | 'id'>>;
   uploadVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationUploadVendorDocumentArgs, 'input'>>;
@@ -1531,15 +1653,32 @@ export type PaymentScheduleResponseResolvers<ContextType = any, ParentType exten
   totalInstallments?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
+export type PaymentTermResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentTerm'] = ResolversParentTypes['PaymentTerm']> = {
+  agreementDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  benefitDetails?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  commissionStructure?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  companyType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  fillAmount?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  otherBenefits?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  paymentTermType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   calculateVendorCommission?: Resolver<ResolversTypes['CommissionBreakdown'], ParentType, ContextType, RequireFields<QueryCalculateVendorCommissionArgs, 'baseAmount' | 'commissionType' | 'commissionValue' | 'gstApplicable'>>;
   generateVendorPaymentSchedule?: Resolver<ResolversTypes['PaymentScheduleResponse'], ParentType, ContextType, RequireFields<QueryGenerateVendorPaymentScheduleArgs, 'frequency' | 'gstApplicable' | 'startDate' | 'totalAmount'>>;
   getActivePendingRequest?: Resolver<Maybe<ResolversTypes['VendorMdRequest']>, ParentType, ContextType, RequireFields<QueryGetActivePendingRequestArgs, 'vendorId'>>;
   getMdRequestsByVendor?: Resolver<Array<ResolversTypes['VendorMdRequest']>, ParentType, ContextType, RequireFields<QueryGetMdRequestsByVendorArgs, 'vendorId'>>;
+  getPaymentTermsByVendor?: Resolver<Array<ResolversTypes['PaymentTerm']>, ParentType, ContextType, RequireFields<QueryGetPaymentTermsByVendorArgs, 'vendorId'>>;
   getPendingMdRequests?: Resolver<Array<ResolversTypes['VendorMdRequest']>, ParentType, ContextType>;
   getPermissionsByRoleId?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType, RequireFields<QueryGetPermissionsByRoleIdArgs, 'roleId'>>;
   getResolvedMdRequests?: Resolver<Array<ResolversTypes['VendorMdRequest']>, ParentType, ContextType>;
   getRoleById?: Resolver<Maybe<ResolversTypes['Role']>, ParentType, ContextType, RequireFields<QueryGetRoleByIdArgs, 'id'>>;
+  getSharedTenders?: Resolver<Array<ResolversTypes['VendorTender']>, ParentType, ContextType, RequireFields<QueryGetSharedTendersArgs, 'vendorId'>>;
   getTagById?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType, RequireFields<QueryGetTagByIdArgs, 'id'>>;
   getTenderById?: Resolver<Maybe<ResolversTypes['Tender']>, ParentType, ContextType, RequireFields<QueryGetTenderByIdArgs, 'id'>>;
   getTenderDocumentById?: Resolver<Maybe<ResolversTypes['TenderDocument']>, ParentType, ContextType, RequireFields<QueryGetTenderDocumentByIdArgs, 'id'>>;
@@ -1603,9 +1742,12 @@ export type TagResolvers<ContextType = any, ParentType extends ResolversParentTy
 export type TenderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tender'] = ResolversParentTypes['Tender']> = {
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  deletedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  deletedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   documents?: Resolver<Maybe<Array<ResolversTypes['TenderDocument']>>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isDeleted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuingDepartment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   mailSentAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -1656,10 +1798,12 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 
 export type VendorResolvers<ContextType = any, ParentType extends ResolversParentTypes['Vendor'] = ResolversParentTypes['Vendor']> = {
   address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  agreementWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   agreements?: Resolver<Maybe<Array<ResolversTypes['VendorAgreement']>>, ParentType, ContextType>;
   approvals?: Resolver<Maybe<Array<ResolversTypes['VendorApproval']>>, ParentType, ContextType>;
   cinNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   contactPersons?: Resolver<Maybe<Array<ResolversTypes['VendorContactPerson']>>, ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   documents?: Resolver<Maybe<Array<ResolversTypes['VendorDocument']>>, ParentType, ContextType>;
   followUps?: Resolver<Maybe<Array<ResolversTypes['VendorFollowUp']>>, ParentType, ContextType>;
@@ -1669,11 +1813,13 @@ export type VendorResolvers<ContextType = any, ParentType extends ResolversParen
   msmeUdyamNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   panNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  paymentTerms?: Resolver<Maybe<Array<ResolversTypes['PaymentTerm']>>, ParentType, ContextType>;
   proposals?: Resolver<Maybe<Array<ResolversTypes['VendorProposal']>>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['VendorStatus'], ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['VendorTag']>>, ParentType, ContextType>;
   tenders?: Resolver<Maybe<Array<ResolversTypes['VendorTender']>>, ParentType, ContextType>;
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   workflows?: Resolver<Maybe<Array<ResolversTypes['VendorWorkflow']>>, ParentType, ContextType>;
 };
@@ -1736,13 +1882,21 @@ export type VendorDocumentResolvers<ContextType = any, ParentType extends Resolv
 };
 
 export type VendorFollowUpResolvers<ContextType = any, ParentType extends ResolversParentTypes['VendorFollowUp'] = ResolversParentTypes['VendorFollowUp']> = {
+  autoMailSent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  courierDeliveryRemarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierProvider?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierTrackingNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  documentUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  followUpStatus?: Resolver<ResolversTypes['FollowUpStatus'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isCompleted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  nextFollowUpDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  nextFollowUpDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   remarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  reminderSent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['FollowUpType'], ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
 
@@ -1784,6 +1938,8 @@ export type VendorTenderResolvers<ContextType = any, ParentType extends Resolver
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   participationStatus?: Resolver<ResolversTypes['TenderParticipationStatus'], ParentType, ContextType>;
   quotedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  sharedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  tender?: Resolver<Maybe<ResolversTypes['Tender']>, ParentType, ContextType>;
   tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
 };
@@ -1804,6 +1960,7 @@ export type Resolvers<ContextType = any> = {
   Mutation?: MutationResolvers<ContextType>;
   PaymentScheduleItem?: PaymentScheduleItemResolvers<ContextType>;
   PaymentScheduleResponse?: PaymentScheduleResponseResolvers<ContextType>;
+  PaymentTerm?: PaymentTermResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Role?: RoleResolvers<ContextType>;
   RolePermissionResult?: RolePermissionResultResolvers<ContextType>;

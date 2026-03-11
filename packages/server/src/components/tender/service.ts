@@ -115,12 +115,12 @@ export class TenderService implements ITenderService {
       updateData.mailSentAt = new Date();
     }
 
-    // When MD tags the tender, sync TenderTag records inside a transaction
-    if (nextStatus === TenderStatus.MD_TAGGED && Array.isArray(input.tagIds) && input.tagIds.length > 0) {
+    // Sync TenderTag records whenever tagIds are provided (MD tagging or NIT verify with tags)
+    if (Array.isArray(input.tagIds) && input.tagIds.length > 0) {
       return this.db.transaction(async (manager) => {
         await manager.update('tender', input.tenderId, updateData);
 
-        // Replace all existing tag associations
+        // Replace all existing tag associations (one tender = one tag)
         await manager.delete(TenderTag, { tenderId: input.tenderId });
         const newTags = input.tagIds.map((tagId: string) =>
           manager.create(TenderTag, { tenderId: input.tenderId, tagId }),
@@ -139,14 +139,30 @@ export class TenderService implements ITenderService {
     if (!tender) {
       throw new Error(ErrorInfo.TENDER_NOT_FOUND);
     }
-    return this.tenderRepository.deleteTender(id);
+    // Soft delete
+    return this.tenderRepository.updateTender(id, {
+      isDeleted: true,
+      deletedBy: getCurrentEmail(),
+      deletedDate: new Date(),
+    } as any).then(() => true);
   }
 
   async deleteTenders(ids: string[]) {
     if (!ids || ids.length === 0) {
       throw new Error(ErrorInfo.NO_TENDERS_TO_DELETE);
     }
-    return this.tenderRepository.deleteTenders(ids);
+    // Soft delete all
+    const email = getCurrentEmail();
+    await Promise.all(
+      ids.map((id) =>
+        this.tenderRepository.updateTender(id, {
+          isDeleted: true,
+          deletedBy: email,
+          deletedDate: new Date(),
+        } as any)
+      )
+    );
+    return true;
   }
 
   async createTendersBatch(inputs: any[]): Promise<import('./types').CreateTendersBatchResult> {

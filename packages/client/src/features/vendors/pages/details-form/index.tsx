@@ -17,6 +17,7 @@ import {
   DatePicker,
 } from 'antd';
 import {
+  BellOutlined,
   ArrowLeftOutlined,
   SendOutlined,
   CheckCircleOutlined,
@@ -24,6 +25,9 @@ import {
   FileTextOutlined,
   UploadOutlined,
   ClockCircleOutlined,
+  DeleteOutlined,
+  ShopOutlined,
+  CreditCardOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRef } from 'react';
@@ -41,6 +45,9 @@ import FormActionsBar from '../../../../components/form-actions';
 import SubMenu from '../../../../components/sub-menu';
 import type { SubMenuItemConfig } from '../../../../components/sub-menu';
 import RemarkModal from '../../components/RemarkModal';
+import FollowUpsSection from '../../components/FollowUpsSection';
+import SharedTendersSection from '../../components/SharedTendersSection';
+import PaymentTermsSection from '../../components/PaymentTermsSection';
 import {
   useGetVendorById,
   useSearchVendorDocuments,
@@ -51,6 +58,7 @@ import {
   useCreateMdRequest,
   useResolveMdRequest,
   useUploadVendorDocument,
+  useDeleteVendorDocument,
 } from '../../services/vendors.service';
 import { useSearchTags } from '../../../tags/services/tags.service';
 import { useCreateTag } from '../../../tags/services/tags.service';
@@ -59,11 +67,14 @@ import styles from './styles.module.css';
 
 const { TextArea } = Input;
 
-type VendorSubMenuItem = 'basic' | 'documents';
+type VendorSubMenuItem = 'basic' | 'documents' | 'followups' | 'shared-tenders' | 'payment-terms';
 
 const VENDOR_MENU_ITEMS: SubMenuItemConfig[] = [
   { key: 'basic', icon: <InfoCircleOutlined />, label: 'Basic Info' },
   { key: 'documents', icon: <FileTextOutlined />, label: 'Documents' },
+  { key: 'followups', icon: <BellOutlined />, label: 'Follow Ups' },
+  { key: 'shared-tenders', icon: <ShopOutlined />, label: 'Shared Tenders' },
+  { key: 'payment-terms', icon: <CreditCardOutlined />, label: 'Payment Terms' },
 ];
 
 export default function VendorDetailsForm() {
@@ -276,6 +287,21 @@ export default function VendorDetailsForm() {
     [pendingRequest, resolveMdRequest, navigate, role]
   );
 
+  const { deleteVendorDocument } = useDeleteVendorDocument();
+
+  const handleDeleteDocument = useCallback(
+    async (docId: string) => {
+      try {
+        await deleteVendorDocument(docId);
+        message.success('Document deleted');
+        refetchDocs();
+      } catch (error: any) {
+        message.error(error?.message ?? 'Failed to delete document');
+      }
+    },
+    [deleteVendorDocument, refetchDocs]
+  );
+
   const documentColumns: ColumnsType<VendorDocument> = [
     {
       title: 'Document Type',
@@ -288,7 +314,7 @@ export default function VendorDetailsForm() {
       title: 'File',
       dataIndex: 'fileName',
       key: 'fileName',
-      width: '25%',
+      width: '20%',
       render: (fileName: string | undefined) =>
         fileName ? (
           <AntButton type="link" size="small" icon={<FileTextOutlined />} style={{ padding: 0 }}>
@@ -301,22 +327,43 @@ export default function VendorDetailsForm() {
         ),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      width: '15%',
-      render: (status: string) => {
-        const colorMap: Record<string, string> = { Verified: 'success', Pending: 'processing', Rejected: 'error' };
-        return <Tag color={colorMap[status] ?? 'default'}>{status}</Tag>;
+      title: 'Expiry Date',
+      dataIndex: 'expiryDate',
+      key: 'expiryDate',
+      width: '18%',
+      render: (date?: string, record?: VendorDocument) => {
+        if (!date) return <span style={{ color: '#bfbfbf' }}>—</span>;
+        const isExpired = record?.expired;
+        return (
+          <span style={{ color: isExpired ? '#ff4d4f' : '#595959', fontWeight: isExpired ? 600 : 400 }}>
+            {new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+            {isExpired && <Tag color="error" style={{ marginLeft: 6, fontSize: 11 }}>Expired</Tag>}
+          </span>
+        );
       },
     },
     {
       title: 'Remarks',
       dataIndex: 'remarks',
       key: 'remarks',
-      width: '35%',
+      width: '25%',
       render: (remarks?: string) => (
         <span style={{ color: remarks ? '#595959' : '#bfbfbf', fontSize: 13 }}>{remarks || '—'}</span>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: '12%',
+      align: 'center' as const,
+      render: (_: unknown, record: VendorDocument) => (
+        <AntButton
+          type="text"
+          danger
+          icon={<DeleteOutlined />}
+          size="small"
+          onClick={() => handleDeleteDocument(record.id)}
+        />
       ),
     },
   ];
@@ -357,29 +404,31 @@ export default function VendorDetailsForm() {
           </div>
         </Space>
 
-        {/* Workflow actions remain in header */}
-        <Space align="center">
-          {isEditMode && role === 'EMPLOYEE' && !pendingRequest && (
-            <Button
-              variant="primary"
-              icon={<SendOutlined />}
-              onClick={handleSendToMd}
-              loading={sendToMdLoading}
-            >
-              Send to MD
-            </Button>
-          )}
-          {isEditMode && role === 'MD' && isPendingView && pendingRequest && (
-            <Button
-              variant="primary"
-              icon={<CheckCircleOutlined />}
-              onClick={handleResolve}
-              loading={sendToMdLoading}
-            >
-              Resolve Request
-            </Button>
-          )}
-        </Space>
+        {/* Workflow actions remain in header - only show on basic info section */}
+        {selectedSubMenu === 'basic' && (
+          <Space align="center">
+            {isEditMode && role === 'EMPLOYEE' && !pendingRequest && (
+              <Button
+                variant="primary"
+                icon={<SendOutlined />}
+                onClick={handleSendToMd}
+                loading={sendToMdLoading}
+              >
+                Send to MD
+              </Button>
+            )}
+            {isEditMode && role === 'MD' && isPendingView && pendingRequest && (
+              <Button
+                variant="primary"
+                icon={<CheckCircleOutlined />}
+                onClick={handleResolve}
+                loading={sendToMdLoading}
+              >
+                Resolve Request
+              </Button>
+            )}
+          </Space>
+        )}
       </div>
 
       <div className={styles.content}>
@@ -417,19 +466,30 @@ export default function VendorDetailsForm() {
                 vendorStatus={vendor?.status ?? form.getFieldValue('status') ?? 'New'}
               />
             )}
+            {selectedSubMenu === 'followups' && (
+              <FollowUpsSection vendorId={id} />
+            )}
+            {selectedSubMenu === 'shared-tenders' && (
+              <SharedTendersSection vendorId={id} />
+            )}
+            {selectedSubMenu === 'payment-terms' && (
+              <PaymentTermsSection vendorId={id} companyType={vendor?.companyType} />
+            )}
           </div>
 
-          {/* Footer Actions — scoped under form content, matching user form layout */}
-          <FormActionsBar
-            onCancel={handleBack}
-            cancelLabel="Back"
-            cancelIcon={<ArrowLeftOutlined />}
-            onDelete={isEditMode ? () => setDeleteConfirmOpen(true) : undefined}
-            deleteLoading={deleting}
-            onOk={handleSaveClick}
-            okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
-            okLoading={saving}
-          />
+          {/* Footer Actions — only show in basic info section */}
+          {selectedSubMenu === 'basic' && (
+            <FormActionsBar
+              onCancel={handleBack}
+              cancelLabel="Back"
+              cancelIcon={<ArrowLeftOutlined />}
+              onDelete={isEditMode ? () => setDeleteConfirmOpen(true) : undefined}
+              deleteLoading={deleting}
+              onOk={handleSaveClick}
+              okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
+              okLoading={saving}
+            />
+          )}
         </div>
       </div>
 
@@ -602,9 +662,29 @@ function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPend
               </Form.Item>
             </Col>
 
+            <Col span={12}>
+              <Form.Item
+                label="Agreement With"
+                name="agreementWith"
+              >
+                <Select placeholder="Select agreement party">
+                  <Select.Option value="GMSS">GMSS</Select.Option>
+                  <Select.Option value="Nisnik International">Nisnik International</Select.Option>
+                  <Select.Option value="Nishhant Om Gupta">Nishhant Om Gupta</Select.Option>
+                  <Select.Option value="Pooja Gupta">Pooja Gupta</Select.Option>
+                  <Select.Option value="Vandana Gupta">Vandana Gupta</Select.Option>
+                  <Select.Option value="Gupta Engineering">Gupta Engineering</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+
             {/* Row 3: Tags */}
             <Col span={24}>
-              <Form.Item label="Tags / Categories" name="tags">
+              <Form.Item
+                label="Tags / Categories"
+                name="tags"
+                rules={[{ required: true, message: 'Please select at least one tag' }]}
+              >
                 <Select
                   mode="multiple"
                   showSearch
@@ -769,8 +849,12 @@ function DocumentsSection({ vendorId, documents, documentColumns, onUploadSucces
   };
 
   const handleUpload = async () => {
-    if (!file || !docType.trim()) {
-      message.error('Please select a file and enter document type.');
+    if (!file) {
+      message.error('Please select a file.');
+      return;
+    }
+    if (!docType.trim()) {
+      message.error('Please enter a document type.');
       return;
     }
     if (!vendorId) {
@@ -779,11 +863,21 @@ function DocumentsSection({ vendorId, documents, documentColumns, onUploadSucces
     }
     setUploading(true);
     try {
-      const { publicUrl } = await uploadFileToS3(file, 'vendor-documents', generateUploadUrl);
+      let publicUrl: string | undefined;
+      try {
+        const { publicUrl: url } = await uploadFileToS3(file, 'vendor-documents', generateUploadUrl);
+        publicUrl = url;
+      } catch (uploadErr) {
+        // S3 not configured — warn but still create entry for demo/testing
+        console.error('S3 upload failed:', uploadErr);
+        message.warning('File could not be stored (S3 unavailable) — document entry created anyway.');
+      }
+
+      // Create document record even if S3 upload fails
       await uploadVendorDocument(
         vendorId,
         docType,
-        publicUrl,
+        publicUrl || file.name, // Use filename as fallback if no URL
         expired && expiryDate ? expiryDate : undefined
       );
       onUploadSuccess();
@@ -791,7 +885,7 @@ function DocumentsSection({ vendorId, documents, documentColumns, onUploadSucces
       message.success('Document uploaded successfully.');
     } catch (err) {
       console.error(err);
-      message.error('Failed to upload document. Please try again.');
+      message.error('Failed to create document entry. Please try again.');
     } finally {
       setUploading(false);
     }

@@ -7,7 +7,9 @@ export const vendorTenderTypeDefs = gql`
     tenderId: ID!
     participationStatus: TenderParticipationStatus!
     quotedAmount: Float
+    sharedDate: String
     createdDate: String!
+    tender: Tender
   }
 
   input ParticipateInTenderInput {
@@ -33,5 +35,6 @@ export const vendorTenderTypeDefs = gql`
 
   extend type Query {
     getVendorTenders(vendorId: ID!): [VendorTender!]!
+    getSharedTenders(vendorId: ID!): [VendorTender!]!
   }
 `;

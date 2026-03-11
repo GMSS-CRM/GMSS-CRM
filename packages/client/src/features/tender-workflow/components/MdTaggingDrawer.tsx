@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Drawer, Button, Space, Select, Tag, Input, Alert } from "antd";
+import { Drawer, Button, Space, Select, Tag, Input, Alert, Divider, message } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   TagsOutlined,
   BankOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { StatusBadge } from "./StatusBadge";
 import type { Tender } from "../types/tender.types";
-import { useSearchTags } from "../../tags/services/tags.service";
+import { useSearchTags, useCreateTag } from "../../tags/services/tags.service";
 import s from "../styles/tender-workflow.module.css";
 
 interface Props {
@@ -31,29 +32,34 @@ export const MdTaggingDrawer: React.FC<Props> = ({
   onConfirm,
   onReject,
 }) => {
-  const [tags, setTags] = useState<string[]>([]);
+  const [selectedTag, setSelectedTag] = useState<string | undefined>(undefined);
   const [reason, setReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [creatingTag, setCreatingTag] = useState(false);
 
   useEffect(() => {
     if (tender) {
-      setTags(tender.tags.map((t) => t.id));
+      // One tender = one tag: use first existing tag
+      setSelectedTag(tender.tags.length > 0 ? tender.tags[0].id : undefined);
       setReason("");
       setRejecting(false);
+      setNewTagName("");
     }
   }, [tender]);
 
-  const { data: tagsData } = useSearchTags();
+  const { data: tagsData, refetch: refetchTags } = useSearchTags();
+  const [createTagMut] = useCreateTag();
   const serverTags = tagsData?.searchTags ?? [];
 
   if (!tender) return null;
 
   const handleConfirm = async () => {
-    if (!tags.length) return;
+    if (!selectedTag) return;
     setLoading(true);
     try {
-      await onConfirm(tender.id, tags);
+      await onConfirm(tender.id, [selectedTag]);
     } finally {
       setLoading(false);
     }
@@ -66,8 +72,28 @@ export const MdTaggingDrawer: React.FC<Props> = ({
     setLoading(false);
   };
 
+  const handleCreateTag = async () => {
+    if (!newTagName.trim()) return;
+    setCreatingTag(true);
+    try {
+      const result = await createTagMut({ variables: { input: { name: newTagName.trim() } } });
+      const newId = result.data?.createTag?.id;
+      if (newId) {
+        setSelectedTag(newId);
+        setNewTagName("");
+        void refetchTags();
+        message.success(`Tag "${newTagName.trim()}" created`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create tag";
+      message.error(msg);
+    } finally {
+      setCreatingTag(false);
+    }
+  };
+
   const tagOptions = serverTags.map((t) => ({
-    label: <Tag color="blue">{t.name}</Tag>,
+    label: t.name,
     value: t.id,
   }));
 
@@ -117,7 +143,7 @@ export const MdTaggingDrawer: React.FC<Props> = ({
                 icon={<CheckCircleOutlined />}
                 onClick={handleConfirm}
                 loading={loading}
-                disabled={!tags.length}
+                disabled={!selectedTag}
               >
                 {isNitReview ? "Verify & Tag" : "Confirm & Tag"}
               </Button>
@@ -168,40 +194,63 @@ export const MdTaggingDrawer: React.FC<Props> = ({
 
         <div className={s.section}>
           <h4 className={s.sectionTitle}>
-            <TagsOutlined /> Assign Tags
+            <TagsOutlined /> Assign Tag
           </h4>
-          <p className={s.tagHint}>Select tags to categorize and match vendors.</p>
+          <p className={s.tagHint}>Select one tag to categorize this tender and match vendors.</p>
           <Select
-            mode="multiple"
-            placeholder="Select tags…"
-            value={tags}
-            onChange={setTags}
+            placeholder="Select a tag…"
+            value={selectedTag}
+            onChange={(val) => setSelectedTag(val)}
             options={tagOptions}
             style={{ width: "100%" }}
             optionFilterProp="label"
             showSearch
             allowClear
+            dropdownRender={(menu) => (
+              <>
+                {menu}
+                <Divider style={{ margin: '8px 0' }} />
+                <Space style={{ padding: '0 8px 4px' }}>
+                  <Input
+                    placeholder="New tag name"
+                    value={newTagName}
+                    onChange={(e) => setNewTagName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCreateTag(); } }}
+                    size="small"
+                  />
+                  <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    onClick={handleCreateTag}
+                    loading={creatingTag}
+                    disabled={!newTagName.trim()}
+                    size="small"
+                  >
+                    Create
+                  </Button>
+                </Space>
+              </>
+            )}
           />
-          {tags.length > 0 && (
-            <div className={s.tagChips}>
-              {tags.map((id) => {
-                const tag = serverTags.find((t) => t.id === id);
+          {selectedTag && (
+            <div className={s.tagChips} style={{ marginTop: 8 }}>
+              {(() => {
+                const tag = serverTags.find((t) => t.id === selectedTag);
                 return tag ? (
                   <Tag
-                    key={id}
                     color="blue"
                     closable
-                    onClose={() => setTags((p) => p.filter((x) => x !== id))}
+                    onClose={() => setSelectedTag(undefined)}
                   >
                     {tag.name}
                   </Tag>
                 ) : null;
-              })}
+              })()}
             </div>
           )}
-          {!tags.length && (
+          {!selectedTag && (
             <Alert
-              message="Select at least one tag to confirm."
+              message="Select a tag to confirm."
               type="warning"
               showIcon
               style={{ marginTop: 10 }}

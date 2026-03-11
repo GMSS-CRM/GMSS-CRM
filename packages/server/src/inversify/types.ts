@@ -54,5 +54,8 @@ export const TYPES = {
   IVendorMdRequestRepository: Symbol.for('IVendorMdRequestRepository'),
   IVendorMdRequestService: Symbol.for('IVendorMdRequestService'),
 
+  IPaymentTermRepository: Symbol.for('IPaymentTermRepository'),
+  IPaymentTermService: Symbol.for('IPaymentTermService'),
+
   IS3Service: Symbol.for('IS3Service'),
 };

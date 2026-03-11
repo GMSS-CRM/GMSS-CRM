@@ -121,28 +121,25 @@ export const TenderPreviewTable: React.FC<Props> = ({
             onClick={onAddToDraft}
             className={s.previewAddBtn}
           >
-            {loading ? 'Adding to Draft…' : `Add ${selectedKeys.length || ''} to Draft`}
+            {loading ? 'Sending to MD…' : `Send ${selectedKeys.length || ''} to MD`}
           </Button>
         </Space>
       </div>
-      <Table
-        className={s.previewTable}
-        rowSelection={{
-          selectedRowKeys: selectedKeys,
-          onChange: onSelectionChange,
-        }}
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        size="small"
-        pagination={{
-          pageSize: 4,
-          size: "small",
-          showSizeChanger: false,
-          showTotal: (total, range) => `${range[0]}–${range[1]} of ${total}`,
-        }}
-        scroll={{ x: 960 }}
-      />
+      <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+        <Table
+          className={s.previewTable}
+          rowSelection={{
+            selectedRowKeys: selectedKeys,
+            onChange: onSelectionChange,
+          }}
+          columns={columns}
+          dataSource={data}
+          rowKey="id"
+          size="small"
+          pagination={false}
+          scroll={{ x: 960 }}
+        />
+      </div>
     </div>
   );
 };

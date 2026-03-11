@@ -40,7 +40,7 @@ const toLocalTender = (t: GqlTender): import("../types/tender.types").Tender => 
   tags: (t.tags ?? []).map((tt) => ({
     id: tt.tagId,
     name: tt.tag?.name ?? "",
-    color: "blue", // color not stored on server; default used for display
+    color: "blue",
   })),
   documents: (t.documents ?? []).map((d) => ({
     id: d.id,
@@ -54,7 +54,9 @@ const toLocalTender = (t: GqlTender): import("../types/tender.types").Tender => 
   submissionDeadline: t.submissionDeadline ? new Date(t.submissionDeadline) : undefined,
   rejectionReason: t.rejectionReason ?? undefined,
   mailSentAt: t.mailSentAt ? new Date(t.mailSentAt) : undefined,
-});
+  createdBy: t.createdBy ?? undefined,
+  updatedBy: t.updatedBy ?? undefined,
+} as any);
 
 const generateRefNumber = (): string => {
   const prefix = "TND";
@@ -143,6 +145,7 @@ export interface UseTenderWorkflowReturn {
   markReadyToMail: (tenderId: string) => void;
   sendMail: (tenderId: string) => void;
   sendMailBulk: (ids: string[]) => void;
+  mdBulkApprove: (ids: string[]) => void;
 
   // Validation helpers
   validateTransition: (currentStatus: TenderStatus, nextStatus: TenderStatus, userRole: UserRole) => boolean;
@@ -158,13 +161,13 @@ export interface UseTenderWorkflowReturn {
 
 export function useTenderWorkflow(): UseTenderWorkflowReturn {
   const [role, setRoleState] = useState<UserRole>("USER");
-  // Default active tab depends on role: users see Draft, MDs see Pending Tagging
-  const [activeTab, setActiveTab] = useState<string>("draft");
+  // Default active tab: users see Rejected (draft removed), MDs see Pending Approval
+  const [activeTab, setActiveTab] = useState<string>("rejected");
 
   const setRole = (r: UserRole) => {
     setRoleState(r);
     if (r === "MD") setActiveTab("pendingApproval");
-    else setActiveTab("draft");
+    else setActiveTab("rejected");
   };
 
   const [ui, setUi] = useState<LocalUIState>({
@@ -183,9 +186,19 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
   const [_deleteTendersMut] = useDeleteTenders();
   const [changeStatusMut] = useChangeTenderStatus();
 
-  // Map GQL tenders → local shape
+  // Map GQL tenders → local shape, filter out overdue tenders
   const tenders = useMemo(
-    () => (data?.searchTenders ?? []).map(toLocalTender),
+    () => {
+      const allTenders = (data?.searchTenders ?? []).map(toLocalTender);
+      // Only show tenders that are not overdue (except MAIL_SENT - completed tenders can be shown)
+      return allTenders.filter((t) => {
+        if (t.status === "MAIL_SENT") return true; // Always show completed tenders
+        if (!t.submissionDeadline) return true; // Show if no deadline
+        const now = Date.now();
+        const deadline = new Date(t.submissionDeadline).getTime();
+        return deadline >= now; // Filter out if deadline has passed
+      });
+    },
     [data],
   );
 
@@ -292,8 +305,22 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
       const { created = [], skipped = [] } = result.data?.createTendersBatch ?? {};
 
       if (created.length > 0) {
+        // Send created tenders directly to MD (skip draft)
+        const createdIds = created.map((c: any) => c.id).filter(Boolean) as string[];
+        if (createdIds.length > 0) {
+          await Promise.all(
+            createdIds.map((id) =>
+              changeStatusMut({
+                variables: {
+                  input: { tenderId: id, status: 'PENDING_MD_TAGGING' as unknown as GqlTenderStatus },
+                },
+              })
+            )
+          );
+        }
+
         notification.success({
-          message: `${created.length} tender${created.length > 1 ? 's' : ''} added to Draft`,
+          message: `${created.length} tender${created.length > 1 ? 's' : ''} sent to MD`,
           placement: 'topRight',
           duration: 4,
         });
@@ -445,15 +472,52 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
   const sendMail = useCallback(
     async (tenderId: string) => {
-      await changeStatus(tenderId, "MAIL_SENT");
-      void refetch();
+      try {
+        await changeStatusMut({
+          variables: {
+            input: {
+              tenderId,
+              status: 'MAIL_SENT' as unknown as GqlTenderStatus,
+            },
+          },
+        });
+        void refetch();
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to send mail";
+        message.error(`Mail sending failed: ${msg}`);
+      }
     },
-    [changeStatus, refetch],
+    [changeStatusMut, refetch],
   );
 
   const sendMailBulk = useCallback(
     async (ids: string[]) => {
-      await Promise.all(ids.map((id) => changeStatus(id, "MAIL_SENT")));
+      const results = await Promise.allSettled(
+        ids.map((id) =>
+          changeStatusMut({
+            variables: {
+              input: {
+                tenderId: id,
+                status: 'MAIL_SENT' as unknown as GqlTenderStatus,
+              },
+            },
+          })
+        )
+      );
+      const failed = results.filter((r) => r.status === 'rejected');
+      if (failed.length > 0) {
+        message.error(`${failed.length} mail(s) failed to send. Check tender details.`);
+      } else {
+        message.success(`${ids.length} mail(s) sent successfully.`);
+      }
+      void refetch();
+    },
+    [changeStatusMut, refetch],
+  );
+
+  const mdBulkApprove = useCallback(
+    async (ids: string[]) => {
+      await Promise.all(ids.map((id) => changeStatus(id, "READY_FOR_NIT")));
       void refetch();
     },
     [changeStatus, refetch],
@@ -525,6 +589,7 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
     markReadyToMail,
     sendMail,
     sendMailBulk,
+    mdBulkApprove,
     validateTransition,
     canPerformAction,
     getTendersByTab,
