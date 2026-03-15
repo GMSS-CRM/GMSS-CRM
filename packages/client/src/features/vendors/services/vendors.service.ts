@@ -822,3 +822,150 @@ export const useGetSharedTenders = (vendorId: string | undefined) => {
     refetch,
   };
 };
+
+// ─── Agreement Types ─────────────────────────────────────────────────────────
+
+export interface VendorAgreement {
+  id: string;
+  vendorId: string;
+  agreementStartDate: string;
+  agreementEndDate: string;
+  renewalReminderDate?: string;
+  signatureStatus: 'PENDING' | 'SIGNED' | 'EXPIRED';
+  signedDate?: string;
+  commissionType?: 'PERCENTAGE' | 'FIXED';
+  commissionValue?: number;
+  commissionStructure?: 'SPLIT_50_50' | 'FULL_ON_PAYMENT';
+  paymentFrequency?: 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+  paymentAmount?: number;
+  gstApplicable: boolean;
+  hasOtherBenefits: boolean;
+  otherBenefitsDescription?: string;
+  createdDate: string;
+  updatedDate: string;
+}
+
+// ─── Agreement GraphQL ────────────────────────────────────────────────────────
+
+const GET_VENDOR_AGREEMENTS = gql`
+  query GetVendorAgreements($vendorId: ID!) {
+    getVendorAgreements(vendorId: $vendorId) {
+      id
+      vendorId
+      agreementStartDate
+      agreementEndDate
+      renewalReminderDate
+      signatureStatus
+      signedDate
+      commissionType
+      commissionValue
+      commissionStructure
+      paymentFrequency
+      paymentAmount
+      gstApplicable
+      hasOtherBenefits
+      otherBenefitsDescription
+      createdDate
+      updatedDate
+    }
+  }
+`;
+
+const CREATE_VENDOR_AGREEMENT = gql`
+  mutation CreateVendorAgreement($input: CreateAgreementInput!) {
+    createVendorAgreement(input: $input) {
+      id
+      vendorId
+      agreementStartDate
+      agreementEndDate
+      signatureStatus
+      commissionType
+      commissionValue
+      commissionStructure
+      paymentFrequency
+      paymentAmount
+      gstApplicable
+      hasOtherBenefits
+      otherBenefitsDescription
+      createdDate
+      updatedDate
+    }
+  }
+`;
+
+const UPDATE_AGREEMENT_SIGNATURE = gql`
+  mutation UpdateAgreementSignature($input: UpdateSignatureInput!) {
+    updateAgreementSignature(input: $input) {
+      id
+      signatureStatus
+      signedDate
+      updatedDate
+    }
+  }
+`;
+
+const CALCULATE_COMMISSION = gql`
+  query CalculateVendorCommission(
+    $baseAmount: Float!
+    $commissionType: CommissionType!
+    $commissionValue: Float!
+    $gstApplicable: Boolean!
+  ) {
+    calculateVendorCommission(
+      baseAmount: $baseAmount
+      commissionType: $commissionType
+      commissionValue: $commissionValue
+      gstApplicable: $gstApplicable
+    ) {
+      baseAmount
+      commissionAmount
+      gstAmount
+      totalAmount
+    }
+  }
+`;
+
+// ─── Agreement Hooks ──────────────────────────────────────────────────────────
+
+export const useGetVendorAgreements = (vendorId: string | undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ getVendorAgreements: VendorAgreement[] }>(
+    GET_VENDOR_AGREEMENTS,
+    { variables: { vendorId }, skip: !vendorId, fetchPolicy: 'cache-and-network' }
+  );
+  return { agreements: data?.getVendorAgreements ?? [], loading, error, refetch };
+};
+
+export const useCreateVendorAgreement = () => {
+  const [mutate, { loading }] = useMutation(CREATE_VENDOR_AGREEMENT, {
+    refetchQueries: [GET_VENDOR_AGREEMENTS],
+  });
+  const createAgreement = (input: Omit<VendorAgreement, 'id' | 'signatureStatus' | 'createdDate' | 'updatedDate'>) =>
+    mutate({ variables: { input } });
+  return { createAgreement, loading };
+};
+
+export const useUpdateAgreementSignature = () => {
+  const [mutate, { loading }] = useMutation(UPDATE_AGREEMENT_SIGNATURE, {
+    refetchQueries: [GET_VENDOR_AGREEMENTS],
+  });
+  const updateSignature = (agreementId: string, signatureStatus: string, signedDate?: string) =>
+    mutate({ variables: { input: { agreementId, signatureStatus, signedDate } } });
+  return { updateSignature, loading };
+};
+
+export const useCalculateCommission = () => {
+  const [query, { loading }] = useMutation<{
+    calculateVendorCommission: { baseAmount: number; commissionAmount: number; gstAmount: number; totalAmount: number };
+  }>(CALCULATE_COMMISSION);
+  // Note: calculateVendorCommission is a Query but we expose it as lazy trigger
+  return { loading };
+};
+
+export const useCalculateCommissionLazy = () => {
+  const { data, loading, refetch } = useQuery<{
+    calculateVendorCommission: { baseAmount: number; commissionAmount: number; gstAmount: number; totalAmount: number };
+  }>(CALCULATE_COMMISSION, { skip: true });
+  const calculate = (vars: { baseAmount: number; commissionType: string; commissionValue: number; gstApplicable: boolean }) =>
+    refetch(vars);
+  return { calculate, result: data?.calculateVendorCommission, loading };
+};

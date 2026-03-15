@@ -10,6 +10,10 @@ const getService = () => {
 };
 
 export const vendorAgreementResolvers = {
+  Query: {
+    getVendorAgreements: (_: unknown, { vendorId }: any) =>
+      getService().getAgreementsByVendor(vendorId),
+  },
   Mutation: {
     createVendorAgreement: (_: unknown, { input }: any) =>
       getService().createAgreement(input),

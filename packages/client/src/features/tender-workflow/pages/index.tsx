@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, Button, Badge, message } from "antd";
 import {
   FileTextOutlined,
@@ -50,6 +51,7 @@ export const TenderWorkflowPage: React.FC = () => {
 
   const [nitTender, setNitTender] = useState<Tender | null>(null);
   const [docTender, setDocTender] = useState<Tender | null>(null);
+  const navigate = useNavigate();
 
   const counts = getTabCounts();
   const tabs = getCurrentTabs();
@@ -69,12 +71,17 @@ export const TenderWorkflowPage: React.FC = () => {
 
   const onView = useCallback(
     (t: Tender) => {
+      // Navigate to post-award detail page once the mail has been sent
+      if (t.status === 'MAIL_SENT') {
+        navigate(`/tender-workflow/${t.id}`);
+        return;
+      }
       // Open tagging drawer for both approval step and post-NIT tagging step
       if (role === "MD" && (t.status === "PENDING_MD_TAGGING" || t.status === "NIT_UPLOADED")) {
         openTaggingDrawer(t);
       }
     },
-    [role, openTaggingDrawer]
+    [role, openTaggingDrawer, navigate]
   );
 
   const tabItems = tabs.map((tab) => ({

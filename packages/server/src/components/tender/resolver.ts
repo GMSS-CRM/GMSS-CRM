@@ -29,6 +29,9 @@ export const tenderResolvers = {
 
     changeTenderStatus: (_: unknown, { input }: any) =>
       getService().changeTenderStatus(input as any),
+
+    seedTenderVendors: (_: unknown, { tenderId }: any) =>
+      getService().seedTenderVendors(tenderId),
   },
 
   Tender: {

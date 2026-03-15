@@ -23,6 +23,7 @@ import type {
 } from '../types/tagTypes';
 import {
   useGetTendersByTag,
+  useGetVendorsByTag,
   useUpdateVendorTagEmail,
 } from '../services/tags.service';
 import styles from '../styles/tags.module.css';
@@ -47,6 +48,7 @@ export default function TagTendersDrawer({
 
   const tagId = open && tag ? tag.id : null;
   const { data: tendersData, loading } = useGetTendersByTag(tagId);
+  const { data: vendorsData } = useGetVendorsByTag(tagId);
   const [updateEmailMutation] = useUpdateVendorTagEmail();
 
   const tenders: TagTenderDisplay[] = (tendersData?.getTendersByTag ?? []).map((t) => ({
@@ -68,10 +70,29 @@ export default function TagTendersDrawer({
     }
   }, [open]);
 
+  // Populate vendors when a tender is selected
+  useEffect(() => {
+    if (selectedTender && vendorsData?.getVendorsByTag) {
+      const vendorList: TenderVendorDisplay[] = vendorsData.getVendorsByTag.map((v: any) => {
+        const firstContact = v.contactPersons && v.contactPersons.length > 0 ? v.contactPersons[0] : null;
+        const enableMail = v.tags && v.tags.length > 0 
+          ? v.tags[0].enableMail ?? false 
+          : false;
+        return {
+          id: v.id,
+          vendorName: v.name ?? '',
+          vendorEmail: firstContact?.email ?? '',
+          vendorPhone: firstContact?.phoneNumber ?? '',
+          enableMail,
+        };
+      });
+      setVendors(vendorList);
+    }
+  }, [selectedTender, vendorsData]);
+
   const handleTenderClick = (tender: TagTenderDisplay) => {
     setSelectedTender(tender);
     setViewMode('vendors');
-    setVendors([]);
   };
 
   const handleBackToTenders = () => {

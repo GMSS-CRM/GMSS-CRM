@@ -2,11 +2,13 @@ import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import type {
   Tender,
+  VendorTender,
   CreateTenderInput,
   UpdateTenderInput,
   SearchTenderInput,
   ChangeTenderStatusInput,
   CreateTendersBatchResult,
+  UpdateVendorTenderFollowUpInput,
 } from '@gmss/types';
 
 // ─── Fragments ────────────────────────────────────────────────────────────────
@@ -192,3 +194,97 @@ export const useCreateTenderDocument = () =>
   >(CREATE_TENDER_DOCUMENT, {
     refetchQueries: [{ query: SEARCH_TENDERS }],
   });
+
+// ─── Vendor Follow-Up ─────────────────────────────────────────────────────────
+
+const VENDOR_TENDER_FOLLOW_UP_FIELDS = gql`
+  fragment VendorTenderFollowUpFields on VendorTender {
+    id
+    vendorId
+    tenderId
+    sharedDate
+    isParticipating
+    participationStatus
+    interestStatus
+    notInterestedReason
+    proposalShared
+    tieUpAgreementObtained
+    quoteReceived
+    quoteUrl
+    quotedAmount
+    quoteApproved
+    companyDocsUploaded
+    tenderDocsUploaded
+    emdRequired
+    emdSource
+    emdAmount
+    emdPaid
+    tabulationType
+    tabulationUploaded
+    tabulationApproved
+    participationDecisionReason
+    followUpRemarks
+    createdDate
+    updatedDate
+    vendor {
+      id
+      name
+      status
+      type
+      contactPersons {
+        id
+        name
+        email
+        phoneNumber
+        designation
+      }
+    }
+  }
+`;
+
+export const GET_TENDER_FOLLOW_UPS = gql`
+  ${VENDOR_TENDER_FOLLOW_UP_FIELDS}
+  query GetTenderFollowUps($tenderId: ID!) {
+    getTenderFollowUps(tenderId: $tenderId) {
+      ...VendorTenderFollowUpFields
+    }
+  }
+`;
+
+export const UPDATE_VENDOR_TENDER_FOLLOW_UP = gql`
+  ${VENDOR_TENDER_FOLLOW_UP_FIELDS}
+  mutation UpdateVendorTenderFollowUp($input: UpdateVendorTenderFollowUpInput!) {
+    updateVendorTenderFollowUp(input: $input) {
+      ...VendorTenderFollowUpFields
+    }
+  }
+`;
+
+export const useGetTenderFollowUps = (tenderId: string) =>
+  useQuery<{ getTenderFollowUps: VendorTender[] }>(GET_TENDER_FOLLOW_UPS, {
+    variables: { tenderId },
+    skip: !tenderId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+export const useUpdateVendorTenderFollowUp = () =>
+  useMutation<
+    { updateVendorTenderFollowUp: VendorTender },
+    { input: UpdateVendorTenderFollowUpInput }
+  >(UPDATE_VENDOR_TENDER_FOLLOW_UP, {
+    refetchQueries: [GET_TENDER_FOLLOW_UPS],
+  });
+
+// ─── Seed Tender Vendors ──────────────────────────────────────────────────────
+
+const SEED_TENDER_VENDORS = gql`
+  mutation SeedTenderVendors($tenderId: ID!) {
+    seedTenderVendors(tenderId: $tenderId)
+  }
+`;
+
+export const useSeedTenderVendors = () =>
+  useMutation<{ seedTenderVendors: boolean }, { tenderId: string }>(
+    SEED_TENDER_VENDORS,
+    { refetchQueries: [GET_TENDER_FOLLOW_UPS] },
+  );

@@ -1,6 +1,7 @@
-import { Menu, Divider, Tag } from 'antd';
+import { Menu, Divider, Tag, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import type { ReactNode } from 'react';
+import { LockOutlined } from '@ant-design/icons';
 import styles from './styles.module.css';
 
 export type SubMenuItem = string;
@@ -9,6 +10,8 @@ export interface SubMenuItemConfig {
   key: string;
   icon: ReactNode;
   label: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 interface SubMenuProps {
@@ -31,8 +34,17 @@ export default function SubMenu({
 }: SubMenuProps) {
   const menuItems: MenuProps['items'] = items.map((item) => ({
     key: item.key,
-    icon: item.icon,
-    label: item.label,
+    icon: item.disabled ? (
+      <Tooltip title={item.disabledReason ?? 'Not available'} placement="right">
+        <LockOutlined style={{ opacity: 0.4 }} />
+      </Tooltip>
+    ) : item.icon,
+    label: item.disabled ? (
+      <Tooltip title={item.disabledReason ?? 'Not available'} placement="right">
+        <span style={{ opacity: 0.4 }}>{item.label}</span>
+      </Tooltip>
+    ) : item.label,
+    disabled: item.disabled,
   }));
 
   return (

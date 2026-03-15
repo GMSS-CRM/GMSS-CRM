@@ -17,3 +17,4 @@ export * from "./VendorProposal";
 export * from "./VendorTender";
 export * from "./VendorWorkflow";
 export * from "./VendorMdRequest";
+export * from "./TenderPostAward";

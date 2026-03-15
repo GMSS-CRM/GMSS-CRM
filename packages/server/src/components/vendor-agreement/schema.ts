@@ -47,6 +47,10 @@ input UpdateSignatureInput {
   signedDate: String
 }
 
+extend type Query {
+  getVendorAgreements(vendorId: ID!): [VendorAgreement!]!
+}
+
 extend type Mutation {
   createVendorAgreement(input: CreateAgreementInput!): VendorAgreement!
   updateAgreementSignature(input: UpdateSignatureInput!): VendorAgreement!

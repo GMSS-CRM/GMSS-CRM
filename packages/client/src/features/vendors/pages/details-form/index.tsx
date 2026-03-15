@@ -28,6 +28,7 @@ import {
   DeleteOutlined,
   ShopOutlined,
   CreditCardOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRef } from 'react';
@@ -48,6 +49,7 @@ import RemarkModal from '../../components/RemarkModal';
 import FollowUpsSection from '../../components/FollowUpsSection';
 import SharedTendersSection from '../../components/SharedTendersSection';
 import PaymentTermsSection from '../../components/PaymentTermsSection';
+import AgreementSection from '../../components/AgreementSection';
 import {
   useGetVendorById,
   useSearchVendorDocuments,
@@ -67,15 +69,47 @@ import styles from './styles.module.css';
 
 const { TextArea } = Input;
 
-type VendorSubMenuItem = 'basic' | 'documents' | 'followups' | 'shared-tenders' | 'payment-terms';
+type VendorSubMenuItem = 'basic' | 'documents' | 'followups' | 'shared-tenders' | 'payment-terms' | 'agreement';
 
-const VENDOR_MENU_ITEMS: SubMenuItemConfig[] = [
+const BASE_MENU_ITEMS = [
   { key: 'basic', icon: <InfoCircleOutlined />, label: 'Basic Info' },
   { key: 'documents', icon: <FileTextOutlined />, label: 'Documents' },
   { key: 'followups', icon: <BellOutlined />, label: 'Follow Ups' },
   { key: 'shared-tenders', icon: <ShopOutlined />, label: 'Shared Tenders' },
+  { key: 'agreement', icon: <SafetyCertificateOutlined />, label: 'Agreement' },
   { key: 'payment-terms', icon: <CreditCardOutlined />, label: 'Payment Terms' },
-];
+] as const;
+
+function buildMenuItems(vendorStatus: string | undefined) {
+  const status = vendorStatus ?? 'New';
+  const isInterested = status === 'Interested' || status === 'Final';
+  const isFinal = status === 'Final';
+
+  return BASE_MENU_ITEMS.map((item) => {
+    if (item.key === 'documents') {
+      return {
+        ...item,
+        disabled: !isInterested,
+        disabledReason: !isInterested ? 'Available for Interested & Final companies' : undefined,
+      };
+    }
+    if (item.key === 'agreement') {
+      return {
+        ...item,
+        disabled: !isInterested,
+        disabledReason: !isInterested ? 'Available for Interested & Final companies' : undefined,
+      };
+    }
+    if (item.key === 'payment-terms') {
+      return {
+        ...item,
+        disabled: !isFinal,
+        disabledReason: !isFinal ? 'Available for Final companies only' : undefined,
+      };
+    }
+    return item;
+  });
+}
 
 export default function VendorDetailsForm() {
   const navigate = useNavigate();
@@ -437,8 +471,13 @@ export default function VendorDetailsForm() {
           <SubMenu
             title="Vendor Details"
             selectedMenu={selectedSubMenu}
-            onMenuChange={(key) => setSelectedSubMenu(key as VendorSubMenuItem)}
-            items={VENDOR_MENU_ITEMS}
+            onMenuChange={(key) => {
+              const menuItems = buildMenuItems(vendor?.status);
+              const item = menuItems.find((m) => m.key === key);
+              if (item && 'disabled' in item && item.disabled) return;
+              setSelectedSubMenu(key as VendorSubMenuItem);
+            }}
+            items={buildMenuItems(vendor?.status)}
           />
         </div>
 
@@ -471,6 +510,9 @@ export default function VendorDetailsForm() {
             )}
             {selectedSubMenu === 'shared-tenders' && (
               <SharedTendersSection vendorId={id} />
+            )}
+            {selectedSubMenu === 'agreement' && (
+              <AgreementSection vendorId={id} vendorStatus={vendor?.status} />
             )}
             {selectedSubMenu === 'payment-terms' && (
               <PaymentTermsSection vendorId={id} companyType={vendor?.companyType} />

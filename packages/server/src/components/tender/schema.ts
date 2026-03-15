@@ -92,5 +92,6 @@ export const tenderTypeDefs = gql`
     deleteTender(id: ID!): Boolean!
     deleteTenders(ids: [ID!]!): Boolean!
     changeTenderStatus(input: ChangeTenderStatusInput!): Tender!
+    seedTenderVendors(tenderId: ID!): Boolean!
   }
 `;

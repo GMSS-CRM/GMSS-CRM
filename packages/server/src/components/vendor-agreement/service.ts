@@ -102,4 +102,12 @@ export class VendorAgreementService
 
     return updated;
   }
+
+  /* ===================================================== */
+  /* GET AGREEMENTS BY VENDOR */
+  /* ===================================================== */
+
+  async getAgreementsByVendor(vendorId: string): Promise<VendorAgreement[]> {
+    return this.repository.findByVendorId(vendorId);
+  }
 }

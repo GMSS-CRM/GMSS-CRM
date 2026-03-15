@@ -33,22 +33,21 @@ export class VendorTenderRepository
     return this.find({ where: { tenderId } });
   }
 
-  findById(id: string) {
-    return this.findOne({ where: { id } });
+  findByTenderWithVendors(tenderId: string) {
+    return this.find({
+      where: { tenderId },
+      relations: ['vendor', 'vendor.contactPersons', 'vendor.tags'],
+    });
   }
 
-  async updateParticipation(
-    id: string,
-    data: Partial<VendorTender>
-  ): Promise<VendorTender> {
+  findById(id: string) {
+    return this.findOne({ where: { id }, relations: ['vendor'] });
+  }
+
+  async updateFollowUp(id: string, data: Partial<VendorTender>): Promise<VendorTender> {
     await this.update(id, data);
-
     const updated = await this.findById(id);
-
-    if (!updated) {
-      throw new Error(ErrorInfo.TENDER_PARTICIPATION_UPDATE_FAILED);
-    }
-
+    if (!updated) throw new Error('VendorTender not found');
     return updated;
   }
 }

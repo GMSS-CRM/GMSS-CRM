@@ -6,58 +6,59 @@ import {
 } from './types';
 import ErrorInfo from '../common/error-info';
 import { IVendorRepository } from '../vendor/types';
-import { VendorStatus } from '../../entities/enums/VendorStatus';
-import { getCurrentEmail } from '../common/utils';
-import { ParticipationStatus } from '../../entities/VendorTender';
+import { VendorTender, ParticipationStatus } from '../../entities/VendorTender';
 
 @injectable()
-export class VendorTenderService
-  implements IVendorTenderService
-{
+export class VendorTenderService implements IVendorTenderService {
   constructor(
     @inject(TYPES.IVendorTenderRepository)
     private readonly repository: IVendorTenderRepository,
 
     @inject(TYPES.IVendorRepository)
-    private readonly vendorRepository: IVendorRepository
+    private readonly vendorRepository: IVendorRepository,
   ) {}
 
   async participateInTender(input: any) {
-    const vendor = await this.vendorRepository.findById(
-      input.vendorId
-    );
+    const vendor = await this.vendorRepository.findById(input.vendorId);
+    if (!vendor || vendor.isDeleted) throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
 
-    if (!vendor || vendor.isDeleted) {
-      throw new Error(ErrorInfo.VENDOR_NOT_FOUND);
-    }
+    // Check if a record already exists for this vendor+tender
+    const existing = await this.repository.findByTender(input.tenderId)
+      .then((list) => list.find((vt) => vt.vendorId === input.vendorId));
 
-    if (vendor.status !== VendorStatus.FINAL) {
-      throw new Error(
-        ErrorInfo.VENDOR_ALREADY_PARTICIPATING
-      );
+    if (existing) {
+      return this.repository.updateFollowUp(existing.id, {
+        participationStatus: ParticipationStatus.PARTICIPATED,
+        isParticipating: true,
+        quotedAmount: input.quotedAmount,
+      });
     }
 
     return this.repository.createParticipation({
-    vendorId: input.vendorId,
-    tenderId: input.tenderId,
-    participationStatus: ParticipationStatus.PARTICIPATED,
-    isParticipating: true,
-  });
+      vendorId: input.vendorId,
+      tenderId: input.tenderId,
+      participationStatus: ParticipationStatus.PARTICIPATED,
+      isParticipating: true,
+      quotedAmount: input.quotedAmount,
+    });
   }
 
   async updateParticipationStatus(input: any) {
-    const participation =
-      await this.repository.findById(input.participationId);
+    const participation = await this.repository.findById(input.participationId);
+    if (!participation) throw new Error(ErrorInfo.TENDER_PARTICIPATION_NOT_FOUND);
+    return this.repository.updateFollowUp(input.participationId, {
+      participationStatus: input.status,
+    });
+  }
 
-    if (!participation) {
-      throw new Error(ErrorInfo.TENDER_PARTICIPATION_NOT_FOUND);
-    }
+  async getTenderFollowUps(tenderId: string): Promise<VendorTender[]> {
+    return this.repository.findByTenderWithVendors(tenderId);
+  }
 
-    return this.repository.updateParticipation(
-      input.participationId,
-      {
-        participationStatus: input.status,
-      }
-    );
+  async updateFollowUp(id: string, data: Partial<VendorTender>): Promise<VendorTender> {
+    const record = await this.repository.findById(id);
+    if (!record) throw new Error('Vendor tender follow-up not found');
+    return this.repository.updateFollowUp(id, data);
   }
 }
+

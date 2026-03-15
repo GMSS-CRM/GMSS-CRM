@@ -58,4 +58,7 @@ export const TYPES = {
   IPaymentTermService: Symbol.for('IPaymentTermService'),
 
   IS3Service: Symbol.for('IS3Service'),
+
+  ITenderPostAwardRepository: Symbol.for('ITenderPostAwardRepository'),
+  ITenderPostAwardService: Symbol.for('ITenderPostAwardService'),
 };

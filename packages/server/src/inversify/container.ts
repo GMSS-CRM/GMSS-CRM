@@ -109,6 +109,13 @@ import { PaymentTermService, IPaymentTermService } from '../components/payment-t
 import { S3Service } from '../components/upload/service';
 import { IS3Service } from '../components/upload/types';
 
+import { TenderPostAwardRepository } from '../components/tender-post-award/repository';
+import { TenderPostAwardService } from '../components/tender-post-award/service';
+import {
+  ITenderPostAwardRepository,
+  ITenderPostAwardService,
+} from '../components/tender-post-award/types';
+
 
 
 let _container: Container | null = null;
@@ -249,6 +256,14 @@ container
   container
     .bind<IS3Service>(TYPES.IS3Service)
     .to(S3Service);
+
+  container
+    .bind<ITenderPostAwardRepository>(TYPES.ITenderPostAwardRepository)
+    .to(TenderPostAwardRepository);
+
+  container
+    .bind<ITenderPostAwardService>(TYPES.ITenderPostAwardService)
+    .to(TenderPostAwardService);
 
 
 

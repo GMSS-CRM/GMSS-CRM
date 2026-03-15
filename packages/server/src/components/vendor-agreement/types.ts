@@ -21,4 +21,6 @@ export interface IVendorAgreementService {
   createAgreement(input: any): Promise<VendorAgreement>;
 
   updateSignature(input: any): Promise<VendorAgreement | null>;
+
+  getAgreementsByVendor(vendorId: string): Promise<VendorAgreement[]>;
 }

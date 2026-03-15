@@ -72,6 +72,15 @@ export const GET_VENDORS_BY_TAG = gql`
       name
       status
       createdDate
+      contactPersons {
+        email
+        phoneNumber
+      }
+      tags {
+        id
+        tagId
+        enableMail
+      }
     }
   }
 `;
@@ -141,7 +150,7 @@ export const useGetTendersByTag = (tagId: string | null) =>
   });
 
 export const useGetVendorsByTag = (tagId: string | null) =>
-  useQuery<{ getVendorsByTag: Array<{ id: string; name: string; status: string; createdDate: string }> }>(GET_VENDORS_BY_TAG, {
+  useQuery<{ getVendorsByTag: Array<{ id: string; name: string; status: string; createdDate: string; contactPersons: Array<{ email: string; phoneNumber: string }>; tags: Array<{ id: string; tagId: string; enableMail: boolean }> }> }>(GET_VENDORS_BY_TAG, {
     variables: { tagId },
     skip: !tagId,
     fetchPolicy: 'cache-and-network',

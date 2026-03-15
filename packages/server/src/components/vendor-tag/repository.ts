@@ -33,7 +33,23 @@ export class VendorTagRepository extends Repository<VendorTag> implements IVendo
     return this.createQueryBuilder('vendorTag')
       .where('vendorTag.tagId = :tagId', { tagId })
       .leftJoinAndSelect('vendorTag.vendor', 'vendor')
-      .select('vendor')
+      .leftJoinAndSelect('vendor.contactPersons', 'contactPersons')
+      .leftJoinAndSelect('vendor.tags', 'tags')
+      .select([
+        'vendorTag.id',
+        'vendorTag.vendorId',
+        'vendorTag.id',
+        'vendorTag.vendorId',
+        'vendor.id',
+        'vendor.name',
+        'vendor.status',
+        'vendor.createdDate',
+        'contactPersons.email',
+        'contactPersons.phoneNumber',
+        'tags.id',
+        'tags.tagId',
+        'tags.enableMail',
+      ])
       .getMany()
       .then((results) => results.map((vt) => vt.vendor));
   }

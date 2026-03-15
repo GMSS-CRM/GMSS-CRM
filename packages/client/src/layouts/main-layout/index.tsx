@@ -12,6 +12,7 @@ import {
   ShopOutlined,
   FileTextOutlined,
   TagsOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
@@ -33,6 +34,11 @@ const menuItems: MenuProps["items"] = [
     key: "tender-workflow",
     icon: <FileTextOutlined style={{ fontSize: 22 }} />,
     label: "Tenders",
+  },
+  {
+    key: "live-tenders",
+    icon: <ThunderboltOutlined style={{ fontSize: 22 }} />,
+    label: "Live",
   },
   {
     key: "tags",

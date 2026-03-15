@@ -33,4 +33,5 @@ export interface ITenderService {
   getTenderById(id: string): Promise<Tender | null>;
   getTenderByName(name: string): Promise<Tender | null>;
   searchTender(params: any): Promise<Tender[]>;
+  seedTenderVendors(tenderId: string): Promise<boolean>;
 }

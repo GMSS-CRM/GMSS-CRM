@@ -7,6 +7,8 @@ import ErrorInfo from '../common/error-info';
 import { getCurrentEmail } from '../common/utils';
 import { DataSource } from 'typeorm';
 import { TenderTag } from '../../entities/TenderTag';
+import { VendorTag } from '../../entities/VendorTag';
+import { VendorTender } from '../../entities/VendorTender';
 
 @injectable()
 export class TenderService implements ITenderService {
@@ -131,7 +133,87 @@ export class TenderService implements ITenderService {
       });
     }
 
+    // When mail is sent, create VendorTender rows for every vendor linked via the tender's tags
+    if (nextStatus === TenderStatus.MAIL_SENT) {
+      return this.db.transaction(async (manager) => {
+        await manager.update('tender', input.tenderId, updateData);
+
+        // 1. Fetch all tag IDs attached to this tender
+        const tenderTags = await manager.find(TenderTag, {
+          where: { tenderId: input.tenderId },
+        });
+        const tagIds = tenderTags.map((tt) => tt.tagId);
+
+        if (tagIds.length > 0) {
+          // 2. Find all vendor IDs linked to those tags (only enableMail = true)
+          const vendorTags = await manager
+            .createQueryBuilder(VendorTag, 'vt')
+            .where('vt.tagId IN (:...tagIds)', { tagIds })
+            .andWhere('vt.enableMail = true')
+            .getMany();
+
+          // 3. Deduplicate vendor IDs
+          const uniqueVendorIds = [...new Set(vendorTags.map((vt) => vt.vendorId))];
+
+          // 4. Find already-existing VendorTender rows to avoid duplicates
+          const existing = await manager.find(VendorTender, {
+            where: uniqueVendorIds.map((vendorId) => ({ vendorId, tenderId: input.tenderId })),
+          });
+          const existingSet = new Set(existing.map((e) => e.vendorId));
+
+          // 5. Insert only the missing ones
+          const toCreate = uniqueVendorIds
+            .filter((vendorId) => !existingSet.has(vendorId))
+            .map((vendorId) =>
+              manager.create(VendorTender, {
+                vendorId,
+                tenderId: input.tenderId,
+              }),
+            );
+
+          if (toCreate.length > 0) {
+            await manager.save(VendorTender, toCreate);
+          }
+        }
+
+        return this.tenderRepository.findById(input.tenderId);
+      });
+    }
+
     return this.tenderRepository.updateTender(input.tenderId, updateData);
+  }
+
+  async seedTenderVendors(tenderId: string): Promise<boolean> {
+    const tender = await this.tenderRepository.findById(tenderId);
+    if (!tender) throw new Error(ErrorInfo.TENDER_NOT_FOUND);
+
+    await this.db.transaction(async (manager) => {
+      const tenderTags = await manager.find(TenderTag, { where: { tenderId } });
+      const tagIds = tenderTags.map((tt) => tt.tagId);
+      if (tagIds.length === 0) return;
+
+      const vendorTags = await manager
+        .createQueryBuilder(VendorTag, 'vt')
+        .where('vt.tagId IN (:...tagIds)', { tagIds })
+        .andWhere('vt.enableMail = true')
+        .getMany();
+
+      const uniqueVendorIds = [...new Set(vendorTags.map((vt) => vt.vendorId))];
+      if (uniqueVendorIds.length === 0) return;
+
+      const existing = await manager.find(VendorTender, {
+        where: uniqueVendorIds.map((vendorId) => ({ vendorId, tenderId })),
+      });
+      const existingSet = new Set(existing.map((e) => e.vendorId));
+
+      const toCreate = uniqueVendorIds
+        .filter((vendorId) => !existingSet.has(vendorId))
+        .map((vendorId) => manager.create(VendorTender, { vendorId, tenderId }));
+
+      if (toCreate.length > 0) await manager.save(VendorTender, toCreate);
+    });
+
+    return true;
   }
 
   async deleteTender(id: string) {
