@@ -15,6 +15,7 @@ export const tenderPostAwardTypeDefs = gql`
     id: ID!
     tenderId: ID!
     currentStage: PostAwardStage!
+    winningVendorId: ID
 
     # Stage 1 – Order Follow-Up
     tenderOfficerName: String
@@ -225,7 +226,7 @@ export const tenderPostAwardTypeDefs = gql`
   }
 
   extend type Query {
-    getTenderPostAward(tenderId: ID!): TenderPostAward!
+    getTenderPostAward(tenderId: ID!, vendorId: ID): TenderPostAward
   }
 
   extend type Mutation {
@@ -236,5 +237,6 @@ export const tenderPostAwardTypeDefs = gql`
     updateWarranty(input: UpdateWarrantyInput!): TenderPostAward!
     updateBillPayment(input: UpdateBillPaymentInput!): TenderPostAward!
     advancePostAwardStage(tenderId: ID!): TenderPostAward!
+    markVendorAsWinner(tenderId: ID!, vendorId: ID!): TenderPostAward!
   }
 `;

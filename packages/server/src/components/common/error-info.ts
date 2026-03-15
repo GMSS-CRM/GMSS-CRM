@@ -93,6 +93,17 @@ export const ErrorInfo = {
   MD_REQUEST_PENDING_EXISTS: 'A pending MD request already exists for this vendor',
   MD_REQUEST_VENDOR_NOT_INTERESTED: 'Vendor must be in INTERESTED status to send to MD',
   MD_REQUEST_ID_REQUIRED: 'Request ID is required',
+
+  // Post Award errors
+  POST_AWARD_NOT_FOUND: 'Post award record not found',
+  POST_AWARD_DOCUMENT_NOT_FOUND: 'Post award document not found',
+  POST_AWARD_FOLLOWUP_NOT_FOUND: 'Post award follow-up not found',
+  POST_AWARD_FOLLOWUP_COMPLETED: 'Follow-up is already completed',
+  POST_AWARD_STAGE_INVALID: 'Invalid post award stage transition',
+
+  // Activity Log errors
+  ACTIVITY_LOG_TENDER_REQUIRED: 'Tender ID is required for activity log',
+  ACTIVITY_LOG_ACTION_REQUIRED: 'Action is required for activity log',
 };
 
 export default ErrorInfo;

@@ -22,7 +22,10 @@ import {
   VendorTender,
   VendorWorkflow,
   VendorMdRequest,
-  TenderPostAward
+  TenderPostAward,
+  TenderActivityLog,
+  PostAwardFollowUp,
+  PostAwardDocument,
 } from "../entities";
 
 dotenv.config();
@@ -56,7 +59,10 @@ export const AppDataSource = new DataSource({
     VendorTender,
     VendorWorkflow,
     VendorMdRequest,
-    TenderPostAward
+    TenderPostAward,
+    TenderActivityLog,
+    PostAwardFollowUp,
+    PostAwardDocument,
   ],
 
   synchronize: true, // ❗ OK for now, disable later

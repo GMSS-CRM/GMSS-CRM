@@ -17,10 +17,11 @@ import {
   message,
 } from 'antd';
 import { SaveOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import type { VendorTender } from '@gmss/types';
-import { useUpdateVendorTenderFollowUp } from '../../services/tenders.service';
+import type { VendorTender, TenderPostAward } from '@gmss/types';
+import { useUpdateVendorTenderFollowUp, useMarkVendorAsWinner } from '../../services/tenders.service';
 import { calcProgress, INTEREST_STATUS_META } from './vendorFollowUpUtils';
 import type { FollowUpDraft } from './vendorFollowUpUtils';
+import FileUploadField from '../../components/FileUploadField';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -76,18 +77,28 @@ interface Props {
   record: VendorTender | null;
   onClose: () => void;
   onSaved: () => void;
+  postAwardData?: TenderPostAward | null;
 }
 
-const VendorDetailDrawer: React.FC<Props> = ({ record, onClose, onSaved }) => {
+const VendorDetailDrawer: React.FC<Props> = ({ record, onClose, onSaved, postAwardData }) => {
   const [draft, setDraft] = useState<FollowUpDraft>(() =>
     record ? buildDraft(record) : buildDraft({} as VendorTender),
   );
+  const [isWinner, setIsWinner] = useState(false);
+  const [initialWinnerState, setInitialWinnerState] = useState(false);
   const [updateFollowUp, { loading: saving }] = useUpdateVendorTenderFollowUp();
+  const [markAsWinner] = useMarkVendorAsWinner();
 
   // Reset draft when record changes
   React.useEffect(() => {
-    if (record) setDraft(buildDraft(record));
-  }, [record]);
+    if (record) {
+      setDraft(buildDraft(record));
+      // Initialize isWinner based on whether this vendor is the winner in post-award record
+      const isWinnerInPostAward = postAwardData?.winningVendorId === record.id;
+      setIsWinner(isWinnerInPostAward);
+      setInitialWinnerState(isWinnerInPostAward);
+    }
+  }, [record, postAwardData?.winningVendorId]);
 
   if (!record) return null;
 
@@ -100,6 +111,7 @@ const VendorDetailDrawer: React.FC<Props> = ({ record, onClose, onSaved }) => {
 
   const handleSave = async () => {
     try {
+      // First: Update vendor follow-up
       await updateFollowUp({
         variables: {
           input: {
@@ -126,10 +138,29 @@ const VendorDetailDrawer: React.FC<Props> = ({ record, onClose, onSaved }) => {
           },
         },
       });
-      message.success('Saved');
+      message.success('Vendor details saved');
+
+      // Second: If winner status changed, call the winner mutation
+      if (isWinner !== initialWinnerState && record.tenderId) {
+        try {
+          if (isWinner) {
+            // Marking as winner
+            await markAsWinner({
+              variables: { tenderId: record.tenderId, vendorId: record.id },
+            });
+            message.success('Marked as winner! Post-award tracking enabled');
+          }
+          // Note: unmarking as winner is not currently supported in backend
+        } catch (winnerError) {
+          console.error('Failed to update winner status:', winnerError);
+          message.error('Vendor saved but failed to update winner status');
+        }
+      }
+
       onSaved();
-    } catch {
-      message.error('Failed to save');
+    } catch (error) {
+      console.error('Failed to save vendor:', error);
+      message.error('Failed to save vendor details');
     }
   };
 
@@ -277,12 +308,14 @@ const VendorDetailDrawer: React.FC<Props> = ({ record, onClose, onSaved }) => {
           {draft.quoteReceived && (
             <>
               <Row gutter={[16, 8]} align="middle" style={{ marginBottom: 8 }}>
-                <Col span={14}><Text>Quote URL</Text></Col>
+                <Col span={14}><Text>Quote File</Text></Col>
                 <Col span={10}>
-                  <Input
-                    placeholder="Drive / SharePoint link…"
+                  <FileUploadField
+                    folder="vendor-quotes"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                    buttonText="Upload Quote"
                     value={draft.quoteUrl}
-                    onChange={(e) => set('quoteUrl', e.target.value)}
+                    onChange={(url) => set('quoteUrl', url)}
                   />
                 </Col>
               </Row>
@@ -431,6 +464,24 @@ const VendorDetailDrawer: React.FC<Props> = ({ record, onClose, onSaved }) => {
           </Row>
         </>
       )}
+
+      <Divider style={{ margin: '12px 0', fontSize: 13 }}>Winner</Divider>
+
+      <Row gutter={[16, 8]} align="middle" style={{ marginBottom: 12 }}>
+        <Col span={14}>
+          <Text strong>Mark as Winner</Text>
+          <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+            This vendor will have post-award progress tracking
+          </Text>
+        </Col>
+        <Col span={10}>
+          <Switch
+            checked={isWinner}
+            onChange={setIsWinner}
+            checkedChildren="Winner" unCheckedChildren="Regular"
+          />
+        </Col>
+      </Row>
 
       <Divider style={{ margin: '12px 0', fontSize: 13 }}>Notes</Divider>
 

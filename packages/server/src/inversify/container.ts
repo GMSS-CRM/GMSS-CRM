@@ -116,6 +116,27 @@ import {
   ITenderPostAwardService,
 } from '../components/tender-post-award/types';
 
+import { TenderActivityLogRepository } from '../components/tender-activity-log/repository';
+import { TenderActivityLogService } from '../components/tender-activity-log/service';
+import {
+  ITenderActivityLogRepository,
+  ITenderActivityLogService,
+} from '../components/tender-activity-log/types';
+
+import { PostAwardFollowUpRepository } from '../components/post-award-follow-up/repository';
+import { PostAwardFollowUpService } from '../components/post-award-follow-up/service';
+import {
+  IPostAwardFollowUpRepository,
+  IPostAwardFollowUpService,
+} from '../components/post-award-follow-up/types';
+
+import { PostAwardDocumentRepository } from '../components/post-award-document/repository';
+import { PostAwardDocumentService } from '../components/post-award-document/service';
+import {
+  IPostAwardDocumentRepository,
+  IPostAwardDocumentService,
+} from '../components/post-award-document/types';
+
 
 
 let _container: Container | null = null;
@@ -265,7 +286,29 @@ container
     .bind<ITenderPostAwardService>(TYPES.ITenderPostAwardService)
     .to(TenderPostAwardService);
 
+  container
+    .bind<ITenderActivityLogRepository>(TYPES.ITenderActivityLogRepository)
+    .to(TenderActivityLogRepository);
 
+  container
+    .bind<ITenderActivityLogService>(TYPES.ITenderActivityLogService)
+    .to(TenderActivityLogService);
+
+  container
+    .bind<IPostAwardFollowUpRepository>(TYPES.IPostAwardFollowUpRepository)
+    .to(PostAwardFollowUpRepository);
+
+  container
+    .bind<IPostAwardFollowUpService>(TYPES.IPostAwardFollowUpService)
+    .to(PostAwardFollowUpService);
+
+  container
+    .bind<IPostAwardDocumentRepository>(TYPES.IPostAwardDocumentRepository)
+    .to(PostAwardDocumentRepository);
+
+  container
+    .bind<IPostAwardDocumentService>(TYPES.IPostAwardDocumentService)
+    .to(PostAwardDocumentService);
 
   return container;
 }

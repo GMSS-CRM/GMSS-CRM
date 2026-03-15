@@ -80,10 +80,12 @@ export default function TagTendersDrawer({
           : false;
         return {
           id: v.id,
+          vendorId: v.id,
           vendorName: v.name ?? '',
           vendorEmail: firstContact?.email ?? '',
           vendorPhone: firstContact?.phoneNumber ?? '',
           enableMail,
+          assignedDate: new Date().toISOString(),
         };
       });
       setVendors(vendorList);

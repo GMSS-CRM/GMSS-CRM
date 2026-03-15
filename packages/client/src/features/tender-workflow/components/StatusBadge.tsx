@@ -9,6 +9,15 @@ import {
   SafetyCertificateOutlined,
   SendOutlined,
   MailOutlined,
+  TeamOutlined,
+  DollarOutlined,
+  FileOutlined,
+  TruckOutlined,
+  InboxOutlined,
+  ToolOutlined,
+  BankOutlined,
+  CreditCardOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import type { TenderStatus } from "../types/tender.types";
 import { STATUS_COLORS, STATUS_LABELS } from "../types/tender.types";
@@ -25,6 +34,20 @@ const ICONS: Record<TenderStatus, React.ReactNode> = {
   DOCS_UPLOADED: <FileTextOutlined />,
   READY_TO_MAIL: <SendOutlined />,
   MAIL_SENT: <MailOutlined />,
+  VENDOR_FOLLOWUP: <TeamOutlined />,
+  QUOTE_COLLECTION: <DollarOutlined />,
+  TENDER_PREPARATION: <FileOutlined />,
+  PARTICIPATED: <CheckCircleOutlined />,
+  ORDER_FOLLOWUP: <ClockCircleOutlined />,
+  ORDER_PROCESSING: <ToolOutlined />,
+  INSPECTION: <SafetyCertificateOutlined />,
+  DISPATCH: <TruckOutlined />,
+  DELIVERY: <InboxOutlined />,
+  WARRANTY: <ToolOutlined />,
+  BILL_SUBMISSION: <BankOutlined />,
+  PAYMENT: <CreditCardOutlined />,
+  SD_RELEASE: <LockOutlined />,
+  COMPLETED: <CheckCircleOutlined />,
 };
 
 interface Props {

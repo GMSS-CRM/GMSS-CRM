@@ -20,6 +20,9 @@ import { vendorWorkflowResolvers } from "../components/vendor-workflow";
 import { vendorMdRequestResolvers } from "../components/vendor-md-request";
 import { uploadResolvers } from "../components/upload";
 import { tenderPostAwardResolvers } from "../components/tender-post-award";
+import { tenderActivityLogResolvers } from "../components/tender-activity-log";
+import { postAwardFollowUpResolvers } from "../components/post-award-follow-up";
+import { postAwardDocumentResolvers } from "../components/post-award-document";
 
 export const resolvers = [
   userResolvers,
@@ -44,4 +47,7 @@ export const resolvers = [
   vendorMdRequestResolvers,
   uploadResolvers,
   tenderPostAwardResolvers,
+  tenderActivityLogResolvers,
+  postAwardFollowUpResolvers,
+  postAwardDocumentResolvers,
 ];

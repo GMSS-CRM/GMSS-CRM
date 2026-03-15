@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Spin,
@@ -11,10 +11,19 @@ import {
   Divider,
   message,
   Card,
+  Tabs,
 } from 'antd';
-import { ArrowLeftOutlined, RightCircleOutlined } from '@ant-design/icons';
+import {
+  ArrowLeftOutlined,
+  RightCircleOutlined,
+  FileOutlined,
+  BellOutlined,
+  TeamOutlined,
+  TrophyOutlined,
+} from '@ant-design/icons';
 import { useQuery } from '@apollo/client/react';
 import { gql } from '@apollo/client';
+import type { VendorTender } from '@gmss/types';
 import {
   useGetTenderPostAward,
   useUpdateOrderFollowUp,
@@ -34,6 +43,10 @@ import {
   BillPaymentSection,
 } from './StageSections';
 import VendorFollowUpSection from './VendorFollowUpSection';
+import PostAwardDocumentsPanel from './PostAwardDocumentsPanel';
+import PostAwardFollowUpsPanel from './PostAwardFollowUpsPanel';
+import { STATUS_COLORS, STATUS_LABELS } from '../../types/tender.types';
+import type { TenderStatus } from '../../types/tender.types';
 
 const { Title, Text } = Typography;
 
@@ -86,11 +99,12 @@ const POST_AWARD_STAGES = [
 const TenderDetailPage: React.FC = () => {
   const { id = '' } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [selectedVendor, setSelectedVendor] = useState<VendorTender | null>(null);
 
   const { data: tenderData, loading: tenderLoading } = useQuery<{ getTenderById: TenderBasic }>(
     GET_TENDER_BASIC, { variables: { id }, skip: !id },
   );
-  const { data: postAwardData, loading: postAwardLoading } = useGetTenderPostAward(id);
+  const { data: postAwardData, loading: postAwardLoading } = useGetTenderPostAward(id, selectedVendor?.id);
 
   const [updateOrderFollowUp, { loading: savingFollowUp }]     = useUpdateOrderFollowUp();
   const [updateOrderProcessing, { loading: savingProcessing }] = useUpdateOrderProcessing();
@@ -102,6 +116,8 @@ const TenderDetailPage: React.FC = () => {
 
   const tender    = tenderData?.getTenderById;
   const postAward = postAwardData?.getTenderPostAward;
+
+  const tenderStatus = (tender?.status ?? 'DRAFT') as TenderStatus;
 
   const currentStageIdx = postAward
     ? POST_AWARD_STAGES.findIndex((s) => s.key === postAward.currentStage)
@@ -157,100 +173,172 @@ const TenderDetailPage: React.FC = () => {
               </Text>
             </div>
           </Space>
-          <Tag color="blue" style={{ fontSize: 12 }}>{tender?.status?.replace(/_/g, ' ')}</Tag>
+          <Tag
+            color={STATUS_COLORS[tenderStatus] ?? 'blue'}
+            style={{ fontSize: 12 }}
+          >
+            {STATUS_LABELS[tenderStatus] ?? tender?.status?.replace(/_/g, ' ')}
+          </Tag>
         </Space>
       </div>
 
       {/* ── Scrollable body ─────────────────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px 32px', background: '#fafafa' }}>
 
-        {/* ── Section 1: Vendor Responses ───────────────────────────────────── */}
-        <Card
-          title={<Text strong style={{ fontSize: 15 }}>Vendor Responses</Text>}
-          style={{ marginBottom: 24, borderRadius: 8 }}
-          bodyStyle={{ padding: '16px 20px' }}
-        >
-          <VendorFollowUpSection tenderId={id} />
-        </Card>
-
-        {/* ── Section 2: Post-Award Progress ───────────────────────────────── */}
+        {/* ── Vendor Responses ──────────────────────────────────────────────── */}
         <Card
           title={
-            <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-              <Text strong style={{ fontSize: 15 }}>Post-Award Progress</Text>
-              {postAward && postAward.currentStage !== 'CLOSED' && (
-                <Button
-                  type="primary"
-                  icon={<RightCircleOutlined />}
-                  size="small"
-                  loading={advancing}
-                  onClick={handleAdvance}
-                >
-                  Advance Stage
-                </Button>
-              )}
+            <Space>
+              <TeamOutlined />
+              <Text strong style={{ fontSize: 15 }}>Vendor Responses</Text>
             </Space>
           }
-          style={{ borderRadius: 8 }}
-          bodyStyle={{ padding: '20px 24px' }}
+          style={{ marginBottom: 24, borderRadius: 8 }}
+          styles={{ body: { padding: '16px 20px' } }}
         >
-          {/* Stage progress bar */}
-          <Steps
-            current={currentStageIdx}
-            size="small"
-            style={{ marginBottom: 28 }}
-            items={POST_AWARD_STAGES.map((s, i) => ({
-              title: s.label,
-              status: i < currentStageIdx ? 'finish' : i === currentStageIdx ? 'process' : 'wait',
-            }))}
-          />
-
-          <Divider style={{ margin: '0 0 20px' }} />
-
-          {/* Stage form content */}
-          {!postAward ? (
-            <Text type="secondary">Post-award record not yet created.</Text>
-          ) : (
-            <>
-              {postAward.currentStage === 'ORDER_FOLLOWUP' && (
-                <OrderFollowUpSection
-                  data={postAward} saving={savingFollowUp}
-                  onSave={makeSaveHandler(updateOrderFollowUp as MutationFn, 'Order Follow-Up')}
-                />
-              )}
-              {postAward.currentStage === 'ORDER_PROCESSING' && (
-                <OrderProcessingSection
-                  data={postAward} saving={savingProcessing}
-                  onSave={makeSaveHandler(updateOrderProcessing as MutationFn, 'Order Processing')}
-                />
-              )}
-              {postAward.currentStage === 'INSPECTION' && (
-                <InspectionSection
-                  data={postAward} saving={savingInspection}
-                  onSave={makeSaveHandler(updateInspection as MutationFn, 'Inspection')}
-                />
-              )}
-              {postAward.currentStage === 'DISPATCH_DELIVERY' && (
-                <DispatchDeliverySection
-                  data={postAward} saving={savingDispatch}
-                  onSave={makeSaveHandler(updateDispatchDelivery as MutationFn, 'Dispatch & Delivery')}
-                />
-              )}
-              {postAward.currentStage === 'WARRANTY' && (
-                <WarrantySection
-                  data={postAward} saving={savingWarranty}
-                  onSave={makeSaveHandler(updateWarranty as MutationFn, 'Warranty')}
-                />
-              )}
-              {postAward.currentStage === 'BILL_PAYMENT' && (
-                <BillPaymentSection
-                  data={postAward} saving={savingBill}
-                  onSave={makeSaveHandler(updateBillPayment as MutationFn, 'Bill & Payment')}
-                />
-              )}
-            </>
-          )}
+          <VendorFollowUpSection tenderId={id} onVendorSelected={setSelectedVendor} selectedVendor={selectedVendor} postAwardData={postAward} />
         </Card>
+
+        {/* ── Post-Award Progress (only when record exists) ────────────────── */}
+        {postAward && selectedVendor ? (
+          <Card
+            title={
+              <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Space>
+                  <TrophyOutlined />
+                  <Text strong style={{ fontSize: 15 }}>Post-Award Progress</Text>
+                  <Text type="secondary" style={{ fontSize: 13 }}>
+                    {selectedVendor.vendor?.name ?? `Vendor ${selectedVendor.vendorId}`}
+                  </Text>
+                </Space>
+                {postAward.currentStage !== 'CLOSED' && (
+                  <Button
+                    type="primary"
+                    icon={<RightCircleOutlined />}
+                    size="small"
+                    loading={advancing}
+                    onClick={handleAdvance}
+                  >
+                    Advance Stage
+                  </Button>
+                )}
+              </Space>
+            }
+            style={{ marginBottom: 24, borderRadius: 8 }}
+            styles={{ body: { padding: '20px 24px' } }}
+          >
+            {/* Stage progress bar */}
+            <Steps
+              current={currentStageIdx}
+              size="small"
+              style={{ marginBottom: 28 }}
+              items={POST_AWARD_STAGES.map((s, i) => ({
+                title: s.label,
+                status: i < currentStageIdx ? 'finish' : i === currentStageIdx ? 'process' : 'wait',
+              }))}
+            />
+
+            <Divider style={{ margin: '0 0 20px' }} />
+
+            {/* Stage form content */}
+            {postAward.currentStage === 'ORDER_FOLLOWUP' && (
+              <OrderFollowUpSection
+                data={postAward} saving={savingFollowUp}
+                onSave={makeSaveHandler(updateOrderFollowUp as MutationFn, 'Order Follow-Up')}
+              />
+            )}
+            {postAward.currentStage === 'ORDER_PROCESSING' && (
+              <OrderProcessingSection
+                data={postAward} saving={savingProcessing}
+                onSave={makeSaveHandler(updateOrderProcessing as MutationFn, 'Order Processing')}
+              />
+            )}
+            {postAward.currentStage === 'INSPECTION' && (
+              <InspectionSection
+                data={postAward} saving={savingInspection}
+                onSave={makeSaveHandler(updateInspection as MutationFn, 'Inspection')}
+              />
+            )}
+            {postAward.currentStage === 'DISPATCH_DELIVERY' && (
+              <DispatchDeliverySection
+                data={postAward} saving={savingDispatch}
+                onSave={makeSaveHandler(updateDispatchDelivery as MutationFn, 'Dispatch & Delivery')}
+              />
+            )}
+            {postAward.currentStage === 'WARRANTY' && (
+              <WarrantySection
+                data={postAward} saving={savingWarranty}
+                onSave={makeSaveHandler(updateWarranty as MutationFn, 'Warranty')}
+              />
+            )}
+            {postAward.currentStage === 'BILL_PAYMENT' && (
+              <BillPaymentSection
+                data={postAward} saving={savingBill}
+                onSave={makeSaveHandler(updateBillPayment as MutationFn, 'Bill & Payment')}
+              />
+            )}
+          </Card>
+        ) : selectedVendor ? (
+          <Card style={{ borderRadius: 8 }}>
+            <Text type="secondary">
+              No post-award record found for {selectedVendor.vendor?.name ?? `Vendor ${selectedVendor.vendorId}`}. 
+              Post-award tracking will be available after vendor is marked as winner.
+            </Text>
+          </Card>
+        ) : (
+          <Card style={{ borderRadius: 8 }}>
+            <Text type="secondary">
+              Click on a vendor in the Vendor Responses table to view their post-award progress.
+            </Text>
+          </Card>
+        )}
+
+        {/* ── Documents, Follow-Ups & Activity ─────────────────────────────── */}
+        {postAward && selectedVendor && (
+          <Card
+            style={{ borderRadius: 8 }}
+            styles={{ body: { padding: '0 20px 20px' } }}
+          >
+            <Tabs
+              defaultActiveKey="activity"
+              items={[
+                {
+                  key: 'documents',
+                  label: (
+                    <span><FileOutlined style={{ marginRight: 6 }} />Documents</span>
+                  ),
+                  children: (
+                    <PostAwardDocumentsPanel
+                      postAwardId={postAward.id}
+                      tenderId={id}
+                      currentStage={postAward.currentStage}
+                    />
+                  ),
+                },
+                {
+                  key: 'followups',
+                  label: (
+                    <span><BellOutlined style={{ marginRight: 6 }} />Follow-Ups</span>
+                  ),
+                  children: (
+                    <PostAwardFollowUpsPanel
+                      postAwardId={postAward.id}
+                      tenderId={id}
+                      currentStage={postAward.currentStage}
+                    />
+                  ),
+                },
+                // {
+                //   key: 'activity',
+                //   label: (
+                //     <span><HistoryOutlined style={{ marginRight: 6 }} />Activity Log</span>
+                //   ),
+                //   children: <ActivityTimeline tenderId={id} />,
+                // },
+              ]}
+            />
+          </Card>
+        )}
 
       </div>
     </div>

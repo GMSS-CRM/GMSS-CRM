@@ -10,7 +10,21 @@ export type TenderStatus =
   | "NIT_VERIFIED"
   | "DOCS_UPLOADED"
   | "READY_TO_MAIL"
-  | "MAIL_SENT";
+  | "MAIL_SENT"
+  | "VENDOR_FOLLOWUP"
+  | "QUOTE_COLLECTION"
+  | "TENDER_PREPARATION"
+  | "PARTICIPATED"
+  | "ORDER_FOLLOWUP"
+  | "ORDER_PROCESSING"
+  | "INSPECTION"
+  | "DISPATCH"
+  | "DELIVERY"
+  | "WARRANTY"
+  | "BILL_SUBMISSION"
+  | "PAYMENT"
+  | "SD_RELEASE"
+  | "COMPLETED";
 
 export type UserRole = "USER" | "MD";
 
@@ -92,12 +106,31 @@ export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   NIT_VERIFIED: ["DOCS_UPLOADED", "READY_TO_MAIL"],
   DOCS_UPLOADED: ["READY_TO_MAIL"],
   READY_TO_MAIL: ["MAIL_SENT"],
-  MAIL_SENT: [],
+  MAIL_SENT: ["VENDOR_FOLLOWUP"],
+  VENDOR_FOLLOWUP: ["QUOTE_COLLECTION", "REJECTED"],
+  QUOTE_COLLECTION: ["TENDER_PREPARATION", "REJECTED"],
+  TENDER_PREPARATION: ["PARTICIPATED", "REJECTED"],
+  PARTICIPATED: ["ORDER_FOLLOWUP", "REJECTED"],
+  ORDER_FOLLOWUP: ["ORDER_PROCESSING"],
+  ORDER_PROCESSING: ["INSPECTION", "DISPATCH"],
+  INSPECTION: ["DISPATCH"],
+  DISPATCH: ["DELIVERY"],
+  DELIVERY: ["WARRANTY", "BILL_SUBMISSION"],
+  WARRANTY: ["BILL_SUBMISSION"],
+  BILL_SUBMISSION: ["PAYMENT"],
+  PAYMENT: ["SD_RELEASE", "COMPLETED"],
+  SD_RELEASE: ["COMPLETED"],
+  COMPLETED: [],
 };
 
 // Role-based allowed status targets
 export const ROLE_CAN_SET_STATUS: Record<UserRole, TenderStatus[]> = {
-  USER: ["DRAFT", "PENDING_MD_TAGGING", "NIT_UPLOADED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT"],
+  USER: [
+    "DRAFT", "PENDING_MD_TAGGING", "NIT_UPLOADED", "DOCS_UPLOADED", "READY_TO_MAIL", "MAIL_SENT",
+    "VENDOR_FOLLOWUP", "QUOTE_COLLECTION", "TENDER_PREPARATION", "PARTICIPATED",
+    "ORDER_FOLLOWUP", "ORDER_PROCESSING", "INSPECTION", "DISPATCH", "DELIVERY",
+    "WARRANTY", "BILL_SUBMISSION", "PAYMENT", "SD_RELEASE", "COMPLETED",
+  ],
   MD: ["MD_TAGGED", "REJECTED", "NIT_VERIFIED", "READY_FOR_NIT"],
 };
 
@@ -112,6 +145,20 @@ export const STATUS_COLORS: Record<TenderStatus, string> = {
   DOCS_UPLOADED: "success",
   READY_TO_MAIL: "gold",
   MAIL_SENT: "success",
+  VENDOR_FOLLOWUP: "processing",
+  QUOTE_COLLECTION: "warning",
+  TENDER_PREPARATION: "gold",
+  PARTICIPATED: "cyan",
+  ORDER_FOLLOWUP: "purple",
+  ORDER_PROCESSING: "processing",
+  INSPECTION: "warning",
+  DISPATCH: "gold",
+  DELIVERY: "cyan",
+  WARRANTY: "error",
+  BILL_SUBMISSION: "purple",
+  PAYMENT: "processing",
+  SD_RELEASE: "gold",
+  COMPLETED: "success",
 };
 
 export const STATUS_LABELS: Record<TenderStatus, string> = {
@@ -125,6 +172,20 @@ export const STATUS_LABELS: Record<TenderStatus, string> = {
   DOCS_UPLOADED: "Documents Uploaded",
   READY_TO_MAIL: "Ready to Mail",
   MAIL_SENT: "Mail Sent",
+  VENDOR_FOLLOWUP: "Vendor Follow-Up",
+  QUOTE_COLLECTION: "Quote Collection",
+  TENDER_PREPARATION: "Tender Preparation",
+  PARTICIPATED: "Participated",
+  ORDER_FOLLOWUP: "Order Follow-Up",
+  ORDER_PROCESSING: "Order Processing",
+  INSPECTION: "Inspection",
+  DISPATCH: "Dispatch",
+  DELIVERY: "Delivery",
+  WARRANTY: "Warranty",
+  BILL_SUBMISSION: "Bill Submission",
+  PAYMENT: "Payment",
+  SD_RELEASE: "SD Release",
+  COMPLETED: "Completed",
 };
 
 // Tab configuration for each role
@@ -139,13 +200,18 @@ export const USER_TABS: TabConfig[] = [
   { key: "nitPending", label: "NIT Pending", statuses: ["READY_FOR_NIT", "MD_TAGGED"] },
   { key: "docsPending", label: "Docs Pending", statuses: ["NIT_VERIFIED", "DOCS_UPLOADED"] },
   { key: "readyToMail", label: "Ready to Mail", statuses: ["READY_TO_MAIL"] },
-  { key: "completed", label: "Completed", statuses: ["MAIL_SENT"] },
+  { key: "mailSent", label: "Mail Sent", statuses: ["MAIL_SENT"] },
+  { key: "vendorFollowUp", label: "Vendor Follow-Up", statuses: ["VENDOR_FOLLOWUP", "QUOTE_COLLECTION", "TENDER_PREPARATION"] },
+  { key: "participated", label: "Participated", statuses: ["PARTICIPATED"] },
+  { key: "postAward", label: "Post-Award", statuses: ["ORDER_FOLLOWUP", "ORDER_PROCESSING", "INSPECTION", "DISPATCH", "DELIVERY", "WARRANTY", "BILL_SUBMISSION", "PAYMENT", "SD_RELEASE"] },
+  { key: "completed", label: "Completed", statuses: ["COMPLETED"] },
 ];
 
 export const MD_TABS: TabConfig[] = [
   { key: "pendingApproval", label: "Pending Approval", statuses: ["PENDING_MD_TAGGING"] },
   { key: "pendingTagging", label: "Pending Tagging", statuses: ["NIT_UPLOADED"] },
-  { key: "completed", label: "Completed", statuses: ["MAIL_SENT"] },
+  { key: "postAward", label: "Post-Award", statuses: ["ORDER_FOLLOWUP", "ORDER_PROCESSING", "INSPECTION", "DISPATCH", "DELIVERY", "WARRANTY", "BILL_SUBMISSION", "PAYMENT", "SD_RELEASE"] },
+  { key: "completed", label: "Completed", statuses: ["MAIL_SENT", "COMPLETED"] },
 ];
 
 // Document type options

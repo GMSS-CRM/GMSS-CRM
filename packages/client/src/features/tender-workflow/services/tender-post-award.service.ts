@@ -9,6 +9,7 @@ const TENDER_POST_AWARD_FIELDS = gql`
     id
     tenderId
     currentStage
+    winningVendorId
 
     # Stage 1 – Order Follow-Up
     tenderOfficerName
@@ -115,8 +116,8 @@ const TENDER_POST_AWARD_FIELDS = gql`
 
 export const GET_TENDER_POST_AWARD = gql`
   ${TENDER_POST_AWARD_FIELDS}
-  query GetTenderPostAward($tenderId: ID!) {
-    getTenderPostAward(tenderId: $tenderId) {
+  query GetTenderPostAward($tenderId: ID!, $vendorId: ID) {
+    getTenderPostAward(tenderId: $tenderId, vendorId: $vendorId) {
       ...TenderPostAwardFields
     }
   }
@@ -189,9 +190,9 @@ export const ADVANCE_POST_AWARD_STAGE = gql`
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 
-export const useGetTenderPostAward = (tenderId: string) =>
+export const useGetTenderPostAward = (tenderId: string, vendorId?: string) =>
   useQuery<{ getTenderPostAward: TenderPostAward }>(GET_TENDER_POST_AWARD, {
-    variables: { tenderId },
+    variables: { tenderId, ...(vendorId && { vendorId }) },
     skip: !tenderId,
   });
 

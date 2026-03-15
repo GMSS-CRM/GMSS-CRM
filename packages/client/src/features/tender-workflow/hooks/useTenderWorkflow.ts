@@ -190,9 +190,15 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
   const tenders = useMemo(
     () => {
       const allTenders = (data?.searchTenders ?? []).map(toLocalTender);
-      // Only show tenders that are not overdue (except MAIL_SENT - completed tenders can be shown)
+      // Post-award and completed statuses are always visible regardless of deadline
+      const POST_AWARD_STATUSES = new Set([
+        "MAIL_SENT", "VENDOR_FOLLOWUP", "QUOTE_COLLECTION", "TENDER_PREPARATION",
+        "PARTICIPATED", "ORDER_FOLLOWUP", "ORDER_PROCESSING", "INSPECTION",
+        "DISPATCH", "DELIVERY", "WARRANTY", "BILL_SUBMISSION", "PAYMENT",
+        "SD_RELEASE", "COMPLETED",
+      ]);
       return allTenders.filter((t) => {
-        if (t.status === "MAIL_SENT") return true; // Always show completed tenders
+        if (POST_AWARD_STATUSES.has(t.status)) return true;
         if (!t.submissionDeadline) return true; // Show if no deadline
         const now = Date.now();
         const deadline = new Date(t.submissionDeadline).getTime();

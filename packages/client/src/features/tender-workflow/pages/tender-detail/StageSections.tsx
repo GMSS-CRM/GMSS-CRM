@@ -15,6 +15,7 @@ import {
 } from 'antd';
 import type { TenderPostAward } from '@gmss/types';
 import dayjs from 'dayjs';
+import FileUploadField from '../../components/FileUploadField';
 
 const { Title } = Typography;
 
@@ -119,7 +120,7 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
       <Title level={5}>PO Details</Title>
       <Row gutter={16}>
         <Col span={4}><Form.Item label="PO Uploaded" name="poUploaded" valuePropName="checked"><Switch /></Form.Item></Col>
-        <Col span={20}><Form.Item label="PO Document URL" name="poDocumentUrl"><Input /></Form.Item></Col>
+        <Col span={20}><Form.Item label="PO Document" name="poDocumentUrl"><FileUploadField folder="post-award/po-documents" accept=".pdf,.doc,.docx" buttonText="Upload PO" /></Form.Item></Col>
       </Row>
       <Row gutter={16}>
         <Col span={6}><Form.Item label="Commission Payment Required" name="commissionPaymentRequired" valuePropName="checked"><Switch /></Form.Item></Col>
@@ -213,7 +214,7 @@ export const InspectionSection: React.FC<Props> = ({ data, saving, onSave }) => 
           <Row gutter={16}>
             <Col span={8}><Form.Item label="Visit Schedule" name="tpiVisitSchedule"><DatePicker showTime style={{ width: '100%' }} /></Form.Item></Col>
             <Col span={4}><Form.Item label="Inspection Done" name="inspectionDone" valuePropName="checked"><Switch /></Form.Item></Col>
-            <Col span={12}><Form.Item label="Certificate URL" name="inspectionCertificateUrl"><Input /></Form.Item></Col>
+            <Col span={12}><Form.Item label="Inspection Certificate" name="inspectionCertificateUrl"><FileUploadField folder="post-award/inspection" accept=".pdf,.jpg,.jpeg,.png" buttonText="Upload Certificate" /></Form.Item></Col>
           </Row>
         </>
       )}
@@ -262,7 +263,7 @@ export const DispatchDeliverySection: React.FC<Props> = ({ data, saving, onSave 
         <Col span={8}><Form.Item label="Consignment Number" name="consignmentNumber"><Input /></Form.Item></Col>
         <Col span={8}><Form.Item label="Actual Delivery Date" name="actualDeliveryDate"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
       </Row>
-      <Form.Item label="Proof of Delivery URL" name="proofOfDeliveryUrl"><Input /></Form.Item>
+      <Form.Item label="Proof of Delivery" name="proofOfDeliveryUrl"><FileUploadField folder="post-award/delivery" accept=".pdf,.jpg,.jpeg,.png" buttonText="Upload POD" /></Form.Item>
 
       <Divider />
       <Title level={5}>LDC Calculation</Title>
@@ -277,7 +278,7 @@ export const DispatchDeliverySection: React.FC<Props> = ({ data, saving, onSave 
         <Col span={8}><Form.Item label="Railway PO Value (₹)" name="ldcRailwayPoValue"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
         <Col span={8}><Form.Item label="LDC Total (₹)" name="ldcCalculatedTotal"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
       </Row>
-      <Form.Item label="LDC Invoice URL" name="ldcInvoiceUrl"><Input /></Form.Item>
+      <Form.Item label="LDC Invoice" name="ldcInvoiceUrl"><FileUploadField folder="post-award/ldc" accept=".pdf,.jpg,.jpeg,.png" buttonText="Upload LDC Invoice" /></Form.Item>
 
       <Divider />
       <Row gutter={16}>

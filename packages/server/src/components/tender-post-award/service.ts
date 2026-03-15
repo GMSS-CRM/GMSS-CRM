@@ -21,6 +21,10 @@ export class TenderPostAwardService implements ITenderPostAwardService {
     private readonly repo: ITenderPostAwardRepository,
   ) {}
 
+  async get(tenderId: string): Promise<TenderPostAward | null> {
+    return this.repo.findByTenderId(tenderId);
+  }
+
   async getOrCreate(tenderId: string): Promise<TenderPostAward> {
     const existing = await this.repo.findByTenderId(tenderId);
     if (existing) return existing;
@@ -40,5 +44,9 @@ export class TenderPostAwardService implements ITenderPostAwardService {
     const currentIdx = STAGE_ORDER.indexOf(record.currentStage);
     const nextStage = STAGE_ORDER[Math.min(currentIdx + 1, STAGE_ORDER.length - 1)];
     return this.repo.saveStageData(tenderId, { currentStage: nextStage });
+  }
+
+  async setWinningVendor(tenderId: string, vendorId: string): Promise<TenderPostAward> {
+    return this.repo.saveStageData(tenderId, { winningVendorId: vendorId });
   }
 }

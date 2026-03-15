@@ -10,6 +10,7 @@ import type {
   CreateTendersBatchResult,
   UpdateVendorTenderFollowUpInput,
 } from '@gmss/types';
+import { GET_TENDER_POST_AWARD } from './tender-post-award.service';
 
 // ─── Fragments ────────────────────────────────────────────────────────────────
 
@@ -288,3 +289,24 @@ export const useSeedTenderVendors = () =>
     SEED_TENDER_VENDORS,
     { refetchQueries: [GET_TENDER_FOLLOW_UPS] },
   );
+
+// ─── Mark Vendor as Winner ────────────────────────────────────────────────────
+
+const MARK_VENDOR_AS_WINNER = gql`
+  mutation MarkVendorAsWinner($tenderId: ID!, $vendorId: ID!) {
+    markVendorAsWinner(tenderId: $tenderId, vendorId: $vendorId) {
+      id
+      tenderId
+      currentStage
+      winningVendorId
+    }
+  }
+`;
+
+export const useMarkVendorAsWinner = () =>
+  useMutation<
+    { markVendorAsWinner: { id: string; tenderId: string; currentStage: string; winningVendorId: string } },
+    { tenderId: string; vendorId: string }
+  >(MARK_VENDOR_AS_WINNER, {
+    refetchQueries: [GET_TENDER_FOLLOW_UPS, GET_TENDER_POST_AWARD],
+  });

@@ -44,7 +44,6 @@ import type {
 import Button from '../../../../components/button';
 import FormActionsBar from '../../../../components/form-actions';
 import SubMenu from '../../../../components/sub-menu';
-import type { SubMenuItemConfig } from '../../../../components/sub-menu';
 import RemarkModal from '../../components/RemarkModal';
 import FollowUpsSection from '../../components/FollowUpsSection';
 import SharedTendersSection from '../../components/SharedTendersSection';

@@ -690,7 +690,6 @@ function mapGqlFollowUp(f: any): VendorFollowUp {
     documentUrl: f.documentUrl ?? undefined,
     documentName: f.documentName ?? undefined,
     courierTrackingNumber: f.courierTrackingNumber ?? undefined,
-    courierProvider: f.courierProvider ?? undefined,
     courierDeliveryRemarks: f.courierDeliveryRemarks ?? undefined,
     autoMailSent: f.autoMailSent ?? false,
     isCompleted: f.isCompleted ?? false,
@@ -954,11 +953,11 @@ export const useUpdateAgreementSignature = () => {
 };
 
 export const useCalculateCommission = () => {
-  const [query, { loading }] = useMutation<{
+  const [mutate, { loading }] = useMutation<{
     calculateVendorCommission: { baseAmount: number; commissionAmount: number; gstAmount: number; totalAmount: number };
   }>(CALCULATE_COMMISSION);
   // Note: calculateVendorCommission is a Query but we expose it as lazy trigger
-  return { loading };
+  return { mutate, loading };
 };
 
 export const useCalculateCommissionLazy = () => {

@@ -23,6 +23,9 @@ import { vendorWorkflowTypeDefs } from "../components/vendor-workflow";
 import { vendorMdRequestTypeDefs } from "../components/vendor-md-request";
 import { uploadTypeDefs } from "../components/upload";
 import { tenderPostAwardTypeDefs } from "../components/tender-post-award";
+import { tenderActivityLogTypeDefs } from "../components/tender-activity-log";
+import { postAwardFollowUpTypeDefs } from "../components/post-award-follow-up";
+import { postAwardDocumentTypeDefs } from "../components/post-award-document";
 
 export const typeDefs = gql`
   scalar DateTime
@@ -56,4 +59,7 @@ export const mergedTypeDefs = [
   vendorMdRequestTypeDefs,
   uploadTypeDefs,
   tenderPostAwardTypeDefs,
+  tenderActivityLogTypeDefs,
+  postAwardFollowUpTypeDefs,
+  postAwardDocumentTypeDefs,
 ];

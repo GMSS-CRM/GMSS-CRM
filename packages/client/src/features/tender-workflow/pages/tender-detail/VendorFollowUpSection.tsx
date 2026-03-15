@@ -16,7 +16,7 @@ import {
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { EditOutlined, SyncOutlined } from '@ant-design/icons';
-import type { VendorTender } from '@gmss/types';
+import type { VendorTender, TenderPostAward } from '@gmss/types';
 import {
   useGetTenderFollowUps,
   useSeedTenderVendors,
@@ -28,6 +28,9 @@ const { Text } = Typography;
 
 interface Props {
   tenderId: string;
+  onVendorSelected?: (vendor: VendorTender) => void;
+  selectedVendor?: VendorTender | null;
+  postAwardData?: TenderPostAward | null;
 }
 
 const VENDOR_TYPE_COLOURS: Record<string, string> = {
@@ -42,7 +45,7 @@ const ROW_BG: Record<string, string> = {
   PENDING:        '#ffffff',
 };
 
-const VendorFollowUpSection: React.FC<Props> = ({ tenderId }) => {
+const VendorFollowUpSection: React.FC<Props> = ({ tenderId, onVendorSelected, selectedVendor, postAwardData }) => {
   const { data, loading, refetch } = useGetTenderFollowUps(tenderId);
   const [seedVendors, { loading: seeding }] = useSeedTenderVendors();
   const [drawerRecord, setDrawerRecord] = useState<VendorTender | null>(null);
@@ -56,6 +59,15 @@ const VendorFollowUpSection: React.FC<Props> = ({ tenderId }) => {
     } catch {
       message.error('Failed to sync vendors');
     }
+  };
+
+  const handleRowSelect = (vendor: VendorTender) => {
+    onVendorSelected?.(vendor);
+  };
+
+  const handleEditVendor = (vendor: VendorTender) => {
+    onVendorSelected?.(vendor);
+    setDrawerRecord(vendor);
   };
 
   if (loading) {
@@ -221,7 +233,7 @@ const VendorFollowUpSection: React.FC<Props> = ({ tenderId }) => {
         <Button
           type="text"
           icon={<EditOutlined />}
-          onClick={(e) => { e.stopPropagation(); setDrawerRecord(r); }}
+          onClick={(e) => { e.stopPropagation(); handleEditVendor(r); }}
           size="small"
         />
       ),
@@ -252,8 +264,11 @@ const VendorFollowUpSection: React.FC<Props> = ({ tenderId }) => {
         size="small"
         pagination={false}
         onRow={(r) => ({
-          style: { background: ROW_BG[r.interestStatus ?? 'PENDING'] ?? '#fff', cursor: 'pointer' },
-          onClick: () => setDrawerRecord(r),
+          style: { 
+            background: selectedVendor?.id === r.id ? '#f6ffed' : (ROW_BG[r.interestStatus ?? 'PENDING'] ?? '#fff'), 
+            cursor: 'pointer' 
+          },
+          onClick: () => handleRowSelect(r),
         })}
       />
 
@@ -267,6 +282,7 @@ const VendorFollowUpSection: React.FC<Props> = ({ tenderId }) => {
         record={drawerRecord}
         onClose={() => setDrawerRecord(null)}
         onSaved={() => { refetch(); setDrawerRecord(null); }}
+        postAwardData={postAwardData}
       />
     </>
   );

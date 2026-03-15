@@ -9,8 +9,25 @@ function getService(): ITenderPostAwardService {
 
 export const tenderPostAwardResolvers = {
   Query: {
-    getTenderPostAward: (_: unknown, { tenderId }: { tenderId: string }) =>
-      getService().getOrCreate(tenderId),
+    getTenderPostAward: async (_: unknown, { tenderId, vendorId }: { tenderId: string; vendorId?: string }) => {
+      // Fetch the post-award record (null if doesn't exist)
+      const postAward = await getService().get(tenderId);
+      
+      if (!postAward) {
+        // No post-award record exists yet; create one if no vendorId filter
+        if (!vendorId) {
+          return getService().getOrCreate(tenderId);
+        }
+        return null;
+      }
+
+      // If vendorId is provided, only return if it matches the winning vendor
+      if (vendorId && postAward.winningVendorId !== vendorId) {
+        return null;
+      }
+
+      return postAward;
+    },
   },
   Mutation: {
     updateOrderFollowUp: (_: unknown, { input }: { input: { tenderId: string; [key: string]: unknown } }) => {
@@ -39,5 +56,7 @@ export const tenderPostAwardResolvers = {
     },
     advancePostAwardStage: (_: unknown, { tenderId }: { tenderId: string }) =>
       getService().advanceStage(tenderId),
+    markVendorAsWinner: (_: unknown, { tenderId, vendorId }: { tenderId: string; vendorId: string }) =>
+      getService().setWinningVendor(tenderId, vendorId),
   },
 };

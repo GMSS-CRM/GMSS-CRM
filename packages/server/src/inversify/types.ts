@@ -61,4 +61,13 @@ export const TYPES = {
 
   ITenderPostAwardRepository: Symbol.for('ITenderPostAwardRepository'),
   ITenderPostAwardService: Symbol.for('ITenderPostAwardService'),
+
+  ITenderActivityLogRepository: Symbol.for('ITenderActivityLogRepository'),
+  ITenderActivityLogService: Symbol.for('ITenderActivityLogService'),
+
+  IPostAwardFollowUpRepository: Symbol.for('IPostAwardFollowUpRepository'),
+  IPostAwardFollowUpService: Symbol.for('IPostAwardFollowUpService'),
+
+  IPostAwardDocumentRepository: Symbol.for('IPostAwardDocumentRepository'),
+  IPostAwardDocumentService: Symbol.for('IPostAwardDocumentService'),
 };

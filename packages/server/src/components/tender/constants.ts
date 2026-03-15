@@ -24,5 +24,21 @@ export const VALID_TENDER_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   [TenderStatus.NIT_VERIFIED]: [TenderStatus.DOCS_UPLOADED, TenderStatus.READY_TO_MAIL],
   [TenderStatus.DOCS_UPLOADED]: [TenderStatus.READY_TO_MAIL],
   [TenderStatus.READY_TO_MAIL]: [TenderStatus.MAIL_SENT],
-  [TenderStatus.MAIL_SENT]: [],
+  [TenderStatus.MAIL_SENT]: [TenderStatus.VENDOR_FOLLOWUP],
+
+  /* ── Post-mail workflow transitions ────────────────────── */
+  [TenderStatus.VENDOR_FOLLOWUP]: [TenderStatus.QUOTE_COLLECTION, TenderStatus.REJECTED],
+  [TenderStatus.QUOTE_COLLECTION]: [TenderStatus.TENDER_PREPARATION, TenderStatus.REJECTED],
+  [TenderStatus.TENDER_PREPARATION]: [TenderStatus.PARTICIPATED, TenderStatus.REJECTED],
+  [TenderStatus.PARTICIPATED]: [TenderStatus.ORDER_FOLLOWUP, TenderStatus.REJECTED],
+  [TenderStatus.ORDER_FOLLOWUP]: [TenderStatus.ORDER_PROCESSING],
+  [TenderStatus.ORDER_PROCESSING]: [TenderStatus.INSPECTION, TenderStatus.DISPATCH],
+  [TenderStatus.INSPECTION]: [TenderStatus.DISPATCH],
+  [TenderStatus.DISPATCH]: [TenderStatus.DELIVERY],
+  [TenderStatus.DELIVERY]: [TenderStatus.WARRANTY, TenderStatus.BILL_SUBMISSION],
+  [TenderStatus.WARRANTY]: [TenderStatus.BILL_SUBMISSION],
+  [TenderStatus.BILL_SUBMISSION]: [TenderStatus.PAYMENT],
+  [TenderStatus.PAYMENT]: [TenderStatus.SD_RELEASE, TenderStatus.COMPLETED],
+  [TenderStatus.SD_RELEASE]: [TenderStatus.COMPLETED],
+  [TenderStatus.COMPLETED]: [],
 };

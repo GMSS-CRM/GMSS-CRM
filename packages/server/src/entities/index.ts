@@ -18,3 +18,6 @@ export * from "./VendorTender";
 export * from "./VendorWorkflow";
 export * from "./VendorMdRequest";
 export * from "./TenderPostAward";
+export * from "./TenderActivityLog";
+export * from "./PostAwardFollowUp";
+export * from "./PostAwardDocument";

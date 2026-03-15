@@ -3,12 +3,15 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Tender } from './Tender';
 import { PostAwardStage } from './enums/PostAwardStage';
+import type { PostAwardDocument } from './PostAwardDocument';
+import type { PostAwardFollowUp } from './PostAwardFollowUp';
 
 @Entity({ name: 'tender_post_award' })
 export class TenderPostAward {
@@ -24,6 +27,10 @@ export class TenderPostAward {
     default: PostAwardStage.ORDER_FOLLOWUP,
   })
   currentStage!: PostAwardStage;
+
+  /** The vendor that won the tender and is fulfilling the order */
+  @Column({ nullable: true })
+  winningVendorId?: string;
 
   /* ── Stage 1: Order Follow-Up ─────────────────────────── */
 
@@ -308,4 +315,10 @@ export class TenderPostAward {
   @ManyToOne(() => Tender, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'tenderId' })
   tender!: Tender;
+
+  @OneToMany('PostAwardDocument', 'postAward', { cascade: true })
+  documents!: PostAwardDocument[];
+
+  @OneToMany('PostAwardFollowUp', 'postAward', { cascade: true })
+  followUps!: PostAwardFollowUp[];
 }
