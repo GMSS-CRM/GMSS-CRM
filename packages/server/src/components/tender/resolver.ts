@@ -10,7 +10,7 @@ const getService = () => {
 export const tenderResolvers = {
   Query: {
     getTenderById: (_: unknown, { id }: any) => getService().getTenderById(id),
-    searchTenders: (_: unknown, { searchInput }: any) => getService().searchTender(searchInput as any),
+    searchTendersAdvanced: (_: unknown, { searchInput }: any) => getService().searchTender(searchInput as any),
   },
 
   Mutation: {

@@ -861,6 +861,7 @@ export type Query = {
   searchTags: Array<Tag>;
   searchTenderDocuments: Array<TenderDocument>;
   searchTenders: Array<Tender>;
+  searchTendersAdvanced: Array<Tender>;
   searchUsers: Array<User>;
   searchVendorContactPersons: Array<VendorContactPerson>;
   searchVendorDocuments: Array<VendorDocument>;
@@ -1053,6 +1054,11 @@ export type QuerySearchTenderDocumentsArgs = {
 
 
 export type QuerySearchTendersArgs = {
+  searchTerm: Scalars['String']['input'];
+};
+
+
+export type QuerySearchTendersAdvancedArgs = {
   searchInput?: InputMaybe<SearchTenderInput>;
 };
 
@@ -1075,6 +1081,7 @@ export type QuerySearchVendorDocumentsArgs = {
 
 export type QuerySearchVendorsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
+  searchTerm: Scalars['String']['input'];
   status?: InputMaybe<VendorStatus>;
 };
 
@@ -2343,11 +2350,12 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   searchRoles?: Resolver<Array<ResolversTypes['Role']>, ParentType, ContextType, Partial<QuerySearchRolesArgs>>;
   searchTags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType, Partial<QuerySearchTagsArgs>>;
   searchTenderDocuments?: Resolver<Array<ResolversTypes['TenderDocument']>, ParentType, ContextType, Partial<QuerySearchTenderDocumentsArgs>>;
-  searchTenders?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, Partial<QuerySearchTendersArgs>>;
+  searchTenders?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, RequireFields<QuerySearchTendersArgs, 'searchTerm'>>;
+  searchTendersAdvanced?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, Partial<QuerySearchTendersAdvancedArgs>>;
   searchUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QuerySearchUsersArgs>>;
   searchVendorContactPersons?: Resolver<Array<ResolversTypes['VendorContactPerson']>, ParentType, ContextType, Partial<QuerySearchVendorContactPersonsArgs>>;
   searchVendorDocuments?: Resolver<Array<ResolversTypes['VendorDocument']>, ParentType, ContextType, Partial<QuerySearchVendorDocumentsArgs>>;
-  searchVendors?: Resolver<Array<ResolversTypes['Vendor']>, ParentType, ContextType, Partial<QuerySearchVendorsArgs>>;
+  searchVendors?: Resolver<Array<ResolversTypes['Vendor']>, ParentType, ContextType, RequireFields<QuerySearchVendorsArgs, 'searchTerm'>>;
 };
 
 export type RoleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Role'] = ResolversParentTypes['Role']> = {

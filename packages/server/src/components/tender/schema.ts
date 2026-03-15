@@ -71,7 +71,7 @@ export const tenderTypeDefs = gql`
 
   extend type Query {
     getTenderById(id: ID!): Tender
-    searchTenders(searchInput: SearchTenderInput): [Tender!]!
+    searchTendersAdvanced(searchInput: SearchTenderInput): [Tender!]!
   }
 
   type SkippedTenderInfo {

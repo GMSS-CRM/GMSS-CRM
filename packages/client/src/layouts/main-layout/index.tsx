@@ -4,7 +4,8 @@ import {
   Menu,
   Space,
   Dropdown,
-  Avatar,   
+  Avatar,
+  Button,   
 } from "antd";
 import {
   LogoutOutlined,
@@ -13,14 +14,17 @@ import {
   FileTextOutlined,
   TagsOutlined,
   ThunderboltOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
 import { showConfirmModal } from "../../components/confirm-modal";
 import ThemeSwitcher from "../../components/theme-switcher";
 import NotificationDropdown from "../../components/notifications";
+import { SearchModal } from "../../features/search";
 import type { MenuProps } from "antd";
 import styles from "./styles.module.css";
+import { useState } from "react";
 
 const { Header, Sider, Content } = Layout;
 
@@ -31,14 +35,14 @@ const menuItems: MenuProps["items"] = [
   //   label: "Dashboard",
   // },
   {
-    key: "tender-workflow",
-    icon: <FileTextOutlined style={{ fontSize: 22 }} />,
-    label: "Tenders",
-  },
-  {
     key: "live-tenders",
     icon: <ThunderboltOutlined style={{ fontSize: 22 }} />,
     label: "Live",
+  },
+  {
+    key: "tender-workflow",
+    icon: <FileTextOutlined style={{ fontSize: 22 }} />,
+    label: "Tenders",
   },
   {
     key: "tags",
@@ -61,6 +65,7 @@ export default function MainLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Get the current route to highlight the correct menu item
   // Highlight correct menu item for nested routes
@@ -142,6 +147,14 @@ export default function MainLayout() {
 
           {/* Right Side Actions */}
           <Space size={16} className={styles.headerActions}>
+            {/* Search */}
+            <Button
+              type="text"
+              icon={<SearchOutlined />}
+              onClick={() => setSearchOpen(true)}
+              title="Search tenders and vendors (Ctrl+K or Cmd+K)"
+            />
+
             {/* Theme Switcher */}
             <ThemeSwitcher />
 
@@ -167,6 +180,22 @@ export default function MainLayout() {
           <Outlet />
         </Content>
       </Layout>
+
+      {/* Search Modal */}
+      <SearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onTenderSelect={(tenderId: string) => {
+          console.debug('[MainLayout] Navigating to tender:', tenderId);
+          setSearchOpen(false);
+          navigate(`/tender-workflow/${tenderId}`);
+        }}
+        onVendorSelect={(vendorId: string) => {
+          console.debug('[MainLayout] Navigating to vendor:', vendorId);
+          setSearchOpen(false);
+          navigate(`/vendors/${vendorId}`);
+        }}
+      />
     </Layout>
   );
 }

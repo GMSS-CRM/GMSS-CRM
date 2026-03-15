@@ -75,11 +75,10 @@ export default function TagTendersDrawer({
     if (selectedTender && vendorsData?.getVendorsByTag) {
       const vendorList: TenderVendorDisplay[] = vendorsData.getVendorsByTag.map((v: any) => {
         const firstContact = v.contactPersons && v.contactPersons.length > 0 ? v.contactPersons[0] : null;
-        const enableMail = v.tags && v.tags.length > 0 
-          ? v.tags[0].enableMail ?? false 
-          : false;
+        const vendorTagData = v.tags && v.tags.length > 0 ? v.tags[0] : null;
+        const enableMail = vendorTagData?.enableMail ?? false;
         return {
-          id: v.id,
+          id: vendorTagData?.id || v.id,
           vendorId: v.id,
           vendorName: v.name ?? '',
           vendorEmail: firstContact?.email ?? '',
@@ -104,19 +103,19 @@ export default function TagTendersDrawer({
   };
 
   const handleEmailToggle = useCallback(async (
-    vendorId: string, 
+    vendorTagId: string, 
     vendorName: string, 
     enableMail: boolean
   ): Promise<boolean> => {
-    setVendorLoading(prev => ({ ...prev, [vendorId]: true }));
+    setVendorLoading(prev => ({ ...prev, [vendorTagId]: true }));
     
     try {
-      await updateEmailMutation({ variables: { id: vendorId, enableMail } });
+      await updateEmailMutation({ variables: { id: vendorTagId, enableMail } });
       
       // Update local state
       setVendors(prev => 
         prev.map(v => 
-          v.id === vendorId ? { ...v, enableMail } : v
+          v.id === vendorTagId ? { ...v, enableMail } : v
         )
       );
       
@@ -129,7 +128,7 @@ export default function TagTendersDrawer({
       message.error('Failed to update email settings');
       return false;
     } finally {
-      setVendorLoading(prev => ({ ...prev, [vendorId]: false }));
+      setVendorLoading(prev => ({ ...prev, [vendorTagId]: false }));
     }
   }, [updateEmailMutation]);
 

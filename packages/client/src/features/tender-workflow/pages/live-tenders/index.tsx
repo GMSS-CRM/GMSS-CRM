@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table,
@@ -11,10 +11,10 @@ import {
   Input,
   Empty,
   Spin,
+  message,
 } from 'antd';
 import {
   ArrowRightOutlined,
-  ClockCircleOutlined,
   SearchOutlined,
   ReloadOutlined,
   MailOutlined,
@@ -23,48 +23,10 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useSearchTenders } from '../../services/tenders.service';
 import type { Tender, TenderTag, TenderStatus } from '@gmss/types';
+import CountdownTimer from '../../components/CountdownTimer';
 import styles from './styles.module.css';
 
 const { Title, Text } = Typography;
-
-// ─── Countdown hook ───────────────────────────────────────────────────────────
-
-function calcCountdown(targetDate: string): { timeLeft: string; isUrgent: boolean } {
-  const diff = new Date(targetDate).getTime() - Date.now();
-  if (diff <= 0) return { timeLeft: 'Expired', isUrgent: true };
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  const isUrgent = days <= 3;
-  const timeLeft = days > 0 ? `${days}d ${hours}h` : hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  return { timeLeft, isUrgent };
-}
-
-// ─── Row component with per-row countdown ────────────────────────────────────
-
-const CountdownCell: React.FC<{ deadline?: string | null }> = ({ deadline }) => {
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const initial = deadline ? calcCountdown(deadline) : { timeLeft: '—', isUrgent: false };
-  const [display, setDisplay] = useState(initial);
-
-  useEffect(() => {
-    if (!deadline) return;
-    timerRef.current = setInterval(() => {
-      setDisplay(calcCountdown(deadline));
-    }, 60_000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [deadline]);
-
-  if (!deadline) return <Text type="secondary">—</Text>;
-  return (
-    <Space size={4}>
-      <ClockCircleOutlined style={{ color: display.isUrgent ? '#ff4d4f' : '#52c41a' }} />
-      <Text style={{ color: display.isUrgent ? '#ff4d4f' : undefined, fontWeight: display.isUrgent ? 600 : 400 }}>
-        {display.timeLeft}
-      </Text>
-    </Space>
-  );
-};
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -73,7 +35,7 @@ const LiveTendersPage: React.FC = () => {
   const [search, setSearch] = useState('');
 
   const { data, loading, refetch } = useSearchTenders({ status: 'MAIL_SENT' as TenderStatus });
-  const allTenders: Tender[] = data?.searchTenders ?? [];
+  const allTenders: Tender[] = data?.searchTendersAdvanced ?? [];
 
   const filtered = allTenders.filter((t) => {
     if (!search.trim()) return true;
@@ -157,9 +119,23 @@ const LiveTendersPage: React.FC = () => {
     {
       title: 'Submission Deadline',
       key: 'deadline',
-      width: 160,
+      width: 280,
       render: (_: unknown, record: Tender) => (
-        <CountdownCell deadline={record.submissionDeadline} />
+        <CountdownTimer
+          tenderTitle={record.name}
+          dueDate={record.submissionDeadline ?? undefined}
+          onStop={(reason: string, details?: { newDeadline?: string }) => {
+            if (reason === 'extend' && details?.newDeadline) {
+              message.success('Tender deadline extended');
+            } else if (reason === 'filled') {
+              message.success('Tender marked as filled');
+            } else if (reason === 'not-interested') {
+              message.info('Marked as not interested');
+            }
+            // Optionally refetch to reflect status changes
+            refetch?.();
+          }}
+        />
       ),
     },
     {

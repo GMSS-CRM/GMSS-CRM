@@ -189,7 +189,7 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
   // Map GQL tenders → local shape, filter out overdue tenders
   const tenders = useMemo(
     () => {
-      const allTenders = (data?.searchTenders ?? []).map(toLocalTender);
+      const allTenders = (data?.searchTendersAdvanced ?? []).map(toLocalTender);
       // Post-award and completed statuses are always visible regardless of deadline
       const POST_AWARD_STATUSES = new Set([
         "MAIL_SENT", "VENDOR_FOLLOWUP", "QUOTE_COLLECTION", "TENDER_PREPARATION",

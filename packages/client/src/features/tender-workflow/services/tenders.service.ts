@@ -55,7 +55,7 @@ const TENDER_FIELDS = gql`
 export const SEARCH_TENDERS = gql`
   ${TENDER_FIELDS}
   query SearchTenders($searchInput: SearchTenderInput) {
-    searchTenders(searchInput: $searchInput) {
+    searchTendersAdvanced(searchInput: $searchInput) {
       ...TenderFields
     }
   }
@@ -145,7 +145,7 @@ export const CREATE_TENDER_DOCUMENT = gql`
 // ─── Hooks ────────────────────────────────────────────────────────────────────
 
 export const useSearchTenders = (searchInput?: SearchTenderInput) =>
-  useQuery<{ searchTenders: Tender[] }>(SEARCH_TENDERS, {
+  useQuery<{ searchTendersAdvanced: Tender[] }>(SEARCH_TENDERS, {
     variables: { searchInput },
     fetchPolicy: 'cache-and-network',
   });

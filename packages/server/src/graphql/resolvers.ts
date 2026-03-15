@@ -23,6 +23,7 @@ import { tenderPostAwardResolvers } from "../components/tender-post-award";
 import { tenderActivityLogResolvers } from "../components/tender-activity-log";
 import { postAwardFollowUpResolvers } from "../components/post-award-follow-up";
 import { postAwardDocumentResolvers } from "../components/post-award-document";
+import { searchResolvers } from "../components/search";
 
 export const resolvers = [
   userResolvers,
@@ -50,4 +51,5 @@ export const resolvers = [
   tenderActivityLogResolvers,
   postAwardFollowUpResolvers,
   postAwardDocumentResolvers,
+  searchResolvers,
 ];
