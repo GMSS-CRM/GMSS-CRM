@@ -67,6 +67,44 @@ export class TenderPostAward {
   @Column({ type: 'timestamp', nullable: true })
   emdReceivedDate?: Date;
 
+  /* ── Stage 1½: LOA Processing ──────────────────────── */
+
+  @Column({ nullable: true })
+  loaNumber?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  loaDate?: Date;
+
+  @Column({ nullable: true })
+  loaDocumentUrl?: string;
+
+  @Column({ nullable: true })
+  loaExcelEntryNumber?: string;
+
+  @Column({ nullable: true })
+  loaExcelEntryImageUrl?: string;
+
+  @Column({ nullable: true })
+  loaDeliveryMatch?: boolean;
+
+  @Column({ nullable: true })
+  loaPriceMatch?: boolean;
+
+  @Column({ nullable: true })
+  loaPackagingMatch?: boolean;
+
+  @Column({ nullable: true })
+  svcClauseApplicable?: boolean;
+
+  @Column({ nullable: true })
+  fivePercentClauseApplicable?: boolean;
+
+  @Column({ default: false })
+  loaModificationAdviceRequired!: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  loaRemarks?: string;
+
   /* ── Stage 2: Order Processing ────────────────────────── */
 
   @Column({ default: false })
@@ -129,6 +167,53 @@ export class TenderPostAward {
   @Column({ nullable: true })
   lateDeliveryBy?: string;  // GMSS or Vendor/Manufacturer
 
+  /* ── Stage 2 extras: Firm Bill & Option Clause ────────── */
+
+  @Column({ nullable: true })
+  firmBillNumber?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  firmBillDate?: Date;
+
+  @Column({ type: 'float', nullable: true })
+  firmBillQuantity?: number;
+
+  @Column({ type: 'float', nullable: true })
+  firmBillRate?: number;
+
+  @Column({ type: 'float', nullable: true })
+  firmBillBasicRateDiff?: number;
+
+  @Column({ type: 'float', nullable: true })
+  firmBillTotalCharges?: number;
+
+  @Column({ type: 'float', nullable: true })
+  firmBillTotalProfit?: number;
+
+  @Column({ type: 'float', nullable: true })
+  firmBillMarginPct?: number;
+
+  @Column({ nullable: true })
+  optionClauseApplicable?: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  optionClauseReminderDate?: Date;
+
+  @Column({ nullable: true })
+  optionClauseQuantityAdded?: boolean;
+
+  @Column({ type: 'float', nullable: true })
+  optionClauseQuantity?: number;
+
+  @Column({ nullable: true })
+  commissionInvoiceGeneratedDate?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  commissionPaidDate?: Date;
+
+  @Column({ nullable: true })
+  commissionPaymentProofUrl?: string;
+
   /* ── Stage 3: Inspection ─────────────────────────────── */
 
   @Column({ default: false })
@@ -169,6 +254,33 @@ export class TenderPostAward {
   @Column({ nullable: true })
   consignmentNumber?: string;
 
+  @Column({ nullable: true })
+  awbNumber?: string;
+
+  @Column({ nullable: true })
+  gnrNumber?: string;
+
+  @Column({ nullable: true })
+  lorryNumber?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  dispatchDate?: Date;
+
+  @Column({ nullable: true })
+  courierEmail?: string;
+
+  @Column({ nullable: true })
+  courierWebsite?: string;
+
+  @Column({ nullable: true })
+  driverName?: string;
+
+  @Column({ nullable: true })
+  driverContact?: string;
+
+  @Column({ nullable: true })
+  dispatchReceiptUrl?: string;
+
   @Column({ type: 'timestamp', nullable: true })
   actualDeliveryDate?: Date;
 
@@ -192,6 +304,15 @@ export class TenderPostAward {
 
   @Column({ type: 'text', nullable: true })
   receiptNoteDetails?: string;
+
+  @Column({ nullable: true })
+  rNoteNumber?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  rNoteDate?: Date;
+
+  @Column({ nullable: true })
+  rNoteDocumentUrl?: string;
 
   /* ── Stage 5: Warranty Rejections ───────────────────── */
 
@@ -295,6 +416,26 @@ export class TenderPostAward {
 
   @Column({ type: 'text', nullable: true })
   sdReleaseDepartmentDetails?: string;
+
+  /* ── Stage 7: Security Deposit Return ──────────────── */
+
+  @Column({ nullable: true })
+  sdOfficerName?: string;
+
+  @Column({ nullable: true })
+  sdOfficerContact?: string;
+
+  @Column({ nullable: true })
+  sdOfficerEmail?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  sdReturnReceivedDate?: Date;
+
+  @Column({ type: 'float', nullable: true })
+  sdReturnAmount?: number;
+
+  @Column({ type: 'text', nullable: true })
+  sdReturnRemarks?: string;
 
   /* ── Metadata ────────────────────────────────────────── */
 

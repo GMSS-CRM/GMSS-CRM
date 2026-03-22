@@ -137,6 +137,48 @@ import {
   IPostAwardDocumentService,
 } from '../components/post-award-document/types';
 
+import { NotificationRepository } from '../components/notification/repository';
+import { NotificationService } from '../components/notification/service';
+import {
+  INotificationRepository,
+  INotificationService,
+} from '../components/notification/types';
+
+import { TicketRepository } from '../components/ticket/repository';
+import { TicketService } from '../components/ticket/service';
+import {
+  ITicketRepository,
+  ITicketService,
+} from '../components/ticket/types';
+
+import { TenderContactRepository } from '../components/tender-contact/repository';
+import { TenderContactService } from '../components/tender-contact/service';
+import {
+  ITenderContactRepository,
+  ITenderContactService,
+} from '../components/tender-contact/types';
+
+import { CourierRecordRepository } from '../components/courier-record/repository';
+import { CourierRecordService } from '../components/courier-record/service';
+import {
+  ICourierRecordRepository,
+  ICourierRecordService,
+} from '../components/courier-record/types';
+
+import { TagAutoMailRestrictionRepository } from '../components/tag-auto-mail-restriction/repository';
+import { TagAutoMailRestrictionService } from '../components/tag-auto-mail-restriction/service';
+import {
+  ITagAutoMailRestrictionRepository,
+  ITagAutoMailRestrictionService,
+} from '../components/tag-auto-mail-restriction/types';
+
+import { TenderDeliveryScheduleRepository } from '../components/tender-delivery-schedule/repository';
+import { TenderDeliveryScheduleService } from '../components/tender-delivery-schedule/service';
+import {
+  ITenderDeliveryScheduleRepository,
+  ITenderDeliveryScheduleService,
+} from '../components/tender-delivery-schedule/types';
+
 
 
 let _container: Container | null = null;
@@ -309,6 +351,54 @@ container
   container
     .bind<IPostAwardDocumentService>(TYPES.IPostAwardDocumentService)
     .to(PostAwardDocumentService);
+
+  // Notification
+  container
+    .bind<INotificationRepository>(TYPES.INotificationRepository)
+    .to(NotificationRepository);
+  container
+    .bind<INotificationService>(TYPES.INotificationService)
+    .to(NotificationService);
+
+  // Ticket
+  container
+    .bind<ITicketRepository>(TYPES.ITicketRepository)
+    .to(TicketRepository);
+  container
+    .bind<ITicketService>(TYPES.ITicketService)
+    .to(TicketService);
+
+  // TenderContact
+  container
+    .bind<ITenderContactRepository>(TYPES.ITenderContactRepository)
+    .to(TenderContactRepository);
+  container
+    .bind<ITenderContactService>(TYPES.ITenderContactService)
+    .to(TenderContactService);
+
+  // CourierRecord
+  container
+    .bind<ICourierRecordRepository>(TYPES.ICourierRecordRepository)
+    .to(CourierRecordRepository);
+  container
+    .bind<ICourierRecordService>(TYPES.ICourierRecordService)
+    .to(CourierRecordService);
+
+  // TagAutoMailRestriction
+  container
+    .bind<ITagAutoMailRestrictionRepository>(TYPES.ITagAutoMailRestrictionRepository)
+    .to(TagAutoMailRestrictionRepository);
+  container
+    .bind<ITagAutoMailRestrictionService>(TYPES.ITagAutoMailRestrictionService)
+    .to(TagAutoMailRestrictionService);
+
+  // TenderDeliverySchedule
+  container
+    .bind<ITenderDeliveryScheduleRepository>(TYPES.ITenderDeliveryScheduleRepository)
+    .to(TenderDeliveryScheduleRepository);
+  container
+    .bind<ITenderDeliveryScheduleService>(TYPES.ITenderDeliveryScheduleService)
+    .to(TenderDeliveryScheduleService);
 
   return container;
 }

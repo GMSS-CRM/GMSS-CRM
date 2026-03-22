@@ -70,4 +70,22 @@ export const TYPES = {
 
   IPostAwardDocumentRepository: Symbol.for('IPostAwardDocumentRepository'),
   IPostAwardDocumentService: Symbol.for('IPostAwardDocumentService'),
+
+  INotificationRepository: Symbol.for('INotificationRepository'),
+  INotificationService: Symbol.for('INotificationService'),
+
+  ITicketRepository: Symbol.for('ITicketRepository'),
+  ITicketService: Symbol.for('ITicketService'),
+
+  ITenderContactRepository: Symbol.for('ITenderContactRepository'),
+  ITenderContactService: Symbol.for('ITenderContactService'),
+
+  ICourierRecordRepository: Symbol.for('ICourierRecordRepository'),
+  ICourierRecordService: Symbol.for('ICourierRecordService'),
+
+  ITagAutoMailRestrictionRepository: Symbol.for('ITagAutoMailRestrictionRepository'),
+  ITagAutoMailRestrictionService: Symbol.for('ITagAutoMailRestrictionService'),
+
+  ITenderDeliveryScheduleRepository: Symbol.for('ITenderDeliveryScheduleRepository'),
+  ITenderDeliveryScheduleService: Symbol.for('ITenderDeliveryScheduleService'),
 };

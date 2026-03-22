@@ -15,6 +15,8 @@ import {
   TagsOutlined,
   ThunderboltOutlined,
   SearchOutlined,
+  DashboardOutlined,
+  CheckSquareOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { logout } from "../../features/auth/services/auth.service";
@@ -29,11 +31,11 @@ import { useState } from "react";
 const { Header, Sider, Content } = Layout;
 
 const menuItems: MenuProps["items"] = [
-  // {
-  //   key: "dashboard",
-  //   icon: <DashboardOutlined style={{ fontSize: 22 }} />,
-  //   label: "Dashboard",
-  // },
+  {
+    key: "dashboard",
+    icon: <DashboardOutlined style={{ fontSize: 22 }} />,
+    label: "Dashboard",
+  },
   {
     key: "live-tenders",
     icon: <ThunderboltOutlined style={{ fontSize: 22 }} />,
@@ -58,6 +60,11 @@ const menuItems: MenuProps["items"] = [
     key: "security",
     icon: <SafetyOutlined style={{ fontSize: 22 }} />,
     label: "Security",
+  },
+  {
+    key: "tickets",
+    icon: <CheckSquareOutlined style={{ fontSize: 22 }} />,
+    label: "Tickets",
   },
 ];
 

@@ -835,11 +835,14 @@ export interface VendorAgreement {
   commissionType?: 'PERCENTAGE' | 'FIXED';
   commissionValue?: number;
   commissionStructure?: 'SPLIT_50_50' | 'FULL_ON_PAYMENT';
+  paymentTermType?: 'ADVANCE_PAYMENT' | 'PAYMENT_WITHIN_30_DAYS' | 'PAYMENT_AFTER_30_DAYS';
   paymentFrequency?: 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
   paymentAmount?: number;
   gstApplicable: boolean;
   hasOtherBenefits: boolean;
   otherBenefitsDescription?: string;
+  documentUrl?: string;
+  documentPath?: string;
   createdDate: string;
   updatedDate: string;
 }
@@ -859,11 +862,14 @@ const GET_VENDOR_AGREEMENTS = gql`
       commissionType
       commissionValue
       commissionStructure
+      paymentTermType
       paymentFrequency
       paymentAmount
       gstApplicable
       hasOtherBenefits
       otherBenefitsDescription
+      documentUrl
+      documentPath
       createdDate
       updatedDate
     }
@@ -886,6 +892,8 @@ const CREATE_VENDOR_AGREEMENT = gql`
       gstApplicable
       hasOtherBenefits
       otherBenefitsDescription
+      documentUrl
+      documentPath
       createdDate
       updatedDate
     }

@@ -10,6 +10,7 @@ import { SecurityPage } from "../../features/security";
 import { VendorsPage } from "../../features/vendors";
 import VendorDetailsForm from "../../features/vendors/pages/details-form";
 import { TenderWorkflowPage, TenderDetailPage, LiveTendersPage } from "../../features/tender-workflow";
+import { TicketsPage } from "../../features/tickets";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../../layouts/main-layout";
@@ -48,6 +49,7 @@ export default function AppRoutes() {
         <Route path="tender-workflow" element={<TenderWorkflowPage />} />
         <Route path="tender-workflow/:id" element={<TenderDetailPage />} />
         <Route path="live-tenders" element={<LiveTendersPage />} />
+        <Route path="tickets" element={<TicketsPage />} />
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/tender-workflow" />} />

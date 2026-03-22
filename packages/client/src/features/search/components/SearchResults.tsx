@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Empty, Space, Typography, Tag, Spin, Row, Col } from 'antd';
-import { FileTextOutlined, TeamOutlined, TagsOutlined } from '@ant-design/icons';
-import { useSearchTenders, useSearchVendors } from '../services/search.service';
+import { FileTextOutlined, TeamOutlined, TagsOutlined, CheckSquareOutlined, PaperClipOutlined } from '@ant-design/icons';
+import { useSearchTenders, useSearchVendors, useSearchTickets } from '../services/search.service';
 
 const { Text } = Typography;
 
@@ -9,13 +9,15 @@ interface SearchResultsProps {
   searchTerm: string;
   onTenderSelect?: (tenderId: string) => void;
   onVendorSelect?: (vendorId: string) => void;
+  onTicketSelect?: (ticketId: string) => void;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onTenderSelect, onVendorSelect }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onTenderSelect, onVendorSelect, onTicketSelect }) => {
   const { tenders, loading: tendersLoading } = useSearchTenders(searchTerm);
   const { vendors, loading: vendorsLoading } = useSearchVendors(searchTerm);
+  const { tickets, loading: ticketsLoading } = useSearchTickets(searchTerm);
 
-  const isLoading = tendersLoading || vendorsLoading;
+  const isLoading = tendersLoading || vendorsLoading || ticketsLoading;
 
   // Debug logging
   console.debug('[SearchResults] Render:', { searchTerm: searchTerm?.substring(0, 20), tendersCount: tenders.length, vendorsCount: vendors.length });
@@ -36,7 +38,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onTenderSelec
     );
   }
 
-  if (tenders.length === 0 && vendors.length === 0) {
+  if (tenders.length === 0 && vendors.length === 0 && tickets.length === 0) {
     return (
       <Card>
         <Empty description={`No results found for "${searchTerm}"`} />
@@ -96,6 +98,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onTenderSelec
                         <Text type="secondary" style={{ fontSize: 11 }}>
                           Due: {new Date(tender.submissionDeadline).toLocaleDateString()}
                         </Text>
+                      </Col>
+                    )}
+                    {(tender as any).documents?.length > 0 && (
+                      <Col>
+                        <Tag icon={<PaperClipOutlined />} style={{ fontSize: 10 }}>
+                          {(tender as any).documents.length} doc{(tender as any).documents.length > 1 ? 's' : ''}
+                        </Tag>
                       </Col>
                     )}
                   </Row>
@@ -160,6 +169,56 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onTenderSelec
                       ))}
                     </Row>
                   )}
+                </Space>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* ── Tickets Section ─────────────────────────────────────────────────── */}
+      {tickets.length > 0 && (
+        <Card
+          title={
+            <Space>
+              <CheckSquareOutlined />
+              <Text strong>Tickets ({tickets.length})</Text>
+            </Space>
+          }
+          style={{ borderRadius: 8 }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {tickets.map((ticket) => (
+              <div
+                key={ticket.id}
+                style={{
+                  padding: '12px',
+                  border: '1px solid #f0f0f0',
+                  borderRadius: 6,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#fafafa')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'white')}
+                onClick={() => onTicketSelect?.(ticket.id)}
+              >
+                <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                  <Text strong style={{ fontSize: 13 }}>{ticket.title}</Text>
+                  {ticket.description && (
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      {ticket.description.substring(0, 100)}{ticket.description.length > 100 ? '...' : ''}
+                    </Text>
+                  )}
+                  <Row gutter={[8, 0]}>
+                    <Col>
+                      <Tag color={ticket.priority === 'HIGH' ? 'red' : ticket.priority === 'MEDIUM' ? 'orange' : 'green'}>
+                        {ticket.priority}
+                      </Tag>
+                    </Col>
+                    <Col>
+                      <Tag>{ticket.status?.replace(/_/g, ' ')}</Tag>
+                    </Col>
+                  </Row>
                 </Space>
               </div>
             ))}

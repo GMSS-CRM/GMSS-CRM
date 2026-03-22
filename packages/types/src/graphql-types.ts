@@ -70,22 +70,83 @@ export const CompanyType = {
 } as const;
 
 export type CompanyType = typeof CompanyType[keyof typeof CompanyType];
+export const CourierDirection = {
+  INBOUND: 'INBOUND',
+  OUTBOUND: 'OUTBOUND'
+} as const;
+
+export type CourierDirection = typeof CourierDirection[keyof typeof CourierDirection];
+export type CourierRecord = {
+  __typename?: 'CourierRecord';
+  awbNumber?: Maybe<Scalars['String']['output']>;
+  courierCompany?: Maybe<Scalars['String']['output']>;
+  courierContact?: Maybe<Scalars['String']['output']>;
+  courierEmail?: Maybe<Scalars['String']['output']>;
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  direction: CourierDirection;
+  dispatchDate?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  receiptProofUrl?: Maybe<Scalars['String']['output']>;
+  receivedDate?: Maybe<Scalars['String']['output']>;
+  receiverName?: Maybe<Scalars['String']['output']>;
+  referenceId?: Maybe<Scalars['String']['output']>;
+  referenceType?: Maybe<Scalars['String']['output']>;
+  senderName?: Maybe<Scalars['String']['output']>;
+  status: CourierStatus;
+  trackingUrl?: Maybe<Scalars['String']['output']>;
+  updatedDate: Scalars['String']['output'];
+};
+
+export const CourierStatus = {
+  DELIVERED: 'DELIVERED',
+  DISPATCHED: 'DISPATCHED',
+  IN_TRANSIT: 'IN_TRANSIT'
+} as const;
+
+export type CourierStatus = typeof CourierStatus[keyof typeof CourierStatus];
 export type CreateAgreementInput = {
   agreementEndDate: Scalars['String']['input'];
   agreementStartDate: Scalars['String']['input'];
   commissionStructure?: InputMaybe<CommissionStructure>;
   commissionType?: InputMaybe<CommissionType>;
   commissionValue?: InputMaybe<Scalars['Float']['input']>;
+  documentPath?: InputMaybe<Scalars['String']['input']>;
+  documentUrl?: InputMaybe<Scalars['String']['input']>;
   gstApplicable?: InputMaybe<Scalars['Boolean']['input']>;
   hasOtherBenefits?: InputMaybe<Scalars['Boolean']['input']>;
   otherBenefitsDescription?: InputMaybe<Scalars['String']['input']>;
   paymentAmount?: InputMaybe<Scalars['Float']['input']>;
   paymentFrequency?: InputMaybe<PaymentFrequency>;
+  paymentTermType: PaymentTermType;
   vendorId: Scalars['ID']['input'];
 };
 
 export type CreateApprovalInput = {
   vendorId: Scalars['ID']['input'];
+};
+
+export type CreateCourierRecordInput = {
+  awbNumber?: InputMaybe<Scalars['String']['input']>;
+  courierCompany?: InputMaybe<Scalars['String']['input']>;
+  courierContact?: InputMaybe<Scalars['String']['input']>;
+  courierEmail?: InputMaybe<Scalars['String']['input']>;
+  direction: CourierDirection;
+  dispatchDate?: InputMaybe<Scalars['String']['input']>;
+  receiptProofUrl?: InputMaybe<Scalars['String']['input']>;
+  receiverName?: InputMaybe<Scalars['String']['input']>;
+  referenceId?: InputMaybe<Scalars['String']['input']>;
+  referenceType?: InputMaybe<Scalars['String']['input']>;
+  senderName?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<CourierStatus>;
+  trackingUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CreateDeliveryScheduleInput = {
+  deliveryType: DeliveryType;
+  postAwardId: Scalars['ID']['input'];
+  quantity?: InputMaybe<Scalars['Float']['input']>;
+  scheduledDate: Scalars['String']['input'];
 };
 
 export type CreateFollowUpInput = {
@@ -142,6 +203,15 @@ export type CreateTagInput = {
   name: Scalars['String']['input'];
 };
 
+export type CreateTenderContactInput = {
+  contactType: TenderContactType;
+  designation?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  phone?: InputMaybe<Scalars['String']['input']>;
+  tenderId: Scalars['ID']['input'];
+};
+
 export type CreateTenderDocumentInput = {
   documentName: Scalars['String']['input'];
   documentUrl: Scalars['String']['input'];
@@ -154,13 +224,25 @@ export type CreateTenderInput = {
   issuingDepartment?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   referenceNumber?: InputMaybe<Scalars['String']['input']>;
+  sourcePortal?: InputMaybe<SourcePortal>;
   submissionDeadline?: InputMaybe<Scalars['String']['input']>;
+  tenderType?: InputMaybe<TenderTypeEnum>;
 };
 
 export type CreateTendersBatchResult = {
   __typename?: 'CreateTendersBatchResult';
   created: Array<Tender>;
   skipped: Array<SkippedTenderInfo>;
+};
+
+export type CreateTicketInput = {
+  assignedBy?: InputMaybe<Scalars['String']['input']>;
+  assignedTo?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<TicketPriority>;
+  referenceId?: InputMaybe<Scalars['String']['input']>;
+  referenceType?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
 };
 
 export type CreateUserInput = {
@@ -216,12 +298,48 @@ export type CreateVendorTagInput = {
   vendorId: Scalars['ID']['input'];
 };
 
+export type DashboardSummary = {
+  __typename?: 'DashboardSummary';
+  postAwardByStage: Array<PostAwardStageCount>;
+  recentTenders: Array<Tender>;
+  tendersByStatus: Array<TenderStatusCount>;
+  totalOpenTickets: Scalars['Int']['output'];
+  totalTenders: Scalars['Int']['output'];
+  totalVendors: Scalars['Int']['output'];
+  unreadNotifications: Scalars['Int']['output'];
+};
+
 export type DecideApprovalInput = {
   approvalId: Scalars['ID']['input'];
   remarks?: InputMaybe<Scalars['String']['input']>;
   status: ApprovalStatus;
 };
 
+export const DeliveryScheduleStatus = {
+  CONFIRMED: 'CONFIRMED',
+  EXTENDED: 'EXTENDED',
+  PENDING: 'PENDING'
+} as const;
+
+export type DeliveryScheduleStatus = typeof DeliveryScheduleStatus[keyof typeof DeliveryScheduleStatus];
+export const DeliveryType = {
+  ONE_TIME: 'ONE_TIME',
+  OPTION_CLAUSE: 'OPTION_CLAUSE',
+  PARTIAL: 'PARTIAL'
+} as const;
+
+export type DeliveryType = typeof DeliveryType[keyof typeof DeliveryType];
+export const DocumentType = {
+  AGREEMENT: 'AGREEMENT',
+  DIGITAL_SIGNATURE: 'DIGITAL_SIGNATURE',
+  GENERAL: 'GENERAL',
+  GST_CERT: 'GST_CERT',
+  MSME_CERT: 'MSME_CERT',
+  OTHER: 'OTHER',
+  PAN_CERT: 'PAN_CERT'
+} as const;
+
+export type DocumentType = typeof DocumentType[keyof typeof DocumentType];
 export const EmdSource = {
   BG: 'BG',
   DD: 'DD',
@@ -268,19 +386,25 @@ export type LogTenderActivityInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  addAutoMailRestriction: TagAutoMailRestriction;
   advancePostAwardStage: TenderPostAward;
   assignPermissions: RolePermissionResult;
   changeTenderStatus: Tender;
   changeVendorStatus: Vendor;
   completePostAwardFollowUp: PostAwardFollowUp;
+  createCourierRecord: CourierRecord;
+  createDeliverySchedule: TenderDeliverySchedule;
   createMdRequest: VendorMdRequest;
+  createNotification: Notification;
   createPaymentTerm: PaymentTerm;
   createPostAwardFollowUp: PostAwardFollowUp;
   createRole: Role;
   createTag: Tag;
   createTender: Tender;
+  createTenderContact: TenderContact;
   createTenderDocument: TenderDocument;
   createTendersBatch: CreateTendersBatchResult;
+  createTicket: Ticket;
   createUser: User;
   createVendor: Vendor;
   createVendorAgreement: VendorAgreement;
@@ -289,15 +413,19 @@ export type Mutation = {
   createVendorProposal: VendorProposal;
   createVendorTag: VendorTag;
   decideVendorApproval: Vendor;
+  deleteCourierRecord: Scalars['Boolean']['output'];
+  deleteDeliverySchedule: Scalars['Boolean']['output'];
   deletePaymentTerm: Scalars['Boolean']['output'];
   deletePostAwardDocument: Scalars['Boolean']['output'];
   deleteRole: Scalars['Boolean']['output'];
   deleteTag: Scalars['Boolean']['output'];
   deleteTags: Scalars['Boolean']['output'];
   deleteTender: Scalars['Boolean']['output'];
+  deleteTenderContact: Scalars['Boolean']['output'];
   deleteTenderDocument: Scalars['Boolean']['output'];
   deleteTenderDocuments: Scalars['Boolean']['output'];
   deleteTenders: Scalars['Boolean']['output'];
+  deleteTicket: Scalars['Boolean']['output'];
   deleteUser: Scalars['Boolean']['output'];
   deleteUsers: Scalars['Boolean']['output'];
   deleteVendor: Scalars['Boolean']['output'];
@@ -308,26 +436,39 @@ export type Mutation = {
   deleteVendorFollowUp: Scalars['Boolean']['output'];
   deleteVendorTag: Scalars['Boolean']['output'];
   deleteVendors: Scalars['Boolean']['output'];
+  dismissNotification: Scalars['Boolean']['output'];
   generatePresignedUploadUrl: UploadUrlResult;
   logTenderActivity: TenderActivityLog;
+  markAllNotificationsRead: Scalars['Boolean']['output'];
+  markNotificationRead: Notification;
   markVendorAsWinner: TenderPostAward;
   participateInTender: VendorTender;
+  removeAutoMailRestriction: Scalars['Boolean']['output'];
+  removeAutoMailRestrictionByTagAndVendor: Scalars['Boolean']['output'];
   requestVendorApproval: VendorApproval;
   resolveMdRequest: VendorMdRequest;
+  revertPostAwardStage: TenderPostAward;
   seedTenderVendors: Scalars['Boolean']['output'];
+  silenceTenderCountdown: Tender;
   updateAgreementSignature: VendorAgreement;
   updateBillPayment: TenderPostAward;
+  updateCourierRecord: CourierRecord;
+  updateDeliverySchedule: TenderDeliverySchedule;
   updateDispatchDelivery: TenderPostAward;
   updateInspection: TenderPostAward;
+  updateLoaProcessing: TenderPostAward;
   updateOrderFollowUp: TenderPostAward;
   updateOrderProcessing: TenderPostAward;
   updatePaymentTerm: PaymentTerm;
   updatePostAwardFollowUp: PostAwardFollowUp;
   updateRole: Role;
+  updateSdReturn: TenderPostAward;
   updateTag: Tag;
   updateTender: Tender;
+  updateTenderContact: TenderContact;
   updateTenderDocument: TenderDocument;
   updateTenderParticipation: VendorTender;
+  updateTicket: Ticket;
   updateUser: User;
   updateVendor: Vendor;
   updateVendorContactPerson: VendorContactPerson;
@@ -339,6 +480,12 @@ export type Mutation = {
   updateWarranty: TenderPostAward;
   uploadPostAwardDocument: PostAwardDocument;
   uploadVendorDocument: VendorDocument;
+};
+
+
+export type MutationAddAutoMailRestrictionArgs = {
+  tagId: Scalars['ID']['input'];
+  vendorId: Scalars['ID']['input'];
 };
 
 
@@ -368,8 +515,28 @@ export type MutationCompletePostAwardFollowUpArgs = {
 };
 
 
+export type MutationCreateCourierRecordArgs = {
+  input: CreateCourierRecordInput;
+};
+
+
+export type MutationCreateDeliveryScheduleArgs = {
+  input: CreateDeliveryScheduleInput;
+};
+
+
 export type MutationCreateMdRequestArgs = {
   input: CreateMdRequestInput;
+};
+
+
+export type MutationCreateNotificationArgs = {
+  body?: InputMaybe<Scalars['String']['input']>;
+  referenceId?: InputMaybe<Scalars['String']['input']>;
+  referenceType?: InputMaybe<Scalars['String']['input']>;
+  title: Scalars['String']['input'];
+  type: NotificationType;
+  userId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -398,6 +565,11 @@ export type MutationCreateTenderArgs = {
 };
 
 
+export type MutationCreateTenderContactArgs = {
+  input: CreateTenderContactInput;
+};
+
+
 export type MutationCreateTenderDocumentArgs = {
   input: CreateTenderDocumentInput;
 };
@@ -405,6 +577,11 @@ export type MutationCreateTenderDocumentArgs = {
 
 export type MutationCreateTendersBatchArgs = {
   inputs: Array<CreateTenderInput>;
+};
+
+
+export type MutationCreateTicketArgs = {
+  input: CreateTicketInput;
 };
 
 
@@ -448,6 +625,16 @@ export type MutationDecideVendorApprovalArgs = {
 };
 
 
+export type MutationDeleteCourierRecordArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteDeliveryScheduleArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeletePaymentTermArgs = {
   id: Scalars['ID']['input'];
 };
@@ -478,6 +665,11 @@ export type MutationDeleteTenderArgs = {
 };
 
 
+export type MutationDeleteTenderContactArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationDeleteTenderDocumentArgs = {
   id: Scalars['ID']['input'];
 };
@@ -490,6 +682,11 @@ export type MutationDeleteTenderDocumentsArgs = {
 
 export type MutationDeleteTendersArgs = {
   ids: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationDeleteTicketArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -543,6 +740,11 @@ export type MutationDeleteVendorsArgs = {
 };
 
 
+export type MutationDismissNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationGeneratePresignedUploadUrlArgs = {
   input: GenerateUploadUrlInput;
 };
@@ -550,6 +752,16 @@ export type MutationGeneratePresignedUploadUrlArgs = {
 
 export type MutationLogTenderActivityArgs = {
   input: LogTenderActivityInput;
+};
+
+
+export type MutationMarkAllNotificationsReadArgs = {
+  userId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationMarkNotificationReadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -564,6 +776,17 @@ export type MutationParticipateInTenderArgs = {
 };
 
 
+export type MutationRemoveAutoMailRestrictionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRemoveAutoMailRestrictionByTagAndVendorArgs = {
+  tagId: Scalars['ID']['input'];
+  vendorId: Scalars['ID']['input'];
+};
+
+
 export type MutationRequestVendorApprovalArgs = {
   input: CreateApprovalInput;
 };
@@ -574,7 +797,20 @@ export type MutationResolveMdRequestArgs = {
 };
 
 
+export type MutationRevertPostAwardStageArgs = {
+  tenderId: Scalars['ID']['input'];
+};
+
+
 export type MutationSeedTenderVendorsArgs = {
+  tenderId: Scalars['ID']['input'];
+};
+
+
+export type MutationSilenceTenderCountdownArgs = {
+  newDeadline?: InputMaybe<Scalars['String']['input']>;
+  reason: TenderStatus;
+  remarks?: InputMaybe<Scalars['String']['input']>;
   tenderId: Scalars['ID']['input'];
 };
 
@@ -589,6 +825,18 @@ export type MutationUpdateBillPaymentArgs = {
 };
 
 
+export type MutationUpdateCourierRecordArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateCourierRecordInput;
+};
+
+
+export type MutationUpdateDeliveryScheduleArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateDeliveryScheduleInput;
+};
+
+
 export type MutationUpdateDispatchDeliveryArgs = {
   input: UpdateDispatchDeliveryInput;
 };
@@ -596,6 +844,11 @@ export type MutationUpdateDispatchDeliveryArgs = {
 
 export type MutationUpdateInspectionArgs = {
   input: UpdateInspectionInput;
+};
+
+
+export type MutationUpdateLoaProcessingArgs = {
+  input: UpdateLoaProcessingInput;
 };
 
 
@@ -624,6 +877,11 @@ export type MutationUpdateRoleArgs = {
 };
 
 
+export type MutationUpdateSdReturnArgs = {
+  input: UpdateSdReturnInput;
+};
+
+
 export type MutationUpdateTagArgs = {
   id: Scalars['ID']['input'];
   input: UpdateTagInput;
@@ -636,6 +894,12 @@ export type MutationUpdateTenderArgs = {
 };
 
 
+export type MutationUpdateTenderContactArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateTenderContactInput;
+};
+
+
 export type MutationUpdateTenderDocumentArgs = {
   id: Scalars['ID']['input'];
   input: UpdateTenderDocumentInput;
@@ -644,6 +908,12 @@ export type MutationUpdateTenderDocumentArgs = {
 
 export type MutationUpdateTenderParticipationArgs = {
   input: UpdateTenderParticipationInput;
+};
+
+
+export type MutationUpdateTicketArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateTicketInput;
 };
 
 
@@ -706,6 +976,32 @@ export type MutationUploadVendorDocumentArgs = {
   input: UploadVendorDocumentInput;
 };
 
+export type Notification = {
+  __typename?: 'Notification';
+  body?: Maybe<Scalars['String']['output']>;
+  createdDate: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isDismissed: Scalars['Boolean']['output'];
+  isRead: Scalars['Boolean']['output'];
+  referenceId?: Maybe<Scalars['String']['output']>;
+  referenceType?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  type: NotificationType;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export const NotificationType = {
+  AGREEMENT_RENEWAL: 'AGREEMENT_RENEWAL',
+  DOCUMENT_EXPIRY: 'DOCUMENT_EXPIRY',
+  FOLLOW_UP_DUE: 'FOLLOW_UP_DUE',
+  GENERAL: 'GENERAL',
+  PAYMENT_DUE: 'PAYMENT_DUE',
+  SD_RELEASE: 'SD_RELEASE',
+  TASK_ASSIGNED: 'TASK_ASSIGNED',
+  TENDER_DEADLINE: 'TENDER_DEADLINE'
+} as const;
+
+export type NotificationType = typeof NotificationType[keyof typeof NotificationType];
 export type ParticipateInTenderInput = {
   quotedAmount?: InputMaybe<Scalars['Float']['input']>;
   tenderId: Scalars['ID']['input'];
@@ -751,11 +1047,20 @@ export type PaymentTerm = {
   vendorId: Scalars['ID']['output'];
 };
 
+export const PaymentTermType = {
+  ADVANCE_PAYMENT: 'ADVANCE_PAYMENT',
+  PAYMENT_AFTER_30_DAYS: 'PAYMENT_AFTER_30_DAYS',
+  PAYMENT_WITHIN_30_DAYS: 'PAYMENT_WITHIN_30_DAYS'
+} as const;
+
+export type PaymentTermType = typeof PaymentTermType[keyof typeof PaymentTermType];
 export const Permission = {
+  APPROVE_TENDER: 'APPROVE_TENDER',
   CREATE_ROLE: 'CREATE_ROLE',
   CREATE_USER: 'CREATE_USER',
   DELETE_ROLE: 'DELETE_ROLE',
   DELETE_USER: 'DELETE_USER',
+  IMPORT_TENDER: 'IMPORT_TENDER',
   READ_APP_SETTING: 'READ_APP_SETTING',
   READ_ROLE: 'READ_ROLE',
   READ_USER: 'READ_USER',
@@ -804,12 +1109,20 @@ export const PostAwardStage = {
   CLOSED: 'CLOSED',
   DISPATCH_DELIVERY: 'DISPATCH_DELIVERY',
   INSPECTION: 'INSPECTION',
+  LOA_PROCESSING: 'LOA_PROCESSING',
   ORDER_FOLLOWUP: 'ORDER_FOLLOWUP',
   ORDER_PROCESSING: 'ORDER_PROCESSING',
+  SD_RETURN: 'SD_RETURN',
   WARRANTY: 'WARRANTY'
 } as const;
 
 export type PostAwardStage = typeof PostAwardStage[keyof typeof PostAwardStage];
+export type PostAwardStageCount = {
+  __typename?: 'PostAwardStageCount';
+  count: Scalars['Int']['output'];
+  stage: Scalars['String']['output'];
+};
+
 export const ProposalStatus = {
   ACCEPTED: 'ACCEPTED',
   DRAFT: 'DRAFT',
@@ -824,7 +1137,16 @@ export type Query = {
   calculateVendorCommission: CommissionBreakdown;
   generateVendorPaymentSchedule: PaymentScheduleResponse;
   getActivePendingRequest?: Maybe<VendorMdRequest>;
+  getAllPermissions: Array<Permission>;
+  getAutoMailRestrictions: Array<TagAutoMailRestriction>;
+  getAutoMailRestrictionsByVendor: Array<TagAutoMailRestriction>;
+  getCourierRecordById?: Maybe<CourierRecord>;
+  getCourierRecords: Array<CourierRecord>;
+  getCourierRecordsByReference: Array<CourierRecord>;
+  getDashboardSummary: DashboardSummary;
+  getDeliverySchedules: Array<TenderDeliverySchedule>;
   getMdRequestsByVendor: Array<VendorMdRequest>;
+  getNotifications: Array<Notification>;
   getOverduePostAwardFollowUps: Array<PostAwardFollowUp>;
   getPaymentTermsByVendor: Array<PaymentTerm>;
   getPendingMdRequests: Array<VendorMdRequest>;
@@ -842,10 +1164,15 @@ export type Query = {
   getTagById?: Maybe<Tag>;
   getTenderActivityLogs: Array<TenderActivityLog>;
   getTenderById?: Maybe<Tender>;
+  getTenderContacts: Array<TenderContact>;
   getTenderDocumentById?: Maybe<TenderDocument>;
   getTenderFollowUps: Array<VendorTender>;
   getTenderPostAward?: Maybe<TenderPostAward>;
   getTendersByTag: Array<Tender>;
+  getTicketById?: Maybe<Ticket>;
+  getTickets: Array<Ticket>;
+  getTicketsByAssignee: Array<Ticket>;
+  getUnreadNotificationCount: Scalars['Int']['output'];
   getUserById?: Maybe<User>;
   getVendorAgreements: Array<VendorAgreement>;
   getVendorApprovals: Array<VendorApproval>;
@@ -862,6 +1189,7 @@ export type Query = {
   searchTenderDocuments: Array<TenderDocument>;
   searchTenders: Array<Tender>;
   searchTendersAdvanced: Array<Tender>;
+  searchTickets: Array<Ticket>;
   searchUsers: Array<User>;
   searchVendorContactPersons: Array<VendorContactPerson>;
   searchVendorDocuments: Array<VendorDocument>;
@@ -890,8 +1218,39 @@ export type QueryGetActivePendingRequestArgs = {
 };
 
 
+export type QueryGetAutoMailRestrictionsArgs = {
+  tagId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetAutoMailRestrictionsByVendorArgs = {
+  vendorId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetCourierRecordByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetCourierRecordsByReferenceArgs = {
+  referenceId: Scalars['String']['input'];
+  referenceType: Scalars['String']['input'];
+};
+
+
+export type QueryGetDeliverySchedulesArgs = {
+  postAwardId: Scalars['ID']['input'];
+};
+
+
 export type QueryGetMdRequestsByVendorArgs = {
   vendorId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetNotificationsArgs = {
+  userId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -962,6 +1321,11 @@ export type QueryGetTenderByIdArgs = {
 };
 
 
+export type QueryGetTenderContactsArgs = {
+  tenderId: Scalars['ID']['input'];
+};
+
+
 export type QueryGetTenderDocumentByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -980,6 +1344,21 @@ export type QueryGetTenderPostAwardArgs = {
 
 export type QueryGetTendersByTagArgs = {
   tagId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTicketByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetTicketsByAssigneeArgs = {
+  userId: Scalars['String']['input'];
+};
+
+
+export type QueryGetUnreadNotificationCountArgs = {
+  userId?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1054,12 +1433,18 @@ export type QuerySearchTenderDocumentsArgs = {
 
 
 export type QuerySearchTendersArgs = {
+  includeExpired?: InputMaybe<Scalars['Boolean']['input']>;
   searchTerm: Scalars['String']['input'];
 };
 
 
 export type QuerySearchTendersAdvancedArgs = {
   searchInput?: InputMaybe<SearchTenderInput>;
+};
+
+
+export type QuerySearchTicketsArgs = {
+  searchTerm: Scalars['String']['input'];
 };
 
 
@@ -1081,7 +1466,6 @@ export type QuerySearchVendorDocumentsArgs = {
 
 export type QuerySearchVendorsArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
-  searchTerm: Scalars['String']['input'];
   status?: InputMaybe<VendorStatus>;
 };
 
@@ -1165,6 +1549,13 @@ export type SkippedTenderInfo = {
   referenceNumber?: Maybe<Scalars['String']['output']>;
 };
 
+export const SourcePortal = {
+  GEM: 'GEM',
+  IREPS: 'IREPS',
+  OTHER: 'OTHER'
+} as const;
+
+export type SourcePortal = typeof SourcePortal[keyof typeof SourcePortal];
 export const TabulationType = {
   BOTH: 'BOTH',
   FINANCIAL: 'FINANCIAL',
@@ -1185,26 +1576,46 @@ export type Tag = {
   vendorCount: Scalars['Int']['output'];
 };
 
+export type TagAutoMailRestriction = {
+  __typename?: 'TagAutoMailRestriction';
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  tagId: Scalars['ID']['output'];
+  vendorId: Scalars['ID']['output'];
+};
+
 export type Tender = {
   __typename?: 'Tender';
+  agApprovalRequired?: Maybe<Scalars['Boolean']['output']>;
+  closingDateChanged?: Maybe<Scalars['Boolean']['output']>;
+  closingDateProofUrl?: Maybe<Scalars['String']['output']>;
+  countdownSilenceReason?: Maybe<Scalars['String']['output']>;
   createdBy: Scalars['String']['output'];
   createdDate: Scalars['String']['output'];
   deletedBy?: Maybe<Scalars['String']['output']>;
   deletedDate?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   documents?: Maybe<Array<TenderDocument>>;
+  feasibilityRemarks?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isDeleted?: Maybe<Scalars['Boolean']['output']>;
+  isFeasible?: Maybe<Scalars['Boolean']['output']>;
+  isLoadedOnPortal?: Maybe<Scalars['Boolean']['output']>;
   issuingDepartment?: Maybe<Scalars['String']['output']>;
+  mailCheckProofUrl?: Maybe<Scalars['String']['output']>;
   mailSentAt?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
   referenceNumber?: Maybe<Scalars['String']['output']>;
   rejectionReason?: Maybe<Scalars['String']['output']>;
+  sourcePortal?: Maybe<SourcePortal>;
   status: TenderStatus;
   submissionDeadline?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<TenderTag>>;
+  tenderType?: Maybe<TenderTypeEnum>;
   updatedBy?: Maybe<Scalars['String']['output']>;
   updatedDate: Scalars['String']['output'];
+  updatedSubmissionDeadline?: Maybe<Scalars['String']['output']>;
 };
 
 export type TenderActivityLog = {
@@ -1216,6 +1627,44 @@ export type TenderActivityLog = {
   metadata?: Maybe<Scalars['String']['output']>;
   performedBy: Scalars['String']['output'];
   tenderId: Scalars['ID']['output'];
+};
+
+export type TenderContact = {
+  __typename?: 'TenderContact';
+  contactType: TenderContactType;
+  createdDate: Scalars['String']['output'];
+  designation?: Maybe<Scalars['String']['output']>;
+  email?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  phone?: Maybe<Scalars['String']['output']>;
+  tenderId: Scalars['ID']['output'];
+  updatedDate: Scalars['String']['output'];
+};
+
+export const TenderContactType = {
+  ACCOUNTS_OFFICER: 'ACCOUNTS_OFFICER',
+  CONSIGNEE: 'CONSIGNEE',
+  DEPARTMENT: 'DEPARTMENT',
+  OFFICER: 'OFFICER',
+  SD_OFFICER: 'SD_OFFICER'
+} as const;
+
+export type TenderContactType = typeof TenderContactType[keyof typeof TenderContactType];
+export type TenderDeliverySchedule = {
+  __typename?: 'TenderDeliverySchedule';
+  confirmedDate?: Maybe<Scalars['String']['output']>;
+  createdBy: Scalars['String']['output'];
+  createdDate: Scalars['String']['output'];
+  deliveryType: DeliveryType;
+  id: Scalars['ID']['output'];
+  postAwardId: Scalars['ID']['output'];
+  proofUrl?: Maybe<Scalars['String']['output']>;
+  quantity?: Maybe<Scalars['Float']['output']>;
+  scheduledDate: Scalars['String']['output'];
+  status: DeliveryScheduleStatus;
+  updatedDate: Scalars['String']['output'];
 };
 
 export type TenderDocument = {
@@ -1239,17 +1688,27 @@ export type TenderParticipationStatus = typeof TenderParticipationStatus[keyof t
 export type TenderPostAward = {
   __typename?: 'TenderPostAward';
   actualDeliveryDate?: Maybe<Scalars['String']['output']>;
+  awbNumber?: Maybe<Scalars['String']['output']>;
   billUploaded: Scalars['Boolean']['output'];
+  commissionInvoiceGeneratedDate?: Maybe<Scalars['String']['output']>;
   commissionInvoiceProvided: Scalars['Boolean']['output'];
+  commissionPaidDate?: Maybe<Scalars['String']['output']>;
+  commissionPaymentProofUrl?: Maybe<Scalars['String']['output']>;
   commissionPaymentRequired: Scalars['Boolean']['output'];
   consignmentNumber?: Maybe<Scalars['String']['output']>;
   courierCompanyName?: Maybe<Scalars['String']['output']>;
   courierContact?: Maybe<Scalars['String']['output']>;
+  courierEmail?: Maybe<Scalars['String']['output']>;
+  courierWebsite?: Maybe<Scalars['String']['output']>;
   createdDate: Scalars['String']['output'];
   currentStage: PostAwardStage;
   debitNoteProvided: Scalars['Boolean']['output'];
   deductionReason?: Maybe<Scalars['String']['output']>;
   deliveryDeadlineDays?: Maybe<Scalars['Int']['output']>;
+  dispatchDate?: Maybe<Scalars['String']['output']>;
+  dispatchReceiptUrl?: Maybe<Scalars['String']['output']>;
+  driverContact?: Maybe<Scalars['String']['output']>;
+  driverName?: Maybe<Scalars['String']['output']>;
   emdAdviceNumber?: Maybe<Scalars['String']['output']>;
   emdAmount?: Maybe<Scalars['Float']['output']>;
   emdReceivedDate?: Maybe<Scalars['String']['output']>;
@@ -1257,7 +1716,17 @@ export type TenderPostAward = {
   extensionAccepted: Scalars['Boolean']['output'];
   extensionReason?: Maybe<Scalars['String']['output']>;
   extensionRequested: Scalars['Boolean']['output'];
+  firmBillBasicRateDiff?: Maybe<Scalars['Float']['output']>;
+  firmBillDate?: Maybe<Scalars['String']['output']>;
+  firmBillMarginPct?: Maybe<Scalars['Float']['output']>;
+  firmBillNumber?: Maybe<Scalars['String']['output']>;
+  firmBillQuantity?: Maybe<Scalars['Float']['output']>;
+  firmBillRate?: Maybe<Scalars['Float']['output']>;
+  firmBillTotalCharges?: Maybe<Scalars['Float']['output']>;
+  firmBillTotalProfit?: Maybe<Scalars['Float']['output']>;
+  fivePercentClauseApplicable?: Maybe<Scalars['Boolean']['output']>;
   followUpRemarks?: Maybe<Scalars['String']['output']>;
+  gnrNumber?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inspectionCertificateUrl?: Maybe<Scalars['String']['output']>;
   inspectionDone: Scalars['Boolean']['output'];
@@ -1269,9 +1738,24 @@ export type TenderPostAward = {
   ldcInvoiceUrl?: Maybe<Scalars['String']['output']>;
   ldcPercentage?: Maybe<Scalars['Float']['output']>;
   ldcRailwayPoValue?: Maybe<Scalars['Float']['output']>;
+  loaDate?: Maybe<Scalars['String']['output']>;
+  loaDeliveryMatch?: Maybe<Scalars['Boolean']['output']>;
+  loaDocumentUrl?: Maybe<Scalars['String']['output']>;
+  loaExcelEntryImageUrl?: Maybe<Scalars['String']['output']>;
+  loaExcelEntryNumber?: Maybe<Scalars['String']['output']>;
+  loaModificationAdviceRequired: Scalars['Boolean']['output'];
+  loaNumber?: Maybe<Scalars['String']['output']>;
+  loaPackagingMatch?: Maybe<Scalars['Boolean']['output']>;
+  loaPriceMatch?: Maybe<Scalars['Boolean']['output']>;
   loaReceived: Scalars['Boolean']['output'];
+  loaRemarks?: Maybe<Scalars['String']['output']>;
+  lorryNumber?: Maybe<Scalars['String']['output']>;
   moaDocumentUrl?: Maybe<Scalars['String']['output']>;
   newDeliveryDate?: Maybe<Scalars['String']['output']>;
+  optionClauseApplicable?: Maybe<Scalars['Boolean']['output']>;
+  optionClauseQuantity?: Maybe<Scalars['Float']['output']>;
+  optionClauseQuantityAdded?: Maybe<Scalars['Boolean']['output']>;
+  optionClauseReminderDate?: Maybe<Scalars['String']['output']>;
   paymentDepartmentName?: Maybe<Scalars['String']['output']>;
   paymentOfficerContact?: Maybe<Scalars['String']['output']>;
   paymentOfficerName?: Maybe<Scalars['String']['output']>;
@@ -1286,17 +1770,27 @@ export type TenderPostAward = {
   podNumber?: Maybe<Scalars['String']['output']>;
   proofOfDeliveryUrl?: Maybe<Scalars['String']['output']>;
   purchaseInvoiceReceived: Scalars['Boolean']['output'];
+  rNoteDate?: Maybe<Scalars['String']['output']>;
+  rNoteDocumentUrl?: Maybe<Scalars['String']['output']>;
+  rNoteNumber?: Maybe<Scalars['String']['output']>;
   receiptNoteDetails?: Maybe<Scalars['String']['output']>;
   receiptNoteReceived: Scalars['Boolean']['output'];
   runningBillDeduction: Scalars['Boolean']['output'];
   sdCourierDetails?: Maybe<Scalars['String']['output']>;
   sdDocumentUrl?: Maybe<Scalars['String']['output']>;
+  sdOfficerContact?: Maybe<Scalars['String']['output']>;
+  sdOfficerEmail?: Maybe<Scalars['String']['output']>;
+  sdOfficerName?: Maybe<Scalars['String']['output']>;
   sdReleaseDepartmentDetails?: Maybe<Scalars['String']['output']>;
   sdReleased: Scalars['Boolean']['output'];
+  sdReturnAmount?: Maybe<Scalars['Float']['output']>;
+  sdReturnReceivedDate?: Maybe<Scalars['String']['output']>;
+  sdReturnRemarks?: Maybe<Scalars['String']['output']>;
   securityDepositAmount?: Maybe<Scalars['Float']['output']>;
   securityDepositDueDate?: Maybe<Scalars['String']['output']>;
   securityDepositRequired: Scalars['Boolean']['output'];
   securityDepositType?: Maybe<Scalars['String']['output']>;
+  svcClauseApplicable?: Maybe<Scalars['Boolean']['output']>;
   tenderId: Scalars['ID']['output'];
   tenderOfficerEmail?: Maybe<Scalars['String']['output']>;
   tenderOfficerName?: Maybe<Scalars['String']['output']>;
@@ -1333,15 +1827,18 @@ export type TenderPostAward = {
 export const TenderStatus = {
   BILL_SUBMISSION: 'BILL_SUBMISSION',
   COMPLETED: 'COMPLETED',
+  DEADLINE_EXTENDED: 'DEADLINE_EXTENDED',
   DELIVERY: 'DELIVERY',
   DISPATCH: 'DISPATCH',
   DOCS_UPLOADED: 'DOCS_UPLOADED',
   DRAFT: 'DRAFT',
+  FILLED: 'FILLED',
   INSPECTION: 'INSPECTION',
   MAIL_SENT: 'MAIL_SENT',
   MD_TAGGED: 'MD_TAGGED',
   NIT_UPLOADED: 'NIT_UPLOADED',
   NIT_VERIFIED: 'NIT_VERIFIED',
+  NOT_INTERESTED_TENDER: 'NOT_INTERESTED_TENDER',
   ORDER_FOLLOWUP: 'ORDER_FOLLOWUP',
   ORDER_PROCESSING: 'ORDER_PROCESSING',
   PARTICIPATED: 'PARTICIPATED',
@@ -1358,6 +1855,12 @@ export const TenderStatus = {
 } as const;
 
 export type TenderStatus = typeof TenderStatus[keyof typeof TenderStatus];
+export type TenderStatusCount = {
+  __typename?: 'TenderStatusCount';
+  count: Scalars['Int']['output'];
+  status: Scalars['String']['output'];
+};
+
 export type TenderTag = {
   __typename?: 'TenderTag';
   id: Scalars['ID']['output'];
@@ -1366,6 +1869,41 @@ export type TenderTag = {
   tenderId: Scalars['ID']['output'];
 };
 
+export const TenderTypeEnum = {
+  LIMITED: 'LIMITED',
+  NORMAL: 'NORMAL'
+} as const;
+
+export type TenderTypeEnum = typeof TenderTypeEnum[keyof typeof TenderTypeEnum];
+export type Ticket = {
+  __typename?: 'Ticket';
+  assignedBy?: Maybe<Scalars['String']['output']>;
+  assignedTo?: Maybe<Scalars['String']['output']>;
+  createdDate: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  priority: TicketPriority;
+  referenceId?: Maybe<Scalars['String']['output']>;
+  referenceType?: Maybe<Scalars['String']['output']>;
+  status: TicketStatus;
+  title: Scalars['String']['output'];
+  updatedDate: Scalars['String']['output'];
+};
+
+export const TicketPriority = {
+  HIGH: 'HIGH',
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM'
+} as const;
+
+export type TicketPriority = typeof TicketPriority[keyof typeof TicketPriority];
+export const TicketStatus = {
+  CLOSED: 'CLOSED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  OPEN: 'OPEN'
+} as const;
+
+export type TicketStatus = typeof TicketStatus[keyof typeof TicketStatus];
 export type UpdateBillPaymentInput = {
   billUploaded?: InputMaybe<Scalars['Boolean']['input']>;
   commissionInvoiceProvided?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1381,18 +1919,53 @@ export type UpdateBillPaymentInput = {
   tenderId: Scalars['ID']['input'];
 };
 
+export type UpdateCourierRecordInput = {
+  awbNumber?: InputMaybe<Scalars['String']['input']>;
+  courierCompany?: InputMaybe<Scalars['String']['input']>;
+  courierContact?: InputMaybe<Scalars['String']['input']>;
+  courierEmail?: InputMaybe<Scalars['String']['input']>;
+  dispatchDate?: InputMaybe<Scalars['String']['input']>;
+  receiptProofUrl?: InputMaybe<Scalars['String']['input']>;
+  receivedDate?: InputMaybe<Scalars['String']['input']>;
+  receiverName?: InputMaybe<Scalars['String']['input']>;
+  senderName?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<CourierStatus>;
+  trackingUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateDeliveryScheduleInput = {
+  confirmedDate?: InputMaybe<Scalars['String']['input']>;
+  deliveryType?: InputMaybe<DeliveryType>;
+  proofUrl?: InputMaybe<Scalars['String']['input']>;
+  quantity?: InputMaybe<Scalars['Float']['input']>;
+  scheduledDate?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<DeliveryScheduleStatus>;
+};
+
 export type UpdateDispatchDeliveryInput = {
   actualDeliveryDate?: InputMaybe<Scalars['String']['input']>;
+  awbNumber?: InputMaybe<Scalars['String']['input']>;
   consignmentNumber?: InputMaybe<Scalars['String']['input']>;
   courierCompanyName?: InputMaybe<Scalars['String']['input']>;
   courierContact?: InputMaybe<Scalars['String']['input']>;
+  courierEmail?: InputMaybe<Scalars['String']['input']>;
+  courierWebsite?: InputMaybe<Scalars['String']['input']>;
+  dispatchDate?: InputMaybe<Scalars['String']['input']>;
+  dispatchReceiptUrl?: InputMaybe<Scalars['String']['input']>;
+  driverContact?: InputMaybe<Scalars['String']['input']>;
+  driverName?: InputMaybe<Scalars['String']['input']>;
+  gnrNumber?: InputMaybe<Scalars['String']['input']>;
   ldcCalculatedTotal?: InputMaybe<Scalars['Float']['input']>;
   ldcGivenPercentage?: InputMaybe<Scalars['Float']['input']>;
   ldcInvoiceUrl?: InputMaybe<Scalars['String']['input']>;
   ldcRailwayPoValue?: InputMaybe<Scalars['Float']['input']>;
+  lorryNumber?: InputMaybe<Scalars['String']['input']>;
   podNumber?: InputMaybe<Scalars['String']['input']>;
   proofOfDeliveryUrl?: InputMaybe<Scalars['String']['input']>;
   purchaseInvoiceReceived?: InputMaybe<Scalars['Boolean']['input']>;
+  rNoteDate?: InputMaybe<Scalars['String']['input']>;
+  rNoteDocumentUrl?: InputMaybe<Scalars['String']['input']>;
+  rNoteNumber?: InputMaybe<Scalars['String']['input']>;
   receiptNoteDetails?: InputMaybe<Scalars['String']['input']>;
   receiptNoteReceived?: InputMaybe<Scalars['Boolean']['input']>;
   tenderId: Scalars['ID']['input'];
@@ -1420,6 +1993,22 @@ export type UpdateInspectionInput = {
   tpiOfficerContact?: InputMaybe<Scalars['String']['input']>;
   tpiOfficerName?: InputMaybe<Scalars['String']['input']>;
   tpiVisitSchedule?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateLoaProcessingInput = {
+  fivePercentClauseApplicable?: InputMaybe<Scalars['Boolean']['input']>;
+  loaDate?: InputMaybe<Scalars['String']['input']>;
+  loaDeliveryMatch?: InputMaybe<Scalars['Boolean']['input']>;
+  loaDocumentUrl?: InputMaybe<Scalars['String']['input']>;
+  loaExcelEntryImageUrl?: InputMaybe<Scalars['String']['input']>;
+  loaExcelEntryNumber?: InputMaybe<Scalars['String']['input']>;
+  loaModificationAdviceRequired?: InputMaybe<Scalars['Boolean']['input']>;
+  loaNumber?: InputMaybe<Scalars['String']['input']>;
+  loaPackagingMatch?: InputMaybe<Scalars['Boolean']['input']>;
+  loaPriceMatch?: InputMaybe<Scalars['Boolean']['input']>;
+  loaRemarks?: InputMaybe<Scalars['String']['input']>;
+  svcClauseApplicable?: InputMaybe<Scalars['Boolean']['input']>;
+  tenderId: Scalars['ID']['input'];
 };
 
 export type UpdateOrderFollowUpInput = {
@@ -1496,6 +2085,16 @@ export type UpdateRoleInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateSdReturnInput = {
+  sdOfficerContact?: InputMaybe<Scalars['String']['input']>;
+  sdOfficerEmail?: InputMaybe<Scalars['String']['input']>;
+  sdOfficerName?: InputMaybe<Scalars['String']['input']>;
+  sdReturnAmount?: InputMaybe<Scalars['Float']['input']>;
+  sdReturnReceivedDate?: InputMaybe<Scalars['String']['input']>;
+  sdReturnRemarks?: InputMaybe<Scalars['String']['input']>;
+  tenderId: Scalars['ID']['input'];
+};
+
 export type UpdateSignatureInput = {
   agreementId: Scalars['ID']['input'];
   signatureStatus: SignatureStatus;
@@ -1506,6 +2105,15 @@ export type UpdateTagInput = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type UpdateTenderContactInput = {
+  contactType?: InputMaybe<TenderContactType>;
+  designation?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type UpdateTenderDocumentInput = {
   documentName?: InputMaybe<Scalars['String']['input']>;
   documentUrl?: InputMaybe<Scalars['String']['input']>;
@@ -1513,16 +2121,34 @@ export type UpdateTenderDocumentInput = {
 };
 
 export type UpdateTenderInput = {
+  agApprovalRequired?: InputMaybe<Scalars['Boolean']['input']>;
+  closingDateChanged?: InputMaybe<Scalars['Boolean']['input']>;
+  closingDateProofUrl?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  feasibilityRemarks?: InputMaybe<Scalars['String']['input']>;
+  isFeasible?: InputMaybe<Scalars['Boolean']['input']>;
+  isLoadedOnPortal?: InputMaybe<Scalars['Boolean']['input']>;
   issuingDepartment?: InputMaybe<Scalars['String']['input']>;
+  mailCheckProofUrl?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   referenceNumber?: InputMaybe<Scalars['String']['input']>;
+  sourcePortal?: InputMaybe<SourcePortal>;
   submissionDeadline?: InputMaybe<Scalars['String']['input']>;
+  tenderType?: InputMaybe<TenderTypeEnum>;
+  updatedSubmissionDeadline?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateTenderParticipationInput = {
   participationId: Scalars['ID']['input'];
   status: TenderParticipationStatus;
+};
+
+export type UpdateTicketInput = {
+  assignedTo?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  priority?: InputMaybe<TicketPriority>;
+  status?: InputMaybe<TicketStatus>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UpdateUserInput = {
@@ -1559,6 +2185,7 @@ export type UpdateVendorDocumentInput = {
 
 export type UpdateVendorDocumentStandaloneInput = {
   documentName?: InputMaybe<Scalars['String']['input']>;
+  documentType?: InputMaybe<DocumentType>;
   documentUrl?: InputMaybe<Scalars['String']['input']>;
   expiresOn?: InputMaybe<Scalars['String']['input']>;
 };
@@ -1648,6 +2275,7 @@ export type UploadUrlResult = {
 
 export type UploadVendorDocumentInput = {
   documentName: Scalars['String']['input'];
+  documentType?: InputMaybe<DocumentType>;
   documentUrl: Scalars['String']['input'];
   expiresOn?: InputMaybe<Scalars['String']['input']>;
   vendorId: Scalars['ID']['input'];
@@ -1704,12 +2332,15 @@ export type VendorAgreement = {
   commissionType?: Maybe<CommissionType>;
   commissionValue?: Maybe<Scalars['Float']['output']>;
   createdDate: Scalars['String']['output'];
+  documentPath?: Maybe<Scalars['String']['output']>;
+  documentUrl?: Maybe<Scalars['String']['output']>;
   gstApplicable: Scalars['Boolean']['output'];
   hasOtherBenefits: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   otherBenefitsDescription?: Maybe<Scalars['String']['output']>;
   paymentAmount?: Maybe<Scalars['Float']['output']>;
   paymentFrequency?: Maybe<PaymentFrequency>;
+  paymentTermType?: Maybe<PaymentTermType>;
   renewalReminderDate?: Maybe<Scalars['String']['output']>;
   signatureStatus: SignatureStatus;
   signedDate?: Maybe<Scalars['String']['output']>;
@@ -1749,6 +2380,7 @@ export type VendorDocument = {
   createdBy: Scalars['String']['output'];
   createdDate: Scalars['String']['output'];
   documentName: Scalars['String']['output'];
+  documentType: DocumentType;
   documentUrl: Scalars['String']['output'];
   expiresOn?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -1811,6 +2443,7 @@ export type VendorProposal = {
 
 export const VendorStatus = {
   APPROVED: 'APPROVED',
+  BLACKLISTED: 'BLACKLISTED',
   DELETED: 'DELETED',
   FINAL: 'FINAL',
   INTERESTED: 'INTERESTED',
@@ -1965,9 +2598,14 @@ export type ResolversTypes = {
   CommissionStructure: CommissionStructure;
   CommissionType: CommissionType;
   CompanyType: CompanyType;
+  CourierDirection: CourierDirection;
+  CourierRecord: ResolverTypeWrapper<CourierRecord>;
+  CourierStatus: CourierStatus;
   CreateAgreementInput: CreateAgreementInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CreateApprovalInput: CreateApprovalInput;
+  CreateCourierRecordInput: CreateCourierRecordInput;
+  CreateDeliveryScheduleInput: CreateDeliveryScheduleInput;
   CreateFollowUpInput: CreateFollowUpInput;
   CreateMdRequestInput: CreateMdRequestInput;
   CreatePaymentTermInput: CreatePaymentTermInput;
@@ -1975,16 +2613,23 @@ export type ResolversTypes = {
   CreateProposalInput: CreateProposalInput;
   CreateRoleInput: CreateRoleInput;
   CreateTagInput: CreateTagInput;
+  CreateTenderContactInput: CreateTenderContactInput;
   CreateTenderDocumentInput: CreateTenderDocumentInput;
   CreateTenderInput: CreateTenderInput;
   CreateTendersBatchResult: ResolverTypeWrapper<CreateTendersBatchResult>;
+  CreateTicketInput: CreateTicketInput;
   CreateUserInput: CreateUserInput;
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
   CreateVendorContactPersonStandaloneInput: CreateVendorContactPersonStandaloneInput;
   CreateVendorDocumentInput: CreateVendorDocumentInput;
   CreateVendorInput: CreateVendorInput;
   CreateVendorTagInput: CreateVendorTagInput;
+  DashboardSummary: ResolverTypeWrapper<DashboardSummary>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   DecideApprovalInput: DecideApprovalInput;
+  DeliveryScheduleStatus: DeliveryScheduleStatus;
+  DeliveryType: DeliveryType;
+  DocumentType: DocumentType;
   EmdSource: EmdSource;
   FollowUpPriority: FollowUpPriority;
   FollowUpStatus: FollowUpStatus;
@@ -1992,16 +2637,19 @@ export type ResolversTypes = {
   GenerateUploadUrlInput: GenerateUploadUrlInput;
   LogTenderActivityInput: LogTenderActivityInput;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
+  Notification: ResolverTypeWrapper<Notification>;
+  NotificationType: NotificationType;
   ParticipateInTenderInput: ParticipateInTenderInput;
   PaymentFrequency: PaymentFrequency;
   PaymentScheduleItem: ResolverTypeWrapper<PaymentScheduleItem>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   PaymentScheduleResponse: ResolverTypeWrapper<PaymentScheduleResponse>;
   PaymentTerm: ResolverTypeWrapper<PaymentTerm>;
+  PaymentTermType: PaymentTermType;
   Permission: Permission;
   PostAwardDocument: ResolverTypeWrapper<PostAwardDocument>;
   PostAwardFollowUp: ResolverTypeWrapper<PostAwardFollowUp>;
   PostAwardStage: PostAwardStage;
+  PostAwardStageCount: ResolverTypeWrapper<PostAwardStageCount>;
   ProposalStatus: ProposalStatus;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   ResolveMdRequestInput: ResolveMdRequestInput;
@@ -2015,30 +2663,46 @@ export type ResolversTypes = {
   SearchVendorDocumentInput: SearchVendorDocumentInput;
   SignatureStatus: SignatureStatus;
   SkippedTenderInfo: ResolverTypeWrapper<SkippedTenderInfo>;
+  SourcePortal: SourcePortal;
   TabulationType: TabulationType;
   Tag: ResolverTypeWrapper<Tag>;
+  TagAutoMailRestriction: ResolverTypeWrapper<TagAutoMailRestriction>;
   Tender: ResolverTypeWrapper<Tender>;
   TenderActivityLog: ResolverTypeWrapper<TenderActivityLog>;
+  TenderContact: ResolverTypeWrapper<TenderContact>;
+  TenderContactType: TenderContactType;
+  TenderDeliverySchedule: ResolverTypeWrapper<TenderDeliverySchedule>;
   TenderDocument: ResolverTypeWrapper<TenderDocument>;
   TenderParticipationStatus: TenderParticipationStatus;
   TenderPostAward: ResolverTypeWrapper<TenderPostAward>;
   TenderStatus: TenderStatus;
+  TenderStatusCount: ResolverTypeWrapper<TenderStatusCount>;
   TenderTag: ResolverTypeWrapper<TenderTag>;
+  TenderTypeEnum: TenderTypeEnum;
+  Ticket: ResolverTypeWrapper<Ticket>;
+  TicketPriority: TicketPriority;
+  TicketStatus: TicketStatus;
   UpdateBillPaymentInput: UpdateBillPaymentInput;
+  UpdateCourierRecordInput: UpdateCourierRecordInput;
+  UpdateDeliveryScheduleInput: UpdateDeliveryScheduleInput;
   UpdateDispatchDeliveryInput: UpdateDispatchDeliveryInput;
   UpdateFollowUpInput: UpdateFollowUpInput;
   UpdateInspectionInput: UpdateInspectionInput;
+  UpdateLoaProcessingInput: UpdateLoaProcessingInput;
   UpdateOrderFollowUpInput: UpdateOrderFollowUpInput;
   UpdateOrderProcessingInput: UpdateOrderProcessingInput;
   UpdatePaymentTermInput: UpdatePaymentTermInput;
   UpdatePostAwardFollowUpInput: UpdatePostAwardFollowUpInput;
   UpdateProposalStatusInput: UpdateProposalStatusInput;
   UpdateRoleInput: UpdateRoleInput;
+  UpdateSdReturnInput: UpdateSdReturnInput;
   UpdateSignatureInput: UpdateSignatureInput;
   UpdateTagInput: UpdateTagInput;
+  UpdateTenderContactInput: UpdateTenderContactInput;
   UpdateTenderDocumentInput: UpdateTenderDocumentInput;
   UpdateTenderInput: UpdateTenderInput;
   UpdateTenderParticipationInput: UpdateTenderParticipationInput;
+  UpdateTicketInput: UpdateTicketInput;
   UpdateUserInput: UpdateUserInput;
   UpdateVendorContactPersonInput: UpdateVendorContactPersonInput;
   UpdateVendorContactPersonStandaloneInput: UpdateVendorContactPersonStandaloneInput;
@@ -2076,9 +2740,12 @@ export type ResolversParentTypes = {
   ChangeVendorStatusInput: ChangeVendorStatusInput;
   CommissionBreakdown: CommissionBreakdown;
   Float: Scalars['Float']['output'];
+  CourierRecord: CourierRecord;
   CreateAgreementInput: CreateAgreementInput;
   Boolean: Scalars['Boolean']['output'];
   CreateApprovalInput: CreateApprovalInput;
+  CreateCourierRecordInput: CreateCourierRecordInput;
+  CreateDeliveryScheduleInput: CreateDeliveryScheduleInput;
   CreateFollowUpInput: CreateFollowUpInput;
   CreateMdRequestInput: CreateMdRequestInput;
   CreatePaymentTermInput: CreatePaymentTermInput;
@@ -2086,26 +2753,31 @@ export type ResolversParentTypes = {
   CreateProposalInput: CreateProposalInput;
   CreateRoleInput: CreateRoleInput;
   CreateTagInput: CreateTagInput;
+  CreateTenderContactInput: CreateTenderContactInput;
   CreateTenderDocumentInput: CreateTenderDocumentInput;
   CreateTenderInput: CreateTenderInput;
   CreateTendersBatchResult: CreateTendersBatchResult;
+  CreateTicketInput: CreateTicketInput;
   CreateUserInput: CreateUserInput;
   CreateVendorContactPersonInput: CreateVendorContactPersonInput;
   CreateVendorContactPersonStandaloneInput: CreateVendorContactPersonStandaloneInput;
   CreateVendorDocumentInput: CreateVendorDocumentInput;
   CreateVendorInput: CreateVendorInput;
   CreateVendorTagInput: CreateVendorTagInput;
+  DashboardSummary: DashboardSummary;
+  Int: Scalars['Int']['output'];
   DecideApprovalInput: DecideApprovalInput;
   GenerateUploadUrlInput: GenerateUploadUrlInput;
   LogTenderActivityInput: LogTenderActivityInput;
   Mutation: Record<PropertyKey, never>;
+  Notification: Notification;
   ParticipateInTenderInput: ParticipateInTenderInput;
   PaymentScheduleItem: PaymentScheduleItem;
-  Int: Scalars['Int']['output'];
   PaymentScheduleResponse: PaymentScheduleResponse;
   PaymentTerm: PaymentTerm;
   PostAwardDocument: PostAwardDocument;
   PostAwardFollowUp: PostAwardFollowUp;
+  PostAwardStageCount: PostAwardStageCount;
   Query: Record<PropertyKey, never>;
   ResolveMdRequestInput: ResolveMdRequestInput;
   Role: Role;
@@ -2118,26 +2790,37 @@ export type ResolversParentTypes = {
   SearchVendorDocumentInput: SearchVendorDocumentInput;
   SkippedTenderInfo: SkippedTenderInfo;
   Tag: Tag;
+  TagAutoMailRestriction: TagAutoMailRestriction;
   Tender: Tender;
   TenderActivityLog: TenderActivityLog;
+  TenderContact: TenderContact;
+  TenderDeliverySchedule: TenderDeliverySchedule;
   TenderDocument: TenderDocument;
   TenderPostAward: TenderPostAward;
+  TenderStatusCount: TenderStatusCount;
   TenderTag: TenderTag;
+  Ticket: Ticket;
   UpdateBillPaymentInput: UpdateBillPaymentInput;
+  UpdateCourierRecordInput: UpdateCourierRecordInput;
+  UpdateDeliveryScheduleInput: UpdateDeliveryScheduleInput;
   UpdateDispatchDeliveryInput: UpdateDispatchDeliveryInput;
   UpdateFollowUpInput: UpdateFollowUpInput;
   UpdateInspectionInput: UpdateInspectionInput;
+  UpdateLoaProcessingInput: UpdateLoaProcessingInput;
   UpdateOrderFollowUpInput: UpdateOrderFollowUpInput;
   UpdateOrderProcessingInput: UpdateOrderProcessingInput;
   UpdatePaymentTermInput: UpdatePaymentTermInput;
   UpdatePostAwardFollowUpInput: UpdatePostAwardFollowUpInput;
   UpdateProposalStatusInput: UpdateProposalStatusInput;
   UpdateRoleInput: UpdateRoleInput;
+  UpdateSdReturnInput: UpdateSdReturnInput;
   UpdateSignatureInput: UpdateSignatureInput;
   UpdateTagInput: UpdateTagInput;
+  UpdateTenderContactInput: UpdateTenderContactInput;
   UpdateTenderDocumentInput: UpdateTenderDocumentInput;
   UpdateTenderInput: UpdateTenderInput;
   UpdateTenderParticipationInput: UpdateTenderParticipationInput;
+  UpdateTicketInput: UpdateTicketInput;
   UpdateUserInput: UpdateUserInput;
   UpdateVendorContactPersonInput: UpdateVendorContactPersonInput;
   UpdateVendorContactPersonStandaloneInput: UpdateVendorContactPersonStandaloneInput;
@@ -2170,25 +2853,62 @@ export type CommissionBreakdownResolvers<ContextType = any, ParentType extends R
   totalAmount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
 };
 
+export type CourierRecordResolvers<ContextType = any, ParentType extends ResolversParentTypes['CourierRecord'] = ResolversParentTypes['CourierRecord']> = {
+  awbNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierCompany?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierContact?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  direction?: Resolver<ResolversTypes['CourierDirection'], ParentType, ContextType>;
+  dispatchDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  receiptProofUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  receivedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  receiverName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  referenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  referenceType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  senderName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['CourierStatus'], ParentType, ContextType>;
+  trackingUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type CreateTendersBatchResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTendersBatchResult'] = ResolversParentTypes['CreateTendersBatchResult']> = {
   created?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType>;
   skipped?: Resolver<Array<ResolversTypes['SkippedTenderInfo']>, ParentType, ContextType>;
 };
 
+export type DashboardSummaryResolvers<ContextType = any, ParentType extends ResolversParentTypes['DashboardSummary'] = ResolversParentTypes['DashboardSummary']> = {
+  postAwardByStage?: Resolver<Array<ResolversTypes['PostAwardStageCount']>, ParentType, ContextType>;
+  recentTenders?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType>;
+  tendersByStatus?: Resolver<Array<ResolversTypes['TenderStatusCount']>, ParentType, ContextType>;
+  totalOpenTickets?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalTenders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalVendors?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  unreadNotifications?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  addAutoMailRestriction?: Resolver<ResolversTypes['TagAutoMailRestriction'], ParentType, ContextType, RequireFields<MutationAddAutoMailRestrictionArgs, 'tagId' | 'vendorId'>>;
   advancePostAwardStage?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationAdvancePostAwardStageArgs, 'tenderId'>>;
   assignPermissions?: Resolver<ResolversTypes['RolePermissionResult'], ParentType, ContextType, RequireFields<MutationAssignPermissionsArgs, 'input'>>;
   changeTenderStatus?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationChangeTenderStatusArgs, 'input'>>;
   changeVendorStatus?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationChangeVendorStatusArgs, 'input'>>;
   completePostAwardFollowUp?: Resolver<ResolversTypes['PostAwardFollowUp'], ParentType, ContextType, RequireFields<MutationCompletePostAwardFollowUpArgs, 'id' | 'outcome'>>;
+  createCourierRecord?: Resolver<ResolversTypes['CourierRecord'], ParentType, ContextType, RequireFields<MutationCreateCourierRecordArgs, 'input'>>;
+  createDeliverySchedule?: Resolver<ResolversTypes['TenderDeliverySchedule'], ParentType, ContextType, RequireFields<MutationCreateDeliveryScheduleArgs, 'input'>>;
   createMdRequest?: Resolver<ResolversTypes['VendorMdRequest'], ParentType, ContextType, RequireFields<MutationCreateMdRequestArgs, 'input'>>;
+  createNotification?: Resolver<ResolversTypes['Notification'], ParentType, ContextType, RequireFields<MutationCreateNotificationArgs, 'title' | 'type'>>;
   createPaymentTerm?: Resolver<ResolversTypes['PaymentTerm'], ParentType, ContextType, RequireFields<MutationCreatePaymentTermArgs, 'input'>>;
   createPostAwardFollowUp?: Resolver<ResolversTypes['PostAwardFollowUp'], ParentType, ContextType, RequireFields<MutationCreatePostAwardFollowUpArgs, 'input'>>;
   createRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationCreateRoleArgs, 'input'>>;
   createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'input'>>;
   createTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationCreateTenderArgs, 'input'>>;
+  createTenderContact?: Resolver<ResolversTypes['TenderContact'], ParentType, ContextType, RequireFields<MutationCreateTenderContactArgs, 'input'>>;
   createTenderDocument?: Resolver<ResolversTypes['TenderDocument'], ParentType, ContextType, RequireFields<MutationCreateTenderDocumentArgs, 'input'>>;
   createTendersBatch?: Resolver<ResolversTypes['CreateTendersBatchResult'], ParentType, ContextType, RequireFields<MutationCreateTendersBatchArgs, 'inputs'>>;
+  createTicket?: Resolver<ResolversTypes['Ticket'], ParentType, ContextType, RequireFields<MutationCreateTicketArgs, 'input'>>;
   createUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'input'>>;
   createVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationCreateVendorArgs, 'input'>>;
   createVendorAgreement?: Resolver<ResolversTypes['VendorAgreement'], ParentType, ContextType, RequireFields<MutationCreateVendorAgreementArgs, 'input'>>;
@@ -2197,15 +2917,19 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createVendorProposal?: Resolver<ResolversTypes['VendorProposal'], ParentType, ContextType, RequireFields<MutationCreateVendorProposalArgs, 'input'>>;
   createVendorTag?: Resolver<ResolversTypes['VendorTag'], ParentType, ContextType, RequireFields<MutationCreateVendorTagArgs, 'input'>>;
   decideVendorApproval?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationDecideVendorApprovalArgs, 'input'>>;
+  deleteCourierRecord?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteCourierRecordArgs, 'id'>>;
+  deleteDeliverySchedule?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteDeliveryScheduleArgs, 'id'>>;
   deletePaymentTerm?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeletePaymentTermArgs, 'id'>>;
   deletePostAwardDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeletePostAwardDocumentArgs, 'id'>>;
   deleteRole?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteRoleArgs, 'id'>>;
   deleteTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagArgs, 'id'>>;
   deleteTags?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTagsArgs, 'ids'>>;
   deleteTender?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderArgs, 'id'>>;
+  deleteTenderContact?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderContactArgs, 'id'>>;
   deleteTenderDocument?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderDocumentArgs, 'id'>>;
   deleteTenderDocuments?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTenderDocumentsArgs, 'ids'>>;
   deleteTenders?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTendersArgs, 'ids'>>;
+  deleteTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTicketArgs, 'id'>>;
   deleteUser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'id'>>;
   deleteUsers?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteUsersArgs, 'ids'>>;
   deleteVendor?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorArgs, 'id'>>;
@@ -2216,26 +2940,39 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteVendorFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorFollowUpArgs, 'id'>>;
   deleteVendorTag?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorTagArgs, 'id'>>;
   deleteVendors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVendorsArgs, 'ids'>>;
+  dismissNotification?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDismissNotificationArgs, 'id'>>;
   generatePresignedUploadUrl?: Resolver<ResolversTypes['UploadUrlResult'], ParentType, ContextType, RequireFields<MutationGeneratePresignedUploadUrlArgs, 'input'>>;
   logTenderActivity?: Resolver<ResolversTypes['TenderActivityLog'], ParentType, ContextType, RequireFields<MutationLogTenderActivityArgs, 'input'>>;
+  markAllNotificationsRead?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, Partial<MutationMarkAllNotificationsReadArgs>>;
+  markNotificationRead?: Resolver<ResolversTypes['Notification'], ParentType, ContextType, RequireFields<MutationMarkNotificationReadArgs, 'id'>>;
   markVendorAsWinner?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationMarkVendorAsWinnerArgs, 'tenderId' | 'vendorId'>>;
   participateInTender?: Resolver<ResolversTypes['VendorTender'], ParentType, ContextType, RequireFields<MutationParticipateInTenderArgs, 'input'>>;
+  removeAutoMailRestriction?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationRemoveAutoMailRestrictionArgs, 'id'>>;
+  removeAutoMailRestrictionByTagAndVendor?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationRemoveAutoMailRestrictionByTagAndVendorArgs, 'tagId' | 'vendorId'>>;
   requestVendorApproval?: Resolver<ResolversTypes['VendorApproval'], ParentType, ContextType, RequireFields<MutationRequestVendorApprovalArgs, 'input'>>;
   resolveMdRequest?: Resolver<ResolversTypes['VendorMdRequest'], ParentType, ContextType, RequireFields<MutationResolveMdRequestArgs, 'input'>>;
+  revertPostAwardStage?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationRevertPostAwardStageArgs, 'tenderId'>>;
   seedTenderVendors?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationSeedTenderVendorsArgs, 'tenderId'>>;
+  silenceTenderCountdown?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationSilenceTenderCountdownArgs, 'reason' | 'tenderId'>>;
   updateAgreementSignature?: Resolver<ResolversTypes['VendorAgreement'], ParentType, ContextType, RequireFields<MutationUpdateAgreementSignatureArgs, 'input'>>;
   updateBillPayment?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateBillPaymentArgs, 'input'>>;
+  updateCourierRecord?: Resolver<ResolversTypes['CourierRecord'], ParentType, ContextType, RequireFields<MutationUpdateCourierRecordArgs, 'id' | 'input'>>;
+  updateDeliverySchedule?: Resolver<ResolversTypes['TenderDeliverySchedule'], ParentType, ContextType, RequireFields<MutationUpdateDeliveryScheduleArgs, 'id' | 'input'>>;
   updateDispatchDelivery?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateDispatchDeliveryArgs, 'input'>>;
   updateInspection?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateInspectionArgs, 'input'>>;
+  updateLoaProcessing?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateLoaProcessingArgs, 'input'>>;
   updateOrderFollowUp?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateOrderFollowUpArgs, 'input'>>;
   updateOrderProcessing?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateOrderProcessingArgs, 'input'>>;
   updatePaymentTerm?: Resolver<ResolversTypes['PaymentTerm'], ParentType, ContextType, RequireFields<MutationUpdatePaymentTermArgs, 'input'>>;
   updatePostAwardFollowUp?: Resolver<ResolversTypes['PostAwardFollowUp'], ParentType, ContextType, RequireFields<MutationUpdatePostAwardFollowUpArgs, 'input'>>;
   updateRole?: Resolver<ResolversTypes['Role'], ParentType, ContextType, RequireFields<MutationUpdateRoleArgs, 'input'>>;
+  updateSdReturn?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateSdReturnArgs, 'input'>>;
   updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id' | 'input'>>;
   updateTender?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationUpdateTenderArgs, 'id' | 'input'>>;
+  updateTenderContact?: Resolver<ResolversTypes['TenderContact'], ParentType, ContextType, RequireFields<MutationUpdateTenderContactArgs, 'id' | 'input'>>;
   updateTenderDocument?: Resolver<ResolversTypes['TenderDocument'], ParentType, ContextType, RequireFields<MutationUpdateTenderDocumentArgs, 'id' | 'input'>>;
   updateTenderParticipation?: Resolver<ResolversTypes['VendorTender'], ParentType, ContextType, RequireFields<MutationUpdateTenderParticipationArgs, 'input'>>;
+  updateTicket?: Resolver<ResolversTypes['Ticket'], ParentType, ContextType, RequireFields<MutationUpdateTicketArgs, 'id' | 'input'>>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'id' | 'input'>>;
   updateVendor?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationUpdateVendorArgs, 'id' | 'input'>>;
   updateVendorContactPerson?: Resolver<ResolversTypes['VendorContactPerson'], ParentType, ContextType, RequireFields<MutationUpdateVendorContactPersonArgs, 'id' | 'input'>>;
@@ -2247,6 +2984,19 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   updateWarranty?: Resolver<ResolversTypes['TenderPostAward'], ParentType, ContextType, RequireFields<MutationUpdateWarrantyArgs, 'input'>>;
   uploadPostAwardDocument?: Resolver<ResolversTypes['PostAwardDocument'], ParentType, ContextType, RequireFields<MutationUploadPostAwardDocumentArgs, 'input'>>;
   uploadVendorDocument?: Resolver<ResolversTypes['VendorDocument'], ParentType, ContextType, RequireFields<MutationUploadVendorDocumentArgs, 'input'>>;
+};
+
+export type NotificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Notification'] = ResolversParentTypes['Notification']> = {
+  body?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isDismissed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isRead?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  referenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  referenceType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['NotificationType'], ParentType, ContextType>;
+  userId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
 export type PaymentScheduleItemResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentScheduleItem'] = ResolversParentTypes['PaymentScheduleItem']> = {
@@ -2310,11 +3060,25 @@ export type PostAwardFollowUpResolvers<ContextType = any, ParentType extends Res
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type PostAwardStageCountResolvers<ContextType = any, ParentType extends ResolversParentTypes['PostAwardStageCount'] = ResolversParentTypes['PostAwardStageCount']> = {
+  count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  stage?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   calculateVendorCommission?: Resolver<ResolversTypes['CommissionBreakdown'], ParentType, ContextType, RequireFields<QueryCalculateVendorCommissionArgs, 'baseAmount' | 'commissionType' | 'commissionValue' | 'gstApplicable'>>;
   generateVendorPaymentSchedule?: Resolver<ResolversTypes['PaymentScheduleResponse'], ParentType, ContextType, RequireFields<QueryGenerateVendorPaymentScheduleArgs, 'frequency' | 'gstApplicable' | 'startDate' | 'totalAmount'>>;
   getActivePendingRequest?: Resolver<Maybe<ResolversTypes['VendorMdRequest']>, ParentType, ContextType, RequireFields<QueryGetActivePendingRequestArgs, 'vendorId'>>;
+  getAllPermissions?: Resolver<Array<ResolversTypes['Permission']>, ParentType, ContextType>;
+  getAutoMailRestrictions?: Resolver<Array<ResolversTypes['TagAutoMailRestriction']>, ParentType, ContextType, RequireFields<QueryGetAutoMailRestrictionsArgs, 'tagId'>>;
+  getAutoMailRestrictionsByVendor?: Resolver<Array<ResolversTypes['TagAutoMailRestriction']>, ParentType, ContextType, RequireFields<QueryGetAutoMailRestrictionsByVendorArgs, 'vendorId'>>;
+  getCourierRecordById?: Resolver<Maybe<ResolversTypes['CourierRecord']>, ParentType, ContextType, RequireFields<QueryGetCourierRecordByIdArgs, 'id'>>;
+  getCourierRecords?: Resolver<Array<ResolversTypes['CourierRecord']>, ParentType, ContextType>;
+  getCourierRecordsByReference?: Resolver<Array<ResolversTypes['CourierRecord']>, ParentType, ContextType, RequireFields<QueryGetCourierRecordsByReferenceArgs, 'referenceId' | 'referenceType'>>;
+  getDashboardSummary?: Resolver<ResolversTypes['DashboardSummary'], ParentType, ContextType>;
+  getDeliverySchedules?: Resolver<Array<ResolversTypes['TenderDeliverySchedule']>, ParentType, ContextType, RequireFields<QueryGetDeliverySchedulesArgs, 'postAwardId'>>;
   getMdRequestsByVendor?: Resolver<Array<ResolversTypes['VendorMdRequest']>, ParentType, ContextType, RequireFields<QueryGetMdRequestsByVendorArgs, 'vendorId'>>;
+  getNotifications?: Resolver<Array<ResolversTypes['Notification']>, ParentType, ContextType, Partial<QueryGetNotificationsArgs>>;
   getOverduePostAwardFollowUps?: Resolver<Array<ResolversTypes['PostAwardFollowUp']>, ParentType, ContextType>;
   getPaymentTermsByVendor?: Resolver<Array<ResolversTypes['PaymentTerm']>, ParentType, ContextType, RequireFields<QueryGetPaymentTermsByVendorArgs, 'vendorId'>>;
   getPendingMdRequests?: Resolver<Array<ResolversTypes['VendorMdRequest']>, ParentType, ContextType>;
@@ -2332,10 +3096,15 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getTagById?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType, RequireFields<QueryGetTagByIdArgs, 'id'>>;
   getTenderActivityLogs?: Resolver<Array<ResolversTypes['TenderActivityLog']>, ParentType, ContextType, RequireFields<QueryGetTenderActivityLogsArgs, 'tenderId'>>;
   getTenderById?: Resolver<Maybe<ResolversTypes['Tender']>, ParentType, ContextType, RequireFields<QueryGetTenderByIdArgs, 'id'>>;
+  getTenderContacts?: Resolver<Array<ResolversTypes['TenderContact']>, ParentType, ContextType, RequireFields<QueryGetTenderContactsArgs, 'tenderId'>>;
   getTenderDocumentById?: Resolver<Maybe<ResolversTypes['TenderDocument']>, ParentType, ContextType, RequireFields<QueryGetTenderDocumentByIdArgs, 'id'>>;
   getTenderFollowUps?: Resolver<Array<ResolversTypes['VendorTender']>, ParentType, ContextType, RequireFields<QueryGetTenderFollowUpsArgs, 'tenderId'>>;
   getTenderPostAward?: Resolver<Maybe<ResolversTypes['TenderPostAward']>, ParentType, ContextType, RequireFields<QueryGetTenderPostAwardArgs, 'tenderId'>>;
   getTendersByTag?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, RequireFields<QueryGetTendersByTagArgs, 'tagId'>>;
+  getTicketById?: Resolver<Maybe<ResolversTypes['Ticket']>, ParentType, ContextType, RequireFields<QueryGetTicketByIdArgs, 'id'>>;
+  getTickets?: Resolver<Array<ResolversTypes['Ticket']>, ParentType, ContextType>;
+  getTicketsByAssignee?: Resolver<Array<ResolversTypes['Ticket']>, ParentType, ContextType, RequireFields<QueryGetTicketsByAssigneeArgs, 'userId'>>;
+  getUnreadNotificationCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType, Partial<QueryGetUnreadNotificationCountArgs>>;
   getUserById?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryGetUserByIdArgs, 'id'>>;
   getVendorAgreements?: Resolver<Array<ResolversTypes['VendorAgreement']>, ParentType, ContextType, RequireFields<QueryGetVendorAgreementsArgs, 'vendorId'>>;
   getVendorApprovals?: Resolver<Array<ResolversTypes['VendorApproval']>, ParentType, ContextType, RequireFields<QueryGetVendorApprovalsArgs, 'vendorId'>>;
@@ -2352,10 +3121,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   searchTenderDocuments?: Resolver<Array<ResolversTypes['TenderDocument']>, ParentType, ContextType, Partial<QuerySearchTenderDocumentsArgs>>;
   searchTenders?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, RequireFields<QuerySearchTendersArgs, 'searchTerm'>>;
   searchTendersAdvanced?: Resolver<Array<ResolversTypes['Tender']>, ParentType, ContextType, Partial<QuerySearchTendersAdvancedArgs>>;
+  searchTickets?: Resolver<Array<ResolversTypes['Ticket']>, ParentType, ContextType, RequireFields<QuerySearchTicketsArgs, 'searchTerm'>>;
   searchUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QuerySearchUsersArgs>>;
   searchVendorContactPersons?: Resolver<Array<ResolversTypes['VendorContactPerson']>, ParentType, ContextType, Partial<QuerySearchVendorContactPersonsArgs>>;
   searchVendorDocuments?: Resolver<Array<ResolversTypes['VendorDocument']>, ParentType, ContextType, Partial<QuerySearchVendorDocumentsArgs>>;
-  searchVendors?: Resolver<Array<ResolversTypes['Vendor']>, ParentType, ContextType, RequireFields<QuerySearchVendorsArgs, 'searchTerm'>>;
+  searchVendors?: Resolver<Array<ResolversTypes['Vendor']>, ParentType, ContextType, Partial<QuerySearchVendorsArgs>>;
 };
 
 export type RoleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Role'] = ResolversParentTypes['Role']> = {
@@ -2394,25 +3164,44 @@ export type TagResolvers<ContextType = any, ParentType extends ResolversParentTy
   vendorCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
+export type TagAutoMailRestrictionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TagAutoMailRestriction'] = ResolversParentTypes['TagAutoMailRestriction']> = {
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  tagId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  vendorId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
 export type TenderResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tender'] = ResolversParentTypes['Tender']> = {
+  agApprovalRequired?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  closingDateChanged?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  closingDateProofUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  countdownSilenceReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   deletedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deletedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   documents?: Resolver<Maybe<Array<ResolversTypes['TenderDocument']>>, ParentType, ContextType>;
+  feasibilityRemarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isDeleted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  isFeasible?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  isLoadedOnPortal?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuingDepartment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  mailCheckProofUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   mailSentAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   referenceNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   rejectionReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sourcePortal?: Resolver<Maybe<ResolversTypes['SourcePortal']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['TenderStatus'], ParentType, ContextType>;
   submissionDeadline?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['TenderTag']>>, ParentType, ContextType>;
+  tenderType?: Resolver<Maybe<ResolversTypes['TenderTypeEnum']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedSubmissionDeadline?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
 export type TenderActivityLogResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderActivityLog'] = ResolversParentTypes['TenderActivityLog']> = {
@@ -2423,6 +3212,33 @@ export type TenderActivityLogResolvers<ContextType = any, ParentType extends Res
   metadata?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   performedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type TenderContactResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderContact'] = ResolversParentTypes['TenderContact']> = {
+  contactType?: Resolver<ResolversTypes['TenderContactType'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  designation?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type TenderDeliveryScheduleResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderDeliverySchedule'] = ResolversParentTypes['TenderDeliverySchedule']> = {
+  confirmedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  deliveryType?: Resolver<ResolversTypes['DeliveryType'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  postAwardId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  proofUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  quantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  scheduledDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['DeliveryScheduleStatus'], ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type TenderDocumentResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderDocument'] = ResolversParentTypes['TenderDocument']> = {
@@ -2437,17 +3253,27 @@ export type TenderDocumentResolvers<ContextType = any, ParentType extends Resolv
 
 export type TenderPostAwardResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderPostAward'] = ResolversParentTypes['TenderPostAward']> = {
   actualDeliveryDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  awbNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   billUploaded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  commissionInvoiceGeneratedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   commissionInvoiceProvided?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  commissionPaidDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  commissionPaymentProofUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   commissionPaymentRequired?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   consignmentNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   courierCompanyName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   courierContact?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  courierWebsite?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   currentStage?: Resolver<ResolversTypes['PostAwardStage'], ParentType, ContextType>;
   debitNoteProvided?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   deductionReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deliveryDeadlineDays?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  dispatchDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  dispatchReceiptUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  driverContact?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  driverName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   emdAdviceNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   emdAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   emdReceivedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -2455,7 +3281,17 @@ export type TenderPostAwardResolvers<ContextType = any, ParentType extends Resol
   extensionAccepted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   extensionReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   extensionRequested?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  firmBillBasicRateDiff?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  firmBillDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  firmBillMarginPct?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  firmBillNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  firmBillQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  firmBillRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  firmBillTotalCharges?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  firmBillTotalProfit?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  fivePercentClauseApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   followUpRemarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  gnrNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   inspectionCertificateUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   inspectionDone?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -2467,9 +3303,24 @@ export type TenderPostAwardResolvers<ContextType = any, ParentType extends Resol
   ldcInvoiceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   ldcPercentage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   ldcRailwayPoValue?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  loaDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  loaDeliveryMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  loaDocumentUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  loaExcelEntryImageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  loaExcelEntryNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  loaModificationAdviceRequired?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  loaNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  loaPackagingMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  loaPriceMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   loaReceived?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  loaRemarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  lorryNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   moaDocumentUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   newDeliveryDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  optionClauseApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  optionClauseQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  optionClauseQuantityAdded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  optionClauseReminderDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentDepartmentName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentOfficerContact?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentOfficerName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -2484,17 +3335,27 @@ export type TenderPostAwardResolvers<ContextType = any, ParentType extends Resol
   podNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   proofOfDeliveryUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   purchaseInvoiceReceived?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  rNoteDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  rNoteDocumentUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  rNoteNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   receiptNoteDetails?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   receiptNoteReceived?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   runningBillDeduction?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   sdCourierDetails?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sdDocumentUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sdOfficerContact?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sdOfficerEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sdOfficerName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sdReleaseDepartmentDetails?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sdReleased?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  sdReturnAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  sdReturnReceivedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  sdReturnRemarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   securityDepositAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   securityDepositDueDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   securityDepositRequired?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   securityDepositType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  svcClauseApplicable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   tenderOfficerEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tenderOfficerName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -2528,11 +3389,30 @@ export type TenderPostAwardResolvers<ContextType = any, ParentType extends Resol
   winningVendorId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
 };
 
+export type TenderStatusCountResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderStatusCount'] = ResolversParentTypes['TenderStatusCount']> = {
+  count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type TenderTagResolvers<ContextType = any, ParentType extends ResolversParentTypes['TenderTag'] = ResolversParentTypes['TenderTag']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   tag?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType>;
   tagId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   tenderId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+};
+
+export type TicketResolvers<ContextType = any, ParentType extends ResolversParentTypes['Ticket'] = ResolversParentTypes['Ticket']> = {
+  assignedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  assignedTo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  priority?: Resolver<ResolversTypes['TicketPriority'], ParentType, ContextType>;
+  referenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  referenceType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['TicketStatus'], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type UploadUrlResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['UploadUrlResult'] = ResolversParentTypes['UploadUrlResult']> = {
@@ -2589,12 +3469,15 @@ export type VendorAgreementResolvers<ContextType = any, ParentType extends Resol
   commissionType?: Resolver<Maybe<ResolversTypes['CommissionType']>, ParentType, ContextType>;
   commissionValue?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentPath?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  documentUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   gstApplicable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   hasOtherBenefits?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   otherBenefitsDescription?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   paymentAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   paymentFrequency?: Resolver<Maybe<ResolversTypes['PaymentFrequency']>, ParentType, ContextType>;
+  paymentTermType?: Resolver<Maybe<ResolversTypes['PaymentTermType']>, ParentType, ContextType>;
   renewalReminderDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   signatureStatus?: Resolver<ResolversTypes['SignatureStatus'], ParentType, ContextType>;
   signedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -2631,6 +3514,7 @@ export type VendorDocumentResolvers<ContextType = any, ParentType extends Resolv
   createdBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   documentName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  documentType?: Resolver<ResolversTypes['DocumentType'], ParentType, ContextType>;
   documentUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   expiresOn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -2735,23 +3619,32 @@ export type VendorWorkflowResolvers<ContextType = any, ParentType extends Resolv
 
 export type Resolvers<ContextType = any> = {
   CommissionBreakdown?: CommissionBreakdownResolvers<ContextType>;
+  CourierRecord?: CourierRecordResolvers<ContextType>;
   CreateTendersBatchResult?: CreateTendersBatchResultResolvers<ContextType>;
+  DashboardSummary?: DashboardSummaryResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  Notification?: NotificationResolvers<ContextType>;
   PaymentScheduleItem?: PaymentScheduleItemResolvers<ContextType>;
   PaymentScheduleResponse?: PaymentScheduleResponseResolvers<ContextType>;
   PaymentTerm?: PaymentTermResolvers<ContextType>;
   PostAwardDocument?: PostAwardDocumentResolvers<ContextType>;
   PostAwardFollowUp?: PostAwardFollowUpResolvers<ContextType>;
+  PostAwardStageCount?: PostAwardStageCountResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Role?: RoleResolvers<ContextType>;
   RolePermissionResult?: RolePermissionResultResolvers<ContextType>;
   SkippedTenderInfo?: SkippedTenderInfoResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
+  TagAutoMailRestriction?: TagAutoMailRestrictionResolvers<ContextType>;
   Tender?: TenderResolvers<ContextType>;
   TenderActivityLog?: TenderActivityLogResolvers<ContextType>;
+  TenderContact?: TenderContactResolvers<ContextType>;
+  TenderDeliverySchedule?: TenderDeliveryScheduleResolvers<ContextType>;
   TenderDocument?: TenderDocumentResolvers<ContextType>;
   TenderPostAward?: TenderPostAwardResolvers<ContextType>;
+  TenderStatusCount?: TenderStatusCountResolvers<ContextType>;
   TenderTag?: TenderTagResolvers<ContextType>;
+  Ticket?: TicketResolvers<ContextType>;
   UploadUrlResult?: UploadUrlResultResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   Vendor?: VendorResolvers<ContextType>;

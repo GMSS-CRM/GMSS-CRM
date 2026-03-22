@@ -24,6 +24,13 @@ import { tenderActivityLogResolvers } from "../components/tender-activity-log";
 import { postAwardFollowUpResolvers } from "../components/post-award-follow-up";
 import { postAwardDocumentResolvers } from "../components/post-award-document";
 import { searchResolvers } from "../components/search";
+import { notificationResolvers } from "../components/notification";
+import { ticketResolvers } from "../components/ticket";
+import { tenderContactResolvers } from "../components/tender-contact";
+import { courierRecordResolvers } from "../components/courier-record";
+import { tagAutoMailRestrictionResolvers } from "../components/tag-auto-mail-restriction";
+import { tenderDeliveryScheduleResolvers } from "../components/tender-delivery-schedule";
+import { dashboardResolvers } from "../components/dashboard";
 
 export const resolvers = [
   userResolvers,
@@ -52,4 +59,11 @@ export const resolvers = [
   postAwardFollowUpResolvers,
   postAwardDocumentResolvers,
   searchResolvers,
+  notificationResolvers,
+  ticketResolvers,
+  tenderContactResolvers,
+  courierRecordResolvers,
+  tagAutoMailRestrictionResolvers,
+  tenderDeliveryScheduleResolvers,
+  dashboardResolvers,
 ];

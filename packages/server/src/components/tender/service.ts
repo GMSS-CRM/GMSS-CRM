@@ -327,4 +327,32 @@ export class TenderService implements ITenderService {
   async searchTender(params: any) {
     return this.tenderRepository.search(params || {});
   }
+
+  async silenceTenderCountdown(
+    tenderId: string,
+    reason: string,
+    newDeadline?: string,
+    remarks?: string,
+  ) {
+    const tender = await this.tenderRepository.findById(tenderId);
+    if (!tender) {
+      throw new Error(ErrorInfo.TENDER_NOT_FOUND);
+    }
+
+    const updateData: any = {
+      status: reason,
+      countdownSilenceReason: remarks ?? reason,
+      updatedBy: getCurrentEmail(),
+    };
+
+    if (newDeadline) {
+      updateData.updatedSubmissionDeadline = new Date(newDeadline);
+    }
+
+    const updated = await this.tenderRepository.updateTender(tenderId, updateData);
+    if (!updated) {
+      throw new Error(ErrorInfo.TENDER_NOT_FOUND);
+    }
+    return updated;
+  }
 }

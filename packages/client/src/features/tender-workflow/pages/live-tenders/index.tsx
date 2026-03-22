@@ -122,6 +122,7 @@ const LiveTendersPage: React.FC = () => {
       width: 280,
       render: (_: unknown, record: Tender) => (
         <CountdownTimer
+          tenderId={record.id}
           tenderTitle={record.name}
           dueDate={record.submissionDeadline ?? undefined}
           onStop={(reason: string, details?: { newDeadline?: string }) => {

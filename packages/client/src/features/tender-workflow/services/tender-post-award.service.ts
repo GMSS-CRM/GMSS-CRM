@@ -24,6 +24,20 @@ const TENDER_POST_AWARD_FIELDS = gql`
     emdAdviceNumber
     emdReceivedDate
 
+    # Stage 1.5 – LOA Processing
+    loaNumber
+    loaDate
+    loaDocumentUrl
+    loaExcelEntryNumber
+    loaExcelEntryImageUrl
+    loaDeliveryMatch
+    loaPriceMatch
+    loaPackagingMatch
+    svcClauseApplicable
+    fivePercentClauseApplicable
+    loaModificationAdviceRequired
+    loaRemarks
+
     # Stage 2 – Order Processing
     poUploaded
     poDocumentUrl
@@ -46,6 +60,23 @@ const TENDER_POST_AWARD_FIELDS = gql`
     ldcPercentage
     lateDeliveryBy
 
+    # Stage 2 extras – Firm Bill & Option Clause
+    firmBillNumber
+    firmBillDate
+    firmBillQuantity
+    firmBillRate
+    firmBillBasicRateDiff
+    firmBillTotalCharges
+    firmBillTotalProfit
+    firmBillMarginPct
+    optionClauseApplicable
+    optionClauseReminderDate
+    optionClauseQuantityAdded
+    optionClauseQuantity
+    commissionInvoiceGeneratedDate
+    commissionPaidDate
+    commissionPaymentProofUrl
+
     # Stage 3 – Inspection
     inspectionRequired
     tpiAgencyName
@@ -61,6 +92,15 @@ const TENDER_POST_AWARD_FIELDS = gql`
     courierContact
     podNumber
     consignmentNumber
+    awbNumber
+    gnrNumber
+    lorryNumber
+    dispatchDate
+    courierEmail
+    courierWebsite
+    driverName
+    driverContact
+    dispatchReceiptUrl
     actualDeliveryDate
     proofOfDeliveryUrl
     ldcGivenPercentage
@@ -69,6 +109,9 @@ const TENDER_POST_AWARD_FIELDS = gql`
     ldcInvoiceUrl
     receiptNoteReceived
     receiptNoteDetails
+    rNoteNumber
+    rNoteDate
+    rNoteDocumentUrl
 
     # Stage 5 – Warranty Rejections
     warrantyRejectionApplicable
@@ -106,6 +149,14 @@ const TENDER_POST_AWARD_FIELDS = gql`
     commissionInvoiceProvided
     sdReleased
     sdReleaseDepartmentDetails
+
+    # Stage 7 – SD Return
+    sdOfficerName
+    sdOfficerContact
+    sdOfficerEmail
+    sdReturnReceivedDate
+    sdReturnAmount
+    sdReturnRemarks
 
     createdDate
     updatedDate
@@ -179,10 +230,37 @@ export const UPDATE_BILL_PAYMENT = gql`
   }
 `;
 
+export const UPDATE_LOA_PROCESSING = gql`
+  ${TENDER_POST_AWARD_FIELDS}
+  mutation UpdateLoaProcessing($input: UpdateLoaProcessingInput!) {
+    updateLoaProcessing(input: $input) {
+      ...TenderPostAwardFields
+    }
+  }
+`;
+
+export const UPDATE_SD_RETURN = gql`
+  ${TENDER_POST_AWARD_FIELDS}
+  mutation UpdateSdReturn($input: UpdateSdReturnInput!) {
+    updateSdReturn(input: $input) {
+      ...TenderPostAwardFields
+    }
+  }
+`;
+
 export const ADVANCE_POST_AWARD_STAGE = gql`
   ${TENDER_POST_AWARD_FIELDS}
   mutation AdvancePostAwardStage($tenderId: ID!) {
     advancePostAwardStage(tenderId: $tenderId) {
+      ...TenderPostAwardFields
+    }
+  }
+`;
+
+export const REVERT_POST_AWARD_STAGE = gql`
+  ${TENDER_POST_AWARD_FIELDS}
+  mutation RevertPostAwardStage($tenderId: ID!) {
+    revertPostAwardStage(tenderId: $tenderId) {
       ...TenderPostAwardFields
     }
   }
@@ -226,7 +304,22 @@ export const useUpdateBillPayment = () =>
     refetchQueries: [GET_TENDER_POST_AWARD],
   });
 
+export const useUpdateLoaProcessing = () =>
+  useMutation(UPDATE_LOA_PROCESSING, {
+    refetchQueries: [GET_TENDER_POST_AWARD],
+  });
+
+export const useUpdateSdReturn = () =>
+  useMutation(UPDATE_SD_RETURN, {
+    refetchQueries: [GET_TENDER_POST_AWARD],
+  });
+
 export const useAdvancePostAwardStage = () =>
   useMutation(ADVANCE_POST_AWARD_STAGE, {
+    refetchQueries: [GET_TENDER_POST_AWARD],
+  });
+
+export const useRevertPostAwardStage = () =>
+  useMutation(REVERT_POST_AWARD_STAGE, {
     refetchQueries: [GET_TENDER_POST_AWARD],
   });

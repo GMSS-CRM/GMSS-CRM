@@ -9,6 +9,16 @@ import {
 } from 'typeorm';
 import type { Vendor } from './Vendor';
 
+export enum DocumentType {
+  GENERAL = 'GENERAL',
+  DIGITAL_SIGNATURE = 'DIGITAL_SIGNATURE',
+  GST_CERT = 'GST_CERT',
+  PAN_CERT = 'PAN_CERT',
+  MSME_CERT = 'MSME_CERT',
+  AGREEMENT = 'AGREEMENT',
+  OTHER = 'OTHER',
+}
+
 @Entity({ name: 'vendor_document' })
 export class VendorDocument {
   @PrimaryGeneratedColumn('uuid')
@@ -22,6 +32,13 @@ export class VendorDocument {
 
   @Column()
   documentUrl!: string;
+
+  @Column({
+    type: 'enum',
+    enum: DocumentType,
+    default: DocumentType.GENERAL,
+  })
+  documentType!: DocumentType;
 
   @Column({ nullable: true })
   expiresOn?: Date;

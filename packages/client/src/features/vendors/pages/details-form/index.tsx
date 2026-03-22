@@ -27,7 +27,6 @@ import {
   ClockCircleOutlined,
   DeleteOutlined,
   ShopOutlined,
-  CreditCardOutlined,
   SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -47,7 +46,6 @@ import SubMenu from '../../../../components/sub-menu';
 import RemarkModal from '../../components/RemarkModal';
 import FollowUpsSection from '../../components/FollowUpsSection';
 import SharedTendersSection from '../../components/SharedTendersSection';
-import PaymentTermsSection from '../../components/PaymentTermsSection';
 import AgreementSection from '../../components/AgreementSection';
 import {
   useGetVendorById,
@@ -63,26 +61,24 @@ import {
 } from '../../services/vendors.service';
 import { useSearchTags } from '../../../tags/services/tags.service';
 import { useCreateTag } from '../../../tags/services/tags.service';
-import { uploadFileToS3, useGenerateUploadUrl } from '../../../tender-workflow/services/upload.service';
+import { useFirebaseUpload } from '../../../tender-workflow/hooks/useFirebaseUpload';
 import styles from './styles.module.css';
 
 const { TextArea } = Input;
 
-type VendorSubMenuItem = 'basic' | 'documents' | 'followups' | 'shared-tenders' | 'payment-terms' | 'agreement';
+type VendorSubMenuItem = 'basic' | 'documents' | 'followups' | 'shared-tenders' | 'agreement';
 
 const BASE_MENU_ITEMS = [
   { key: 'basic', icon: <InfoCircleOutlined />, label: 'Basic Info' },
   { key: 'documents', icon: <FileTextOutlined />, label: 'Documents' },
   { key: 'followups', icon: <BellOutlined />, label: 'Follow Ups' },
   { key: 'shared-tenders', icon: <ShopOutlined />, label: 'Shared Tenders' },
-  { key: 'agreement', icon: <SafetyCertificateOutlined />, label: 'Agreement' },
-  { key: 'payment-terms', icon: <CreditCardOutlined />, label: 'Payment Terms' },
+  { key: 'agreement', icon: <SafetyCertificateOutlined />, label: 'Agreement & Payment Terms' },
 ] as const;
 
 function buildMenuItems(vendorStatus: string | undefined) {
   const status = vendorStatus ?? 'New';
   const isInterested = status === 'Interested' || status === 'Final';
-  const isFinal = status === 'Final';
 
   return BASE_MENU_ITEMS.map((item) => {
     if (item.key === 'documents') {
@@ -97,13 +93,6 @@ function buildMenuItems(vendorStatus: string | undefined) {
         ...item,
         disabled: !isInterested,
         disabledReason: !isInterested ? 'Available for Interested & Final companies' : undefined,
-      };
-    }
-    if (item.key === 'payment-terms') {
-      return {
-        ...item,
-        disabled: !isFinal,
-        disabledReason: !isFinal ? 'Available for Final companies only' : undefined,
       };
     }
     return item;
@@ -511,10 +500,7 @@ export default function VendorDetailsForm() {
               <SharedTendersSection vendorId={id} />
             )}
             {selectedSubMenu === 'agreement' && (
-              <AgreementSection vendorId={id} vendorStatus={vendor?.status} />
-            )}
-            {selectedSubMenu === 'payment-terms' && (
-              <PaymentTermsSection vendorId={id} companyType={vendor?.companyType} />
+              <AgreementSection vendorId={id} vendorStatus={vendor?.status} companyType={vendor?.companyType} />
             )}
           </div>
 
@@ -868,7 +854,7 @@ interface DocumentsSectionProps {
 
 function DocumentsSection({ vendorId, documents, documentColumns, onUploadSuccess, isReadOnly, vendorStatus }: DocumentsSectionProps) {
   const { uploadVendorDocument } = useUploadVendorDocument();
-  const [generateUploadUrl] = useGenerateUploadUrl();
+  const { uploadFile } = useFirebaseUpload();
   const isNewCompany = vendorStatus === 'New';
   const uploadDisabled = isReadOnly || isNewCompany;
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
@@ -906,15 +892,15 @@ function DocumentsSection({ vendorId, documents, documentColumns, onUploadSucces
     try {
       let publicUrl: string | undefined;
       try {
-        const { publicUrl: url } = await uploadFileToS3(file, 'vendor-documents', generateUploadUrl);
-        publicUrl = url;
+        const { downloadUrl } = await uploadFile(file, `vendors/${vendorId}/documents`);
+        publicUrl = downloadUrl;
       } catch (uploadErr) {
-        // S3 not configured — warn but still create entry for demo/testing
-        console.error('S3 upload failed:', uploadErr);
-        message.warning('File could not be stored (S3 unavailable) — document entry created anyway.');
+        // Firebase not configured — warn but still create entry for demo/testing
+        console.error('Firebase upload failed:', uploadErr);
+        message.warning('File could not be stored (Firebase unavailable) — document entry created anyway.');
       }
 
-      // Create document record even if S3 upload fails
+      // Create document record even if Firebase upload fails
       await uploadVendorDocument(
         vendorId,
         docType,

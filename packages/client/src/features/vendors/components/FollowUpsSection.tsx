@@ -9,10 +9,7 @@ import {
   useUpdateVendorFollowUp,
   useDeleteVendorFollowUp,
 } from '../services/vendors.service';
-import {
-  uploadFileToS3,
-  useGenerateUploadUrl,
-} from '../../tender-workflow/services/upload.service';
+import { useFirebaseUpload } from '../../tender-workflow/hooks/useFirebaseUpload';
 
 interface FollowUpsSectionProps {
   vendorId: string | undefined;
@@ -23,7 +20,7 @@ export default function FollowUpsSection({ vendorId }: FollowUpsSectionProps) {
   const { createFollowUp } = useCreateVendorFollowUp();
   const { updateFollowUp } = useUpdateVendorFollowUp();
   const { deleteFollowUp } = useDeleteVendorFollowUp();
-  const [generateUrl] = useGenerateUploadUrl();
+  const { uploadFile } = useFirebaseUpload();
 
   const handleCreateFollowUp = useCallback(
     async (input: {
@@ -65,14 +62,14 @@ export default function FollowUpsSection({ vendorId }: FollowUpsSectionProps) {
   const handleUploadFile = useCallback(
     async (file: RcFile, folder: string) => {
       try {
-        const result = await uploadFileToS3(file, folder, generateUrl);
-        return { publicUrl: result.publicUrl };
+        const result = await uploadFile(file, folder);
+        return { publicUrl: result.downloadUrl };
       } catch (error) {
         message.error('File upload failed');
         throw error;
       }
     },
-    [generateUrl]
+    [uploadFile]
   );
 
   // Map vendor follow-ups to generic FollowUp type

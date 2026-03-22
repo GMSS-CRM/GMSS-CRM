@@ -25,4 +25,9 @@ export enum TenderStatus {
   PAYMENT = 'PAYMENT',
   SD_RELEASE = 'SD_RELEASE',
   COMPLETED = 'COMPLETED',
+
+  /* ── Countdown silent options ──────────────────────────── */
+  FILLED = 'FILLED',
+  NOT_INTERESTED_TENDER = 'NOT_INTERESTED_TENDER',
+  DEADLINE_EXTENDED = 'DEADLINE_EXTENDED',
 }

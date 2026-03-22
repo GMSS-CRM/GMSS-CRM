@@ -10,6 +10,17 @@ import type { TenderDocument } from './TenderDocument';
 import type { TenderTag } from './TenderTag';
 import { TenderStatus } from './enums/TenderStatus';
 
+export enum SourcePortal {
+  IREPS = 'IREPS',
+  GEM = 'GEM',
+  OTHER = 'OTHER',
+}
+
+export enum TenderType {
+  NORMAL = 'NORMAL',
+  LIMITED = 'LIMITED',
+}
+
 @Entity({ name: 'tender' })
 export class Tender {
   @PrimaryGeneratedColumn('uuid')
@@ -42,6 +53,41 @@ export class Tender {
 
   @Column({ type: 'timestamp', nullable: true })
   mailSentAt?: Date;
+
+  /* ── New workflow fields ──────────────────────────────── */
+
+  @Column({ type: 'enum', enum: SourcePortal, nullable: true })
+  sourcePortal?: SourcePortal;
+
+  @Column({ type: 'enum', enum: TenderType, nullable: true })
+  tenderType?: TenderType;
+
+  @Column({ default: false })
+  isLoadedOnPortal!: boolean;
+
+  @Column({ default: false })
+  agApprovalRequired!: boolean;
+
+  @Column({ nullable: true })
+  isFeasible?: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  feasibilityRemarks?: string;
+
+  @Column({ default: false })
+  closingDateChanged!: boolean;
+
+  @Column({ nullable: true })
+  closingDateProofUrl?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  updatedSubmissionDeadline?: Date;
+
+  @Column({ nullable: true })
+  mailCheckProofUrl?: string;
+
+  @Column({ type: 'text', nullable: true })
+  countdownSilenceReason?: string;
 
   @Column({ default: 'SYSTEM' })
   createdBy!: string;

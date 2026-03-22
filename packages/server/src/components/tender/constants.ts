@@ -41,4 +41,7 @@ export const VALID_TENDER_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   [TenderStatus.PAYMENT]: [TenderStatus.SD_RELEASE, TenderStatus.COMPLETED],
   [TenderStatus.SD_RELEASE]: [TenderStatus.COMPLETED],
   [TenderStatus.COMPLETED]: [],
+  [TenderStatus.FILLED]: [],
+  [TenderStatus.NOT_INTERESTED_TENDER]: [],
+  [TenderStatus.DEADLINE_EXTENDED]: [],
 };

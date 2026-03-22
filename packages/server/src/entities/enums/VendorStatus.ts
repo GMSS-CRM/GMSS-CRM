@@ -6,4 +6,5 @@ export enum VendorStatus {
   APPROVED = 'APPROVED',
   FINAL = 'FINAL',
   DELETED = 'DELETED',
+  BLACKLISTED = 'BLACKLISTED',
 }

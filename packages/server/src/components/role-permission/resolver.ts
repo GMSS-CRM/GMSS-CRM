@@ -15,6 +15,8 @@ export const rolePermissionResolvers = {
   Query: {
     getPermissionsByRoleId: (_: any, { roleId }: QueryGetPermissionsByRoleIdArgs) =>
       getService().getPermissionsByRoleId(roleId),
+    getAllPermissions: () =>
+      getService().getAllPermissions(),
   },
 
   Mutation: {

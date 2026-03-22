@@ -32,7 +32,10 @@ import {
   useUpdateDispatchDelivery,
   useUpdateWarranty,
   useUpdateBillPayment,
+  useUpdateLoaProcessing,
+  useUpdateSdReturn,
   useAdvancePostAwardStage,
+  useRevertPostAwardStage,
 } from '../../services/tender-post-award.service';
 import {
   OrderFollowUpSection,
@@ -41,6 +44,8 @@ import {
   DispatchDeliverySection,
   WarrantySection,
   BillPaymentSection,
+  LoaProcessingSection,
+  SdReturnSection,
 } from './StageSections';
 import VendorFollowUpSection from './VendorFollowUpSection';
 import PostAwardDocumentsPanel from './PostAwardDocumentsPanel';
@@ -87,11 +92,13 @@ const GET_TENDER_BASIC = gql`
 
 const POST_AWARD_STAGES = [
   { key: 'ORDER_FOLLOWUP',    label: 'Order Follow-Up' },
+  { key: 'LOA_PROCESSING',    label: 'LOA Processing' },
   { key: 'ORDER_PROCESSING',  label: 'Order Processing' },
   { key: 'INSPECTION',        label: 'Inspection' },
   { key: 'DISPATCH_DELIVERY', label: 'Dispatch & Delivery' },
   { key: 'WARRANTY',          label: 'Warranty' },
   { key: 'BILL_PAYMENT',      label: 'Bill & Payment' },
+  { key: 'SD_RETURN',         label: 'SD Return' },
 ] as const;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -112,7 +119,10 @@ const TenderDetailPage: React.FC = () => {
   const [updateDispatchDelivery, { loading: savingDispatch }]  = useUpdateDispatchDelivery();
   const [updateWarranty, { loading: savingWarranty }]          = useUpdateWarranty();
   const [updateBillPayment, { loading: savingBill }]           = useUpdateBillPayment();
+  const [updateLoaProcessing, { loading: savingLoa }]          = useUpdateLoaProcessing();
+  const [updateSdReturn, { loading: savingSdReturn }]          = useUpdateSdReturn();
   const [advanceStage, { loading: advancing }]                 = useAdvancePostAwardStage();
+  const [revertStage, { loading: reverting }]                  = useRevertPostAwardStage();
 
   const tender    = tenderData?.getTenderById;
   const postAward = postAwardData?.getTenderPostAward;
@@ -139,6 +149,15 @@ const TenderDetailPage: React.FC = () => {
       message.success('Stage advanced');
     } catch {
       message.error('Failed to advance stage');
+    }
+  };
+
+  const handleRevert = async () => {
+    try {
+      await revertStage({ variables: { tenderId: id } });
+      message.success('Stage reverted');
+    } catch {
+      message.error('Failed to revert stage');
     }
   };
 
@@ -212,15 +231,26 @@ const TenderDetailPage: React.FC = () => {
                   </Text>
                 </Space>
                 {postAward.currentStage !== 'CLOSED' && (
-                  <Button
-                    type="primary"
-                    icon={<RightCircleOutlined />}
-                    size="small"
-                    loading={advancing}
-                    onClick={handleAdvance}
-                  >
-                    Advance Stage
-                  </Button>
+                  <Space>
+                    <Button
+                      icon={<ArrowLeftOutlined />}
+                      size="small"
+                      loading={reverting}
+                      disabled={currentStageIdx <= 0}
+                      onClick={handleRevert}
+                    >
+                      Go Back
+                    </Button>
+                    <Button
+                      type="primary"
+                      icon={<RightCircleOutlined />}
+                      size="small"
+                      loading={advancing}
+                      onClick={handleAdvance}
+                    >
+                      Advance Stage
+                    </Button>
+                  </Space>
                 )}
               </Space>
             }
@@ -245,6 +275,12 @@ const TenderDetailPage: React.FC = () => {
               <OrderFollowUpSection
                 data={postAward} saving={savingFollowUp}
                 onSave={makeSaveHandler(updateOrderFollowUp as MutationFn, 'Order Follow-Up')}
+              />
+            )}
+            {postAward.currentStage === 'LOA_PROCESSING' && (
+              <LoaProcessingSection
+                data={postAward} saving={savingLoa}
+                onSave={makeSaveHandler(updateLoaProcessing as MutationFn, 'LOA Processing')}
               />
             )}
             {postAward.currentStage === 'ORDER_PROCESSING' && (
@@ -275,6 +311,12 @@ const TenderDetailPage: React.FC = () => {
               <BillPaymentSection
                 data={postAward} saving={savingBill}
                 onSave={makeSaveHandler(updateBillPayment as MutationFn, 'Bill & Payment')}
+              />
+            )}
+            {postAward.currentStage === 'SD_RETURN' && (
+              <SdReturnSection
+                data={postAward} saving={savingSdReturn}
+                onSave={makeSaveHandler(updateSdReturn as MutationFn, 'SD Return')}
               />
             )}
           </Card>

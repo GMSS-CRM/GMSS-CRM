@@ -27,6 +27,13 @@ import { tenderActivityLogTypeDefs } from "../components/tender-activity-log";
 import { postAwardFollowUpTypeDefs } from "../components/post-award-follow-up";
 import { postAwardDocumentTypeDefs } from "../components/post-award-document";
 import { searchTypeDefs } from "../components/search";
+import { notificationTypeDefs } from "../components/notification";
+import { ticketTypeDefs } from "../components/ticket";
+import { tenderContactTypeDefs } from "../components/tender-contact";
+import { courierRecordTypeDefs } from "../components/courier-record";
+import { tagAutoMailRestrictionTypeDefs } from "../components/tag-auto-mail-restriction";
+import { tenderDeliveryScheduleTypeDefs } from "../components/tender-delivery-schedule";
+import { dashboardTypeDefs } from "../components/dashboard";
 
 export const typeDefs = gql`
   scalar DateTime
@@ -64,4 +71,11 @@ export const mergedTypeDefs = [
   postAwardFollowUpTypeDefs,
   postAwardDocumentTypeDefs,
   searchTypeDefs,
+  notificationTypeDefs,
+  ticketTypeDefs,
+  tenderContactTypeDefs,
+  courierRecordTypeDefs,
+  tagAutoMailRestrictionTypeDefs,
+  tenderDeliveryScheduleTypeDefs,
+  dashboardTypeDefs,
 ];

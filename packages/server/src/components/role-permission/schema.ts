@@ -16,6 +16,7 @@ export const rolePermissionTypeDefs = gql`
 
   extend type Query {
     getPermissionsByRoleId(roleId: ID!): [Permission!]!
+    getAllPermissions: [Permission!]!
   }
 
   extend type Mutation {

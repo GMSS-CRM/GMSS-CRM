@@ -1,79 +1,37 @@
 import { useState, useMemo } from 'react';
-import { Dropdown, Badge, Tabs, Empty, Avatar } from 'antd';
+import { Dropdown, Badge, Tabs, Empty, Spin } from 'antd';
 import { 
   BellOutlined, 
   CheckCircleOutlined, 
   WarningOutlined,
   InfoCircleOutlined,
-  UserAddOutlined,
+  ClockCircleOutlined,
   FileTextOutlined,
   CloseOutlined,
   CheckOutlined,
+  DollarOutlined,
+  SafetyOutlined,
 } from '@ant-design/icons';
+import { NotificationType } from '@gmss/types';
 import Button from '../button';
+import { useNotifications } from './service';
 import styles from './styles.module.css';
 
-export interface Notification {
-  id: string;
-  type: 'info' | 'success' | 'warning' | 'user' | 'document';
-  title: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-  avatar?: string;
-}
+const ICON_MAP: Record<string, { icon: React.ReactNode; className: string }> = {
+  [NotificationType.PAYMENT_DUE]: { icon: <DollarOutlined />, className: styles.iconWarning },
+  [NotificationType.SD_RELEASE]: { icon: <SafetyOutlined />, className: styles.iconSuccess },
+  [NotificationType.DOCUMENT_EXPIRY]: { icon: <FileTextOutlined />, className: styles.iconWarning },
+  [NotificationType.AGREEMENT_RENEWAL]: { icon: <FileTextOutlined />, className: styles.iconInfo },
+  [NotificationType.FOLLOW_UP_DUE]: { icon: <ClockCircleOutlined />, className: styles.iconWarning },
+  [NotificationType.TENDER_DEADLINE]: { icon: <WarningOutlined />, className: styles.iconWarning },
+  [NotificationType.TASK_ASSIGNED]: { icon: <CheckCircleOutlined />, className: styles.iconUser },
+  [NotificationType.GENERAL]: { icon: <InfoCircleOutlined />, className: styles.iconInfo },
+};
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'user',
-    title: 'New User Added',
-    message: 'Rajesh Kumar has been added to the system',
-    timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
-    isRead: false,
-  },
-  {
-    id: '2',
-    type: 'success',
-    title: 'Role Updated',
-    message: 'Manager role permissions have been updated successfully',
-    timestamp: new Date(Date.now() - 30 * 60000).toISOString(),
-    isRead: false,
-  },
-  {
-    id: '3',
-    type: 'warning',
-    title: 'Security Alert',
-    message: 'Multiple failed login attempts detected for user account',
-    timestamp: new Date(Date.now() - 120 * 60000).toISOString(),
-    isRead: false,
-  },
-  {
-    id: '4',
-    type: 'info',
-    title: 'System Maintenance',
-    message: 'Scheduled maintenance will occur on Sunday at 2:00 AM',
-    timestamp: new Date(Date.now() - 180 * 60000).toISOString(),
-    isRead: true,
-  },
-  {
-    id: '5',
-    type: 'document',
-    title: 'New Report Available',
-    message: 'Monthly analytics report is ready for download',
-    timestamp: new Date(Date.now() - 240 * 60000).toISOString(),
-    isRead: true,
-  },
-];
-
-export default function     NotificationDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+export default function NotificationDropdown() {
+  const { notifications, unreadCount, loading, markRead, markAllRead, dismiss } = useNotifications();
   const [activeTab, setActiveTab] = useState<string>('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const unreadCount = useMemo(() => {
-    return notifications.filter(n => !n.isRead).length;
-  }, [notifications]);
 
   const filteredNotifications = useMemo(() => {
     if (activeTab === 'unread') {
@@ -82,15 +40,9 @@ export default function     NotificationDropdown() {
     return notifications;
   }, [notifications, activeTab]);
 
-  const getNotificationIcon = (type: Notification['type']) => {
-    const iconMap = {
-      info: <InfoCircleOutlined className={styles.iconInfo} />,
-      success: <CheckCircleOutlined className={styles.iconSuccess} />,
-      warning: <WarningOutlined className={styles.iconWarning} />,
-      user: <UserAddOutlined className={styles.iconUser} />,
-      document: <FileTextOutlined className={styles.iconDocument} />,
-    };
-    return iconMap[type];
+  const getNotificationIcon = (type: string) => {
+    const entry = ICON_MAP[type] ?? ICON_MAP[NotificationType.GENERAL];
+    return <span className={entry.className}>{entry.icon}</span>;
   };
 
   const getRelativeTime = (timestamp: string): string => {
@@ -105,24 +57,22 @@ export default function     NotificationDropdown() {
     return time.toLocaleDateString();
   };
 
-  const markAsRead = (id: string, e: React.MouseEvent) => {
+  const handleMarkAsRead = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-    );
+    markRead(id);
   };
 
-  const removeNotification = (id: string, e: React.MouseEvent) => {
+  const handleRemove = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    dismiss(id);
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  const handleMarkAllAsRead = () => {
+    markAllRead();
   };
 
-  const clearAll = () => {
-    setNotifications([]);
+  const handleClearAll = () => {
+    notifications.forEach(n => dismiss(n.id));
   };
 
   const dropdownContent = (
@@ -141,7 +91,7 @@ export default function     NotificationDropdown() {
             <Button
               variant="text"
               size="small"
-              onClick={markAllAsRead}
+              onClick={handleMarkAllAsRead}
               className={styles.actionButton}
             >
               Mark all read
@@ -151,7 +101,7 @@ export default function     NotificationDropdown() {
             <Button
               variant="text"
               size="small"
-              onClick={clearAll}
+              onClick={handleClearAll}
               className={styles.actionButton}
             >
               Clear all
@@ -179,7 +129,9 @@ export default function     NotificationDropdown() {
 
       {/* Notifications List */}
       <div className={styles.notificationsList}>
-        {filteredNotifications.length === 0 ? (
+        {loading ? (
+          <div className={styles.empty}><Spin /></div>
+        ) : filteredNotifications.length === 0 ? (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={
@@ -200,11 +152,7 @@ export default function     NotificationDropdown() {
 
               {/* Icon */}
               <div className={styles.notificationIcon}>
-                {notification.avatar ? (
-                  <Avatar src={notification.avatar} size={40} />
-                ) : (
-                  getNotificationIcon(notification.type)
-                )}
+                {getNotificationIcon(notification.type)}
               </div>
 
               {/* Content */}
@@ -213,10 +161,10 @@ export default function     NotificationDropdown() {
                   {notification.title}
                 </div>
                 <div className={styles.notificationMessage}>
-                  {notification.message}
+                  {notification.body}
                 </div>
                 <div className={styles.notificationTime}>
-                  {getRelativeTime(notification.timestamp)}
+                  {getRelativeTime(notification.createdDate)}
                 </div>
               </div>
 
@@ -227,7 +175,7 @@ export default function     NotificationDropdown() {
                     variant="text"
                     size="small"
                     icon={<CheckOutlined />}
-                    onClick={(e) => markAsRead(notification.id, e)}
+                    onClick={(e) => handleMarkAsRead(notification.id, e)}
                     className={styles.iconButton}
                     title="Mark as read"
                   />
@@ -236,7 +184,7 @@ export default function     NotificationDropdown() {
                   variant="text"
                   size="small"
                   icon={<CloseOutlined />}
-                  onClick={(e) => removeNotification(notification.id, e)}
+                  onClick={(e) => handleRemove(notification.id, e)}
                   className={styles.iconButton}
                   title="Remove"
                 />

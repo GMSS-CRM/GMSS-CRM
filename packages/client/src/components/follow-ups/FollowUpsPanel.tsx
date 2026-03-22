@@ -98,13 +98,13 @@ export interface FollowUpsPanelProps {
 const FLOW_TYPES: { key: FollowUpType; label: string; icon: React.ReactNode; description: string }[] = [
   {
     key: 'EMAIL',
-    label: 'Follow up for Email',
+    label: 'Follow ups',
     icon: <MailOutlined />,
     description: 'Track email follow-ups for proposals. Set reminders and record when proposal is received.',
   },
   {
     key: 'HARD_COPY_COURIER',
-    label: 'Hard Copy by Courier',
+    label: 'Agreement Hard Copy by Courier',
     icon: <CarOutlined />,
     description: 'Track hard copy courier follow-ups. Record courier details and delivery status.',
   },
@@ -150,10 +150,10 @@ export default function FollowUpsPanel({
   const [activeTab, setActiveTab] = useState<FollowUpType>('EMAIL');
 
   // ── Modals ────────────────────────────────────────────────────────────────
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createForm] = Form.useForm();
-  const [remarksOpen, setRemarksOpen] = useState(false);
-  const [remarksForm] = Form.useForm();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [form] = Form.useForm();
+  
   const [receivedOpen, setReceivedOpen] = useState(false);
   const [receivedForm] = Form.useForm();
   const [courierOpen, setCourierOpen] = useState(false);
@@ -172,57 +172,66 @@ export default function FollowUpsPanel({
   const tabFollowUps = followUps.filter((f) => f.type === activeTab);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-
-  const handleCreate = useCallback(async () => {
+  // ── Unified Create/Edit Handler ──────────────────────────────────────────
+  
+  const handleSaveFollowUp = useCallback(async () => {
     try {
-      const values = await createForm.validateFields();
-      setIsCreating(true);
-      const isCourierType = activeTab === 'HARD_COPY_COURIER' || activeTab === 'DIGITAL_SIGNATURE_COURIER';
-      await onCreateFollowUp({
-        entityId: entityId!,
-        type: activeTab,
-        remarks: values.remarks,
-        nextFollowUpDate: values.nextFollowUpDate?.toISOString(),
-        ...(isCourierType && {
-          courierTrackingNumber: values.courierTrackingNumber,
-          courierProvider: values.courierProvider,
-          courierDeliveryRemarks: values.courierDeliveryRemarks,
-        }),
-      });
-      message.success('Follow up created');
-      createForm.resetFields();
-      setCreateOpen(false);
-      refetch?.();
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-      if (errorMsg) message.error(errorMsg);
-    } finally {
-      setIsCreating(false);
-    }
-  }, [createForm, onCreateFollowUp, entityId, activeTab, refetch]);
-
-  const handleUpdateRemarks = useCallback(async () => {
-    if (!selectedFollowUp) return;
-    try {
-      const values = await remarksForm.validateFields();
-      setIsUpdating(true);
-      await onUpdateFollowUp({
-        followUpId: selectedFollowUp.id,
-        remarks: values.remarks,
-        nextFollowUpDate: values.nextFollowUpDate?.toISOString(),
-      });
-      message.success('Follow up updated');
-      remarksForm.resetFields();
-      setRemarksOpen(false);
+      const values = await form.validateFields();
+      
+      if (modalMode === 'create') {
+        setIsCreating(true);
+        const isCourierType = activeTab === 'HARD_COPY_COURIER' || activeTab === 'DIGITAL_SIGNATURE_COURIER';
+        await onCreateFollowUp({
+          entityId: entityId!,
+          type: activeTab,
+          remarks: values.remarks,
+          nextFollowUpDate: values.nextFollowUpDate?.toISOString(),
+          ...(isCourierType && {
+            courierTrackingNumber: values.courierTrackingNumber,
+            courierProvider: values.courierProvider,
+            courierDeliveryRemarks: values.courierDeliveryRemarks,
+          }),
+        });
+        message.success('Follow up created');
+      } else {
+        setIsUpdating(true);
+        await onUpdateFollowUp({
+          followUpId: selectedFollowUp!.id,
+          remarks: values.remarks,
+          nextFollowUpDate: values.nextFollowUpDate?.toISOString(),
+        });
+        message.success('Follow up updated');
+      }
+      
+      form.resetFields();
+      setModalOpen(false);
       setSelectedFollowUp(null);
       refetch?.();
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       if (errorMsg) message.error(errorMsg);
     } finally {
+      setIsCreating(false);
       setIsUpdating(false);
     }
-  }, [selectedFollowUp, remarksForm, onUpdateFollowUp, refetch]);
+  }, [form, modalMode, selectedFollowUp, onCreateFollowUp, onUpdateFollowUp, entityId, activeTab, refetch]);
+
+  const openCreateModal = useCallback(() => {
+    setModalMode('create');
+    form.resetFields();
+    setSelectedFollowUp(null);
+    setModalOpen(true);
+  }, [form]);
+
+  const openEditModal = useCallback((followUp: FollowUp) => {
+    setModalMode('edit');
+    setSelectedFollowUp(followUp);
+    form.setFieldsValue({
+      remarks: followUp.remarks,
+      nextFollowUpDate: followUp.nextFollowUpDate ? dayjs(followUp.nextFollowUpDate) : undefined,
+    });
+    setModalOpen(true);
+  }, [form]);
 
   const handleMarkReceived = useCallback(async () => {
     if (!selectedFollowUp) return;
@@ -501,16 +510,7 @@ export default function FollowUpsPanel({
                 type="text"
                 size="small"
                 icon={<EditOutlined />}
-                onClick={() => {
-                  setSelectedFollowUp(record);
-                  remarksForm.setFieldsValue({
-                    remarks: record.remarks,
-                    nextFollowUpDate: record.nextFollowUpDate
-                      ? dayjs(record.nextFollowUpDate)
-                      : undefined,
-                  });
-                  setRemarksOpen(true);
-                }}
+                onClick={() => openEditModal(record)}
               />
             </Tooltip>
 
@@ -659,10 +659,7 @@ export default function FollowUpsPanel({
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => {
-                createForm.resetFields();
-                setCreateOpen(true);
-              }}
+              onClick={openCreateModal}
             >
               Add Follow Up
             </Button>
@@ -706,27 +703,34 @@ export default function FollowUpsPanel({
         rowClassName={(r) => (r.isCompleted ? 'follow-up-row-completed' : '')}
       />
 
-      {/* ── Create Modal ── */}
+      {/* ── Create/Edit Modal ── */}
       <Modal
-        open={createOpen}
+        open={modalOpen}
         title={
           <Space>
             {activeFlowConfig.icon}
-            {`New Follow Up — ${activeFlowConfig.label}`}
+            {modalMode === 'create' 
+              ? `New Follow Up — ${activeFlowConfig.label}`
+              : `Edit Follow Up — ${activeFlowConfig.label}`
+            }
           </Space>
         }
-        onOk={handleCreate}
-        onCancel={() => setCreateOpen(false)}
-        okText="Create"
-        confirmLoading={isCreating}
+        onOk={handleSaveFollowUp}
+        onCancel={() => {
+          setModalOpen(false);
+          setSelectedFollowUp(null);
+          form.resetFields();
+        }}
+        okText={modalMode === 'create' ? 'Create' : 'Update'}
+        confirmLoading={isCreating || isUpdating}
         centered
         width={620}
       >
-        <Form form={createForm} layout="vertical" style={{ marginTop: 16 }}>
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item label="Remarks / Notes" name="remarks">
             <TextArea
               rows={3}
-              placeholder="Enter initial remarks or notes about this follow up"
+              placeholder="Enter remarks or notes about this follow up"
             />
           </Form.Item>
           <Form.Item label="Next Follow Up Date" name="nextFollowUpDate">
@@ -737,7 +741,7 @@ export default function FollowUpsPanel({
             />
           </Form.Item>
           
-          {(activeTab === 'HARD_COPY_COURIER' || activeTab === 'DIGITAL_SIGNATURE_COURIER') && (
+          {modalMode === 'create' && (activeTab === 'HARD_COPY_COURIER' || activeTab === 'DIGITAL_SIGNATURE_COURIER') && (
             <>
               <Divider style={{ margin: '16px 0' }} />
               <Text strong style={{ fontSize: 13, color: 'var(--text-muted, #6b7280)' }}>
@@ -761,38 +765,6 @@ export default function FollowUpsPanel({
               </Form.Item>
             </>
           )}
-        </Form>
-      </Modal>
-
-      {/* ── Edit Remarks Modal ── */}
-      <Modal
-        open={remarksOpen}
-        title={<Space><EditOutlined />Edit Remarks &amp; Next Date</Space>}
-        onOk={handleUpdateRemarks}
-        onCancel={() => {
-          setRemarksOpen(false);
-          setSelectedFollowUp(null);
-        }}
-        okText="Save"
-        confirmLoading={isUpdating}
-        centered
-        width={520}
-      >
-        <Form
-          form={remarksForm}
-          layout="vertical"
-          style={{ marginTop: 16 }}
-        >
-          <Form.Item label="Remarks / Notes" name="remarks">
-            <TextArea rows={3} placeholder="Enter remarks" />
-          </Form.Item>
-          <Form.Item label="Next Follow Up Date" name="nextFollowUpDate">
-            <DatePicker
-              style={{ width: '100%' }}
-              format="DD MMM YYYY"
-              placeholder="Select follow up date"
-            />
-          </Form.Item>
         </Form>
       </Modal>
 

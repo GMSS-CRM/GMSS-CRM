@@ -31,6 +31,12 @@ export enum PaymentFrequency {
   YEARLY = 'YEARLY',
 }
 
+export enum PaymentTermType {
+  ADVANCE_PAYMENT = 'ADVANCE_PAYMENT',
+  PAYMENT_WITHIN_30_DAYS = 'PAYMENT_WITHIN_30_DAYS',
+  PAYMENT_AFTER_30_DAYS = 'PAYMENT_AFTER_30_DAYS',
+}
+
 @Entity({ name: 'vendor_agreement' })
 export class VendorAgreement {
   @PrimaryGeneratedColumn('uuid')
@@ -85,6 +91,13 @@ export class VendorAgreement {
 
   @Column({
     type: 'enum',
+    enum: PaymentTermType,
+    nullable: true,
+  })
+  paymentTermType?: PaymentTermType;
+
+  @Column({
+    type: 'enum',
     enum: PaymentFrequency,
     nullable: true,
   })
@@ -103,6 +116,14 @@ export class VendorAgreement {
 
   @Column({ nullable: true })
   otherBenefitsDescription?: string;
+
+  /* DOCUMENT */
+
+  @Column({ nullable: true })
+  documentUrl?: string;
+
+  @Column({ nullable: true })
+  documentPath?: string;
 
   /* AUDIT */
 

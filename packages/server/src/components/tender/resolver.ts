@@ -32,6 +32,9 @@ export const tenderResolvers = {
 
     seedTenderVendors: (_: unknown, { tenderId }: any) =>
       getService().seedTenderVendors(tenderId),
+
+    silenceTenderCountdown: (_: unknown, { tenderId, reason, newDeadline, remarks }: any) =>
+      getService().silenceTenderCountdown(tenderId, reason, newDeadline, remarks),
   },
 
   Tender: {

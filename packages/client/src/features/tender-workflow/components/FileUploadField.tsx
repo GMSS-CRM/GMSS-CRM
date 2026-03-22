@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Upload, Button, Space, Typography, message, Spin } from 'antd';
 import { UploadOutlined, FileOutlined, DeleteOutlined, LinkOutlined } from '@ant-design/icons';
 import type { RcFile } from 'antd/es/upload';
-import { useGenerateUploadUrl, uploadFileToS3 } from '../services/upload.service';
+import { useFirebaseUpload } from '../hooks/useFirebaseUpload';
 
 const { Text } = Typography;
 
@@ -11,7 +11,7 @@ interface FileUploadFieldProps {
   value?: string;
   /** Callback when upload completes or file is removed */
   onChange?: (url: string) => void;
-  /** S3 folder path, e.g. 'post-award/quotes' */
+  /** Firebase folder path, e.g. 'post-award/quotes' */
   folder: string;
   /** Accepted file types, e.g. '.pdf,.doc,.docx,.jpg,.png' */
   accept?: string;
@@ -22,9 +22,9 @@ interface FileUploadFieldProps {
 }
 
 /**
- * Reusable S3 file upload field for Ant Design forms.
+ * Reusable Firebase file upload field for Ant Design forms.
  *
- * Replaces plain URL text inputs — uploads to S3 via presigned URL
+ * Replaces plain URL text inputs — uploads to Firebase Cloud Storage
  * and stores the resulting public URL.
  */
 const FileUploadField: React.FC<FileUploadFieldProps> = ({
@@ -36,13 +36,13 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({
   disabled = false,
 }) => {
   const [uploading, setUploading] = useState(false);
-  const [generateUrl] = useGenerateUploadUrl();
+  const { uploadFile } = useFirebaseUpload();
 
   const handleUpload = async (file: RcFile) => {
     setUploading(true);
     try {
-      const { publicUrl } = await uploadFileToS3(file, folder, generateUrl);
-      onChange?.(publicUrl);
+      const { downloadUrl } = await uploadFile(file, folder);
+      onChange?.(downloadUrl);
       message.success(`${file.name} uploaded`);
     } catch {
       message.error('Upload failed');

@@ -7,6 +7,7 @@ export const vendorDocumentTypeDefs = gql`
     vendorId: ID!
     documentName: String!
     documentUrl: String!
+    documentType: DocumentType!
     expiresOn: String
     createdBy: String!
     createdDate: String!
@@ -18,12 +19,14 @@ export const vendorDocumentTypeDefs = gql`
     vendorId: ID!
     documentName: String!
     documentUrl: String!
+    documentType: DocumentType
     expiresOn: String
   }
 
   input UpdateVendorDocumentStandaloneInput {
     documentName: String
     documentUrl: String
+    documentType: DocumentType
     expiresOn: String
   }
 

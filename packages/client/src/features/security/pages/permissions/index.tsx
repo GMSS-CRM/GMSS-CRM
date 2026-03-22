@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Select, Input, Table, message, Tooltip, Tag } from 'antd';
+import { Select, Input, Table, message, Tooltip } from 'antd';
 import {
   SearchOutlined,
   ArrowRightOutlined,
@@ -12,8 +12,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { Role } from '../../types';
-import { PERMISSION_LABELS, ALL_PERMISSIONS } from '../../types';
-import { useGetPermissionsByRoleId, useAssignPermissions } from '../../services/permissions.service';
+import { useGetPermissionsByRoleId, useAssignPermissions, useGetAllPermissions } from '../../services/permissions.service';
 import Button from '../../../../components/button';
 import styles from './styles.module.css';
 
@@ -21,15 +20,9 @@ interface PermissionsPageProps {
   roles: Role[];
 }
 
-const MODULE_COLORS: Record<string, string> = {
-  'Users':        'blue',
-  'Roles':        'purple',
-  'App Settings': 'orange',
-};
-
 /**
  * Permissions Management Page
- * Dual-panel UI backed by real backend data via Apollo.
+ * Dual-panel UI with permissions fetched from server
  */
 export default function PermissionsPage({ roles }: PermissionsPageProps) {
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(
@@ -47,6 +40,7 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
   // Apollo hooks
   const [loadPermissions, { loading: loadingPerms }] = useGetPermissionsByRoleId();
   const [assignPermissions, { loading: saving }] = useAssignPermissions();
+  const { data: allPermissionsData } = useGetAllPermissions();
 
   // Load permissions when role changes
   useEffect(() => {
@@ -61,15 +55,16 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
     loadPermissions({ variables: { roleId: selectedRoleId } }).then(
       (result: { data?: { getPermissionsByRoleId?: string[] } }) => {
         const assigned: string[] = (result.data?.getPermissionsByRoleId ?? []) as string[];
+        const allPerms: string[] = allPermissionsData?.getAllPermissions ?? [];
         setRolePermissions(assigned);
         setOriginalRolePermissions(assigned);
-        setAvailablePermissions(ALL_PERMISSIONS.filter((p) => !assigned.includes(p)));
+        setAvailablePermissions(allPerms.filter((p) => !assigned.includes(p)));
         setHasChanges(false);
         setSelectedAvailableKeys([]);
         setSelectedRoleKeys([]);
       }
     );
-  }, [selectedRoleId, loadPermissions]);
+  }, [selectedRoleId, loadPermissions, allPermissionsData]);
 
   const handleRoleChange = useCallback(
     (value: string) => {
@@ -121,30 +116,25 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
 
   const handleCancel = useCallback(() => {
     if (!hasChanges) return;
+    const allPerms: string[] = allPermissionsData?.getAllPermissions ?? [];
     setRolePermissions(originalRolePermissions);
-    setAvailablePermissions(ALL_PERMISSIONS.filter((p) => !originalRolePermissions.includes(p)));
+    setAvailablePermissions(allPerms.filter((p) => !originalRolePermissions.includes(p)));
     setSelectedAvailableKeys([]);
     setSelectedRoleKeys([]);
     setHasChanges(false);
-  }, [hasChanges, originalRolePermissions]);
+  }, [hasChanges, originalRolePermissions, allPermissionsData]);
 
   // Filtered lists based on search
   const filteredAvailable = useMemo(() => {
     if (!availableSearchText.trim()) return availablePermissions;
     const q = availableSearchText.toLowerCase();
-    return availablePermissions.filter((p) => {
-      const meta = PERMISSION_LABELS[p];
-      return meta?.label.toLowerCase().includes(q) || meta?.module.toLowerCase().includes(q);
-    });
+    return availablePermissions.filter((p) => p.toLowerCase().includes(q));
   }, [availablePermissions, availableSearchText]);
 
   const filteredRole = useMemo(() => {
     if (!roleSearchText.trim()) return rolePermissions;
     const q = roleSearchText.toLowerCase();
-    return rolePermissions.filter((p) => {
-      const meta = PERMISSION_LABELS[p];
-      return meta?.label.toLowerCase().includes(q) || meta?.module.toLowerCase().includes(q);
-    });
+    return rolePermissions.filter((p) => p.toLowerCase().includes(q));
   }, [rolePermissions, roleSearchText]);
 
   const permissionColumns: ColumnsType<string> = [
@@ -153,22 +143,8 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
       dataIndex: '',
       key: 'label',
       render: (_, perm) => (
-        <span className={styles.permissionName}>{PERMISSION_LABELS[perm]?.label ?? perm}</span>
+        <span className={styles.permissionName}>{perm.replace(/_/g, ' ')}</span>
       ),
-    },
-    {
-      title: 'Module',
-      dataIndex: '',
-      key: 'module',
-      width: 130,
-      render: (_, perm) => {
-        const mod = PERMISSION_LABELS[perm]?.module ?? 'Other';
-        return (
-          <Tag color={MODULE_COLORS[mod] ?? 'default'} style={{ fontWeight: 500 }}>
-            {mod}
-          </Tag>
-        );
-      },
     },
   ];
 
@@ -179,7 +155,7 @@ export default function PermissionsPage({ roles }: PermissionsPageProps) {
         <div>
           <h2 className={styles.title}>Permissions Management</h2>
           <p className={styles.subtitle}>
-            Assign and manage permissions for roles • {ALL_PERMISSIONS.length} total permissions
+            Assign and manage permissions for roles • {(allPermissionsData?.getAllPermissions ?? []).length} total permissions
           </p>
         </div>
         <div className={styles.roleSelector}>

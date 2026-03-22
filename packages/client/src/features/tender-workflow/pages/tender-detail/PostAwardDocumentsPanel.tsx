@@ -32,7 +32,7 @@ import {
   STAGE_DOCUMENT_TYPES,
 } from '../../services/post-award-documents.service';
 import type { PostAwardDocumentItem } from '../../services/post-award-documents.service';
-import { useGenerateUploadUrl, uploadFileToS3 } from '../../services/upload.service';
+import { useFirebaseUpload } from '../../hooks/useFirebaseUpload';
 
 const { Text } = Typography;
 
@@ -55,7 +55,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
   const { data, loading, refetch } = useGetPostAwardDocuments(postAwardId);
   const [uploadDoc] = useUploadPostAwardDocument();
   const [deleteDoc] = useDeletePostAwardDocument();
-  const [generateUrl] = useGenerateUploadUrl();
+  const { uploadFile } = useFirebaseUpload();
   const [modalOpen, setModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form] = Form.useForm();
@@ -72,7 +72,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
 
     setUploading(true);
     try {
-      const { publicUrl } = await uploadFileToS3(file, `post-award/${tenderId}`, generateUrl);
+      const { downloadUrl } = await uploadFile(file, `post-award/${tenderId}`);
       await uploadDoc({
         variables: {
           input: {
@@ -81,7 +81,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
             stage: currentStage,
             documentType: values.documentType,
             documentName: file.name,
-            documentUrl: publicUrl,
+            documentUrl: downloadUrl,
             remarks: values.remarks,
           },
         },

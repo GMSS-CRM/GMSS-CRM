@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Card, Form, Select, Input, Button as AntButton, Space, Table, Tag, message, Divider, Switch, DatePicker, Modal, Tooltip } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useGetPaymentTermsByVendor, useCreatePaymentTerm, useUpdatePaymentTerm, useDeletePaymentTerm } from '../services/payment-terms.service';
 import styles from './PaymentTermsSection.module.css';
 
 interface PaymentTerm {
@@ -39,10 +40,15 @@ const PAYMENT_TERMS_FOR_CONSULTING = [
 
 export default function PaymentTermsSection({ vendorId, companyType, onDataChange }: PaymentTermsSectionProps) {
   const [form] = Form.useForm();
-  const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Hooks for API calls
+  const { paymentTerms, loading: termsLoading } = useGetPaymentTermsByVendor(vendorId);
+  const createPaymentTerm = useCreatePaymentTerm();
+  const updatePaymentTerm = useUpdatePaymentTerm();
+  const deletePaymentTerm = useDeletePaymentTerm();
 
   const isGmssTerm = companyType === 'GMSS' || companyType === 'Vendor';
   const paymentTermOptions = isGmssTerm ? PAYMENT_TERMS_FOR_GMSS : PAYMENT_TERMS_FOR_CONSULTING;
@@ -74,7 +80,7 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          setPaymentTerms(paymentTerms.filter(t => t.id !== id));
+          await deletePaymentTerm(id);
           message.success('Payment term deleted');
           onDataChange?.();
         } catch {
@@ -82,22 +88,43 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
         }
       },
     });
-  }, [paymentTerms, onDataChange]);
+  }, [deletePaymentTerm, onDataChange]);
 
   const handleSavePaymentTerm = async () => {
     try {
       await form.validateFields();
-      if (!vendorId) return;
+      if (!vendorId) {
+        message.error('Vendor ID is required');
+        return;
+      }
       
       setLoading(true);
-      // TODO: Make API call to save payment term
-      // For now, just close the modal
-      message.success(editingId ? 'Payment term updated' : 'Payment term added');
+      const values = form.getFieldsValue();
+      
+      if (editingId) {
+        // Update existing payment term
+        await updatePaymentTerm({
+          id: editingId,
+          ...values,
+          agreementDate: values.agreementDate ? values.agreementDate.toISOString() : undefined,
+        });
+        message.success('Payment term updated');
+      } else {
+        // Create new payment term
+        await createPaymentTerm({
+          vendorId,
+          companyType: companyType || '',
+          ...values,
+          agreementDate: values.agreementDate ? values.agreementDate.toISOString() : undefined,
+        });
+        message.success('Payment term added');
+      }
+      
       setModalOpen(false);
       form.resetFields();
       onDataChange?.();
-    } catch {
-      message.error('Failed to save payment term');
+    } catch (error) {
+      message.error(editingId ? 'Failed to update payment term' : 'Failed to add payment term');
     } finally {
       setLoading(false);
     }
@@ -196,7 +223,7 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
           dataSource={paymentTerms}
           rowKey="id"
           pagination={false}
-          loading={loading}
+          loading={termsLoading}
           locale={{
             emptyText: 'No payment terms configured. Click "Add Payment Term" to create one.',
           }}
@@ -217,6 +244,7 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
         cancelText="Cancel"
         centered
         width={700}
+        confirmLoading={loading}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item

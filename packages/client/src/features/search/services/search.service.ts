@@ -1,16 +1,17 @@
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
-import type { VendorTender } from '@gmss/types';
+import type { VendorTender, Ticket } from '@gmss/types';
 
 // ─── Search Queries ────────────────────────────────────────────────────────────
 
 export const SEARCH_TENDERS = gql`
   query SearchTenders($searchTerm: String!) {
-    searchTenders(searchTerm: $searchTerm) {
+    searchTenders(searchTerm: $searchTerm, includeExpired: true) {
       id
       name
       referenceNumber
       issuingDepartment
+      description
       status
       submissionDeadline
       createdDate
@@ -20,6 +21,10 @@ export const SEARCH_TENDERS = gql`
           id
           name
         }
+      }
+      documents {
+        id
+        name
       }
     }
   }
@@ -46,6 +51,20 @@ export const SEARCH_VENDORS = gql`
           name
         }
       }
+    }
+  }
+`;
+
+export const SEARCH_TICKETS = gql`
+  query SearchTickets($searchTerm: String!) {
+    searchTickets(searchTerm: $searchTerm) {
+      id
+      title
+      description
+      priority
+      status
+      assignedTo
+      createdDate
     }
   }
 `;
@@ -79,10 +98,12 @@ interface SearchTendersResult {
   name: string;
   referenceNumber: string;
   issuingDepartment: string;
+  description?: string;
   status: string;
   submissionDeadline?: string;
   createdDate: string;
   tags: Array<{ id: string; tag: { id: string; name: string } }>;
+  documents?: Array<{ id: string; name: string }>;
 }
 
 interface SearchVendorsResult {
@@ -129,6 +150,26 @@ export const useSearchVendors = (searchTerm: string) => {
 
   return {
     vendors: isValidTerm ? (data?.searchVendors ?? []) : [],
+    loading: isValidTerm ? loading : false,
+    error: isValidTerm ? error : undefined,
+  };
+};
+
+export const useSearchTickets = (searchTerm: string) => {
+  const isValidTerm = searchTerm && searchTerm.length >= 2;
+
+  const { data, loading, error } = useQuery<{ searchTickets: Ticket[] }>(
+    SEARCH_TICKETS,
+    {
+      variables: { searchTerm: searchTerm || '' },
+      skip: !isValidTerm,
+      fetchPolicy: 'cache-and-network',
+      errorPolicy: 'all',
+    },
+  );
+
+  return {
+    tickets: isValidTerm ? (data?.searchTickets ?? []) : [],
     loading: isValidTerm ? loading : false,
     error: isValidTerm ? error : undefined,
   };

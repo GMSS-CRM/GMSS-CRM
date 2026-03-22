@@ -60,7 +60,7 @@ export class TenderRepository extends Repository<Tender> implements ITenderRepos
     if (params.status) {
       query.andWhere('tender.status = :status', { status: params.status });
     }
-
+    query.andWhere('(tender.submissionDeadline IS NULL OR tender.submissionDeadline > NOW())');
     query.leftJoinAndSelect('tender.documents', 'documents');
     query.leftJoinAndSelect('tender.tags', 'tags');
     query.leftJoinAndSelect('tags.tag', 'tag');

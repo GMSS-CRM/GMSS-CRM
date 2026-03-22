@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Upload, Button, Typography, message, Progress } from "antd";
 import { UploadOutlined, FileTextOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import type { Tender, TenderDocument } from "../types/tender.types";
-import { useGenerateUploadUrl, uploadFileToS3 } from "../services/upload.service";
+import { useFirebaseUpload } from "../hooks/useFirebaseUpload";
 import { useCreateTenderDocument } from "../services/tenders.service";
 import s from "../styles/tender-workflow.module.css";
 
@@ -19,7 +19,7 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [generateUrl] = useGenerateUploadUrl();
+  const { uploadFile, isLoading: firebaseUploading } = useFirebaseUpload();
   const [createDoc] = useCreateTenderDocument();
 
   const reset = () => {
@@ -27,6 +27,11 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
     setUploading(false);
     setProgress(0);
   };
+
+  // Track Firebase loading state
+  React.useEffect(() => {
+    setUploading(firebaseUploading);
+  }, [firebaseUploading]);
 
   const handleUpload = async () => {
     if (!tender) return;
@@ -37,10 +42,10 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
 
     if (file) {
       try {
-        // 1. Upload to S3
+        // 1. Upload to Firebase Cloud Storage
         setProgress(30);
-        const result = await uploadFileToS3(file, `tenders/${tender.id}/nit`, generateUrl);
-        publicUrl = result.publicUrl;
+        const result = await uploadFile(file, `tenders/${tender.id}/nit`);
+        publicUrl = result.downloadUrl;
         setProgress(60);
 
         // 2. Create document record
@@ -55,8 +60,7 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
         });
         setProgress(80);
       } catch {
-        // S3 not configured — warn but still advance status for demo
-        message.warning("File could not be stored (S3 unavailable) — advancing status anyway.");
+        message.warning("File could not be stored (Firebase unavailable) — advancing status anyway.");
       }
     }
 

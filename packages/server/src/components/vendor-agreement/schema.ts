@@ -16,12 +16,16 @@ type VendorAgreement {
   commissionValue: Float
   commissionStructure: CommissionStructure
 
+  paymentTermType: PaymentTermType
   paymentFrequency: PaymentFrequency
   paymentAmount: Float
   gstApplicable: Boolean!
 
   hasOtherBenefits: Boolean!
   otherBenefitsDescription: String
+
+  documentUrl: String
+  documentPath: String
 
   createdDate: String!
   updatedDate: String!
@@ -34,11 +38,20 @@ input CreateAgreementInput {
   commissionType: CommissionType
   commissionValue: Float
   commissionStructure: CommissionStructure
+  paymentTermType: PaymentTermType!
   paymentFrequency: PaymentFrequency
   paymentAmount: Float
   gstApplicable: Boolean
   hasOtherBenefits: Boolean
   otherBenefitsDescription: String
+  documentUrl: String
+  documentPath: String
+}
+
+enum PaymentTermType {
+  ADVANCE_PAYMENT
+  PAYMENT_WITHIN_30_DAYS
+  PAYMENT_AFTER_30_DAYS
 }
 
 input UpdateSignatureInput {

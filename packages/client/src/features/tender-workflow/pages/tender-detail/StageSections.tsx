@@ -113,6 +113,20 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
     ldcApplicable: ldcApplicable,
     ldcPercentage: data.ldcPercentage ?? undefined,
     lateDeliveryBy: data.lateDeliveryBy ?? undefined,
+    // Firm Bill
+    firmBillNumber: data.firmBillNumber ?? '',
+    firmBillDate: data.firmBillDate ? dayjs(data.firmBillDate) : null,
+    firmBillQuantity: data.firmBillQuantity ?? undefined,
+    firmBillRate: data.firmBillRate ?? undefined,
+    firmBillBasicRateDiff: data.firmBillBasicRateDiff ?? undefined,
+    firmBillTotalCharges: data.firmBillTotalCharges ?? undefined,
+    firmBillTotalProfit: data.firmBillTotalProfit ?? undefined,
+    firmBillMarginPct: data.firmBillMarginPct ?? undefined,
+    // Option Clause
+    optionClauseApplicable: boolField(data.optionClauseApplicable),
+    optionClauseReminderDate: data.optionClauseReminderDate ? dayjs(data.optionClauseReminderDate) : null,
+    optionClauseQuantityAdded: boolField(data.optionClauseQuantityAdded),
+    optionClauseQuantity: data.optionClauseQuantity ?? undefined,
   };
 
   return (
@@ -173,6 +187,32 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
             </Col>
           </>
         )}
+      </Row>
+
+      <Divider />
+      <Title level={5}>Firm Bill Details</Title>
+      <Row gutter={16}>
+        <Col span={8}><Form.Item label="Firm Bill Number" name="firmBillNumber"><Input /></Form.Item></Col>
+        <Col span={8}><Form.Item label="Firm Bill Date" name="firmBillDate"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={8}><Form.Item label="Quantity" name="firmBillQuantity"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+      </Row>
+      <Row gutter={16}>
+        <Col span={6}><Form.Item label="Rate (₹)" name="firmBillRate"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={6}><Form.Item label="Basic Rate Diff" name="firmBillBasicRateDiff"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={6}><Form.Item label="Total Charges (₹)" name="firmBillTotalCharges"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={6}><Form.Item label="Total Profit (₹)" name="firmBillTotalProfit"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+      </Row>
+      <Row gutter={16}>
+        <Col span={6}><Form.Item label="Margin %" name="firmBillMarginPct"><InputNumber min={0} max={100} style={{ width: '100%' }} /></Form.Item></Col>
+      </Row>
+
+      <Divider />
+      <Title level={5}>Option Clause</Title>
+      <Row gutter={16}>
+        <Col span={4}><Form.Item label="Option Clause Applicable" name="optionClauseApplicable" valuePropName="checked"><Switch /></Form.Item></Col>
+        <Col span={6}><Form.Item label="Reminder Date" name="optionClauseReminderDate"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={4}><Form.Item label="Quantity Added" name="optionClauseQuantityAdded" valuePropName="checked"><Switch /></Form.Item></Col>
+        <Col span={6}><Form.Item label="Option Clause Qty" name="optionClauseQuantity"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
       </Row>
 
       <Form.Item>
@@ -440,6 +480,115 @@ export const BillPaymentSection: React.FC<Props> = ({ data, saving, onSave }) =>
 
       <Form.Item>
         <Button type="primary" htmlType="submit" loading={saving}>Save Bill & Payment</Button>
+      </Form.Item>
+    </Form>
+  );
+};
+
+/* ─── Stage 1.5: LOA Processing ───────────────────────────────────────────── */
+
+export const LoaProcessingSection: React.FC<Props> = ({ data, saving, onSave }) => {
+  const [form] = Form.useForm();
+
+  const initial = {
+    loaNumber: data.loaNumber ?? '',
+    loaDate: data.loaDate ? dayjs(data.loaDate) : null,
+    loaDocumentUrl: data.loaDocumentUrl ?? '',
+    loaExcelEntryNumber: data.loaExcelEntryNumber ?? '',
+    loaExcelEntryImageUrl: data.loaExcelEntryImageUrl ?? '',
+    loaDeliveryMatch: boolField(data.loaDeliveryMatch),
+    loaPriceMatch: boolField(data.loaPriceMatch),
+    loaPackagingMatch: boolField(data.loaPackagingMatch),
+    svcClauseApplicable: boolField(data.svcClauseApplicable),
+    fivePercentClauseApplicable: boolField(data.fivePercentClauseApplicable),
+    loaModificationAdviceRequired: boolField(data.loaModificationAdviceRequired),
+    loaRemarks: data.loaRemarks ?? '',
+  };
+
+  return (
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+      <Title level={5}>LOA Details</Title>
+      <Row gutter={16}>
+        <Col span={8}><Form.Item label="LOA Number" name="loaNumber"><Input /></Form.Item></Col>
+        <Col span={8}><Form.Item label="LOA Date" name="loaDate"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={8}><Form.Item label="Excel Entry Number" name="loaExcelEntryNumber"><Input /></Form.Item></Col>
+      </Row>
+
+      <Row gutter={16}>
+        <Col span={12}>
+          <Form.Item label="LOA Document" name="loaDocumentUrl">
+            <FileUploadField folder="loa-documents" />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item label="Excel Entry Image" name="loaExcelEntryImageUrl">
+            <FileUploadField folder="loa-excel-entries" />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Divider />
+      <Title level={5}>Match Verification</Title>
+      <Row gutter={16}>
+        <Col span={4}><Form.Item label="Delivery Match" name="loaDeliveryMatch" valuePropName="checked"><Switch /></Form.Item></Col>
+        <Col span={4}><Form.Item label="Price Match" name="loaPriceMatch" valuePropName="checked"><Switch /></Form.Item></Col>
+        <Col span={4}><Form.Item label="Packaging Match" name="loaPackagingMatch" valuePropName="checked"><Switch /></Form.Item></Col>
+      </Row>
+
+      <Divider />
+      <Title level={5}>Clauses</Title>
+      <Row gutter={16}>
+        <Col span={6}><Form.Item label="SVC Clause" name="svcClauseApplicable" valuePropName="checked"><Switch /></Form.Item></Col>
+        <Col span={6}><Form.Item label="5% Clause" name="fivePercentClauseApplicable" valuePropName="checked"><Switch /></Form.Item></Col>
+        <Col span={6}><Form.Item label="Modification Advice Required" name="loaModificationAdviceRequired" valuePropName="checked"><Switch /></Form.Item></Col>
+      </Row>
+
+      <Form.Item label="LOA Remarks" name="loaRemarks">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit" loading={saving}>Save LOA Processing</Button>
+      </Form.Item>
+    </Form>
+  );
+};
+
+/* ─── Stage 7: SD Return ──────────────────────────────────────────────────── */
+
+export const SdReturnSection: React.FC<Props> = ({ data, saving, onSave }) => {
+  const [form] = Form.useForm();
+
+  const initial = {
+    sdOfficerName: data.sdOfficerName ?? '',
+    sdOfficerContact: data.sdOfficerContact ?? '',
+    sdOfficerEmail: data.sdOfficerEmail ?? '',
+    sdReturnReceivedDate: data.sdReturnReceivedDate ? dayjs(data.sdReturnReceivedDate) : null,
+    sdReturnAmount: data.sdReturnAmount ?? undefined,
+    sdReturnRemarks: data.sdReturnRemarks ?? '',
+  };
+
+  return (
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+      <Title level={5}>SD Officer Details</Title>
+      <Row gutter={16}>
+        <Col span={8}><Form.Item label="Officer Name" name="sdOfficerName"><Input /></Form.Item></Col>
+        <Col span={8}><Form.Item label="Contact" name="sdOfficerContact"><Input /></Form.Item></Col>
+        <Col span={8}><Form.Item label="Email" name="sdOfficerEmail"><Input type="email" /></Form.Item></Col>
+      </Row>
+
+      <Divider />
+      <Title level={5}>SD Return Information</Title>
+      <Row gutter={16}>
+        <Col span={8}><Form.Item label="Return Received Date" name="sdReturnReceivedDate"><DatePicker style={{ width: '100%' }} /></Form.Item></Col>
+        <Col span={8}><Form.Item label="Return Amount (₹)" name="sdReturnAmount"><InputNumber style={{ width: '100%' }} /></Form.Item></Col>
+      </Row>
+      <Form.Item label="Remarks" name="sdReturnRemarks">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit" loading={saving}>Save SD Return</Button>
       </Form.Item>
     </Form>
   );

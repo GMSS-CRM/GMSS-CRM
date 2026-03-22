@@ -11,5 +11,6 @@ export interface ITenderPostAwardService {
   getOrCreate(tenderId: string): Promise<TenderPostAward>;
   updateStage(tenderId: string, stage: PostAwardStage, data: Partial<TenderPostAward>): Promise<TenderPostAward>;
   advanceStage(tenderId: string): Promise<TenderPostAward>;
+  revertStage(tenderId: string): Promise<TenderPostAward>;
   setWinningVendor(tenderId: string, vendorId: string): Promise<TenderPostAward>;
 }

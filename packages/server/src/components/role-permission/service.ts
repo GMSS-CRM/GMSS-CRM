@@ -30,6 +30,24 @@ export class RolePermissionService implements IRolePermissionService {
     return records.map((r) => r.permission);
   }
 
+  async getAllPermissions(): Promise<Permission[]> {
+    // Return all permission enum values as defined in the schema
+    return [
+      'READ_USER' as Permission,
+      'CREATE_USER' as Permission,
+      'UPDATE_USER' as Permission,
+      'DELETE_USER' as Permission,
+      'READ_ROLE' as Permission,
+      'CREATE_ROLE' as Permission,
+      'UPDATE_ROLE' as Permission,
+      'DELETE_ROLE' as Permission,
+      'IMPORT_TENDER' as Permission,
+      'APPROVE_TENDER' as Permission,
+      'READ_APP_SETTING' as Permission,
+      'UPDATE_APP_SETTING' as Permission,
+    ];
+  }
+
   async assignPermissions(input: AssignPermissionsInput): Promise<RolePermissionResult> {
     const { roleId, permissions } = input;
 

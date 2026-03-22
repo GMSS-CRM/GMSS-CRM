@@ -12,6 +12,9 @@ export const baseTypeDefs = gql`
     UPDATE_ROLE
     DELETE_ROLE
 
+    IMPORT_TENDER
+    APPROVE_TENDER
+
     READ_APP_SETTING
     UPDATE_APP_SETTING
   }
@@ -24,6 +27,7 @@ export const baseTypeDefs = gql`
     APPROVED
     FINAL
     DELETED
+    BLACKLISTED
   }
 
   enum VendorType {
@@ -118,5 +122,29 @@ export const baseTypeDefs = gql`
     PAYMENT
     SD_RELEASE
     COMPLETED
+    FILLED
+    NOT_INTERESTED_TENDER
+    DEADLINE_EXTENDED
+  }
+
+  enum SourcePortal {
+    IREPS
+    GEM
+    OTHER
+  }
+
+  enum TenderTypeEnum {
+    NORMAL
+    LIMITED
+  }
+
+  enum DocumentType {
+    GENERAL
+    DIGITAL_SIGNATURE
+    GST_CERT
+    PAN_CERT
+    MSME_CERT
+    AGREEMENT
+    OTHER
   }
 `;

@@ -14,5 +14,6 @@ export interface IRolePermissionRepository extends Repository<RolePermission> {
 
 export interface IRolePermissionService {
   getPermissionsByRoleId(roleId: string): Promise<Permission[]>;
+  getAllPermissions(): Promise<Permission[]>;
   assignPermissions(input: AssignPermissionsInput): Promise<RolePermissionResult>;
 }

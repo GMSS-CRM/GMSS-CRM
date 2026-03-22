@@ -54,8 +54,18 @@ export const tenderPostAwardResolvers = {
       const { tenderId, ...data } = input;
       return getService().updateStage(tenderId, PostAwardStage.BILL_PAYMENT, data as any);
     },
+    updateLoaProcessing: (_: unknown, { input }: { input: { tenderId: string; [key: string]: unknown } }) => {
+      const { tenderId, ...data } = input;
+      return getService().updateStage(tenderId, PostAwardStage.LOA_PROCESSING, data as any);
+    },
+    updateSdReturn: (_: unknown, { input }: { input: { tenderId: string; [key: string]: unknown } }) => {
+      const { tenderId, ...data } = input;
+      return getService().updateStage(tenderId, PostAwardStage.SD_RETURN, data as any);
+    },
     advancePostAwardStage: (_: unknown, { tenderId }: { tenderId: string }) =>
       getService().advanceStage(tenderId),
+    revertPostAwardStage: (_: unknown, { tenderId }: { tenderId: string }) =>
+      getService().revertStage(tenderId),
     markVendorAsWinner: (_: unknown, { tenderId, vendorId }: { tenderId: string; vendorId: string }) =>
       getService().setWinningVendor(tenderId, vendorId),
   },
