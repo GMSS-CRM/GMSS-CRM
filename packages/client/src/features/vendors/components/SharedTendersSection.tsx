@@ -73,7 +73,7 @@ export default function SharedTendersSection({ vendorId }: SharedTendersSectionP
       </div>
 
       {/* Stats Cards */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
+      {/* <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={8}>
           <Card>
             <Statistic
@@ -101,7 +101,7 @@ export default function SharedTendersSection({ vendorId }: SharedTendersSectionP
             />
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
       {/* Tenders Grid */}
       <div className={styles.gridContainer}>

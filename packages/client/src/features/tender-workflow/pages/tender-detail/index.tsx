@@ -344,19 +344,19 @@ const TenderDetailPage: React.FC = () => {
             <Tabs
               defaultActiveKey="activity"
               items={[
-                {
-                  key: 'documents',
-                  label: (
-                    <span><FileOutlined style={{ marginRight: 6 }} />Documents</span>
-                  ),
-                  children: (
-                    <PostAwardDocumentsPanel
-                      postAwardId={postAward.id}
-                      tenderId={id}
-                      currentStage={postAward.currentStage}
-                    />
-                  ),
-                },
+                // {
+                //   key: 'documents',
+                //   label: (
+                //     <span><FileOutlined style={{ marginRight: 6 }} />Documents</span>
+                //   ),
+                //   children: (
+                //     <PostAwardDocumentsPanel
+                //       postAwardId={postAward.id}
+                //       tenderId={id}
+                //       currentStage={postAward.currentStage}
+                //     />
+                //   ),
+                // },
                 {
                   key: 'followups',
                   label: (

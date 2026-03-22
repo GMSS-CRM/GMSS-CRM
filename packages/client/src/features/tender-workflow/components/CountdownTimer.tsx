@@ -211,7 +211,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
           </Space>
         </Col>
 
-        {tenderId && (
+        {/* {tenderId && (
           <Col>
             <Space size={4}>
               <Button
@@ -232,7 +232,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({
               </Popover>
             </Space>
           </Col>
-        )}
+        )} */}
       </Row>
     </Card>
   );

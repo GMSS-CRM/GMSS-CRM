@@ -3,8 +3,8 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import type { Ticket } from '@gmss/types';
 
 export const GET_TICKETS = gql`
-  query GetTickets($assignedTo: String, $status: String) {
-    getTickets(assignedTo: $assignedTo, status: $status) {
+  query GetTickets {
+    getTickets {
       id
       title
       description
@@ -21,22 +21,8 @@ export const GET_TICKETS = gql`
 `;
 
 export const CREATE_TICKET = gql`
-  mutation CreateTicket(
-    $title: String!
-    $description: String
-    $priority: TicketPriority!
-    $assignedTo: String
-    $referenceId: String
-    $referenceType: String
-  ) {
-    createTicket(
-      title: $title
-      description: $description
-      priority: $priority
-      assignedTo: $assignedTo
-      referenceId: $referenceId
-      referenceType: $referenceType
-    ) {
+  mutation CreateTicket($input: CreateTicketInput!) {
+    createTicket(input: $input) {
       id
       title
       priority
@@ -64,22 +50,21 @@ export const DELETE_TICKET = gql`
   }
 `;
 
-export function useTickets(assignedTo?: string, status?: string) {
+export function useTickets() {
   const { data, loading, refetch } = useQuery<{ getTickets: Ticket[] }>(
     GET_TICKETS,
-    { variables: { assignedTo, status } },
   );
 
   const [createTicket, { loading: creating }] = useMutation(CREATE_TICKET, {
-    refetchQueries: [{ query: GET_TICKETS, variables: { assignedTo, status } }],
+    refetchQueries: [{ query: GET_TICKETS }],
   });
 
   const [updateTicket, { loading: updating }] = useMutation(UPDATE_TICKET, {
-    refetchQueries: [{ query: GET_TICKETS, variables: { assignedTo, status } }],
+    refetchQueries: [{ query: GET_TICKETS }],
   });
 
   const [deleteTicket, { loading: deleting }] = useMutation(DELETE_TICKET, {
-    refetchQueries: [{ query: GET_TICKETS, variables: { assignedTo, status } }],
+    refetchQueries: [{ query: GET_TICKETS }],
   });
 
   return {
@@ -90,7 +75,7 @@ export function useTickets(assignedTo?: string, status?: string) {
     deleting,
     refetch,
     createTicket: (vars: Record<string, unknown>) =>
-      createTicket({ variables: vars }),
+      createTicket({ variables: { input: vars } }),
     updateTicket: (id: string, input: Record<string, unknown>) =>
       updateTicket({ variables: { id, input } }),
     deleteTicket: (id: string) => deleteTicket({ variables: { id } }),
