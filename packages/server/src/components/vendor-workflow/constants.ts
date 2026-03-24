@@ -26,4 +26,5 @@ export const VALID_VENDOR_TRANSITIONS: Record<VendorStatus, VendorStatus[]> = {
   [VendorStatus.FINAL]: [],
 
   [VendorStatus.DELETED]: [],
+  [VendorStatus.BLACKLISTED]: [],
 };
