@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react';
-import { Card, Empty, Tag, Space, Button, Row, Col, Statistic, Tooltip } from 'antd';
+import { useCallback } from 'react';
+import { Card, Empty, Tag, Space, Button, Tooltip } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -25,13 +25,13 @@ export default function SharedTendersSection({ vendorId }: SharedTendersSectionP
     navigate(`/tender/${tenderId}`);
   }, [navigate]);
 
-  const stats = useMemo(() => {
-    return {
-      total: sharedTenders.length,
-      active: sharedTenders.filter((t) => t.tender?.status === 'ACTIVE').length,
-      closed: sharedTenders.filter((t) => t.tender?.status === 'CLOSED').length,
-    };
-  }, [sharedTenders]);
+  // const stats = useMemo(() => {
+  //   return {
+  //     total: sharedTenders.length,
+  //     active: sharedTenders.filter((t) => t.tender?.status === 'ACTIVE').length,
+  //     closed: sharedTenders.filter((t) => t.tender?.status === 'CLOSED').length,
+  //   };
+  // }, [sharedTenders]);
 
   if (loading) {
     return (

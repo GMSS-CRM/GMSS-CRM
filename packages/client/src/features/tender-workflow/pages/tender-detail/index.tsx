@@ -16,7 +16,6 @@ import {
 import {
   ArrowLeftOutlined,
   RightCircleOutlined,
-  FileOutlined,
   BellOutlined,
   TeamOutlined,
   TrophyOutlined,
@@ -48,7 +47,6 @@ import {
   SdReturnSection,
 } from './StageSections';
 import VendorFollowUpSection from './VendorFollowUpSection';
-import PostAwardDocumentsPanel from './PostAwardDocumentsPanel';
 import PostAwardFollowUpsPanel from './PostAwardFollowUpsPanel';
 import { STATUS_COLORS, STATUS_LABELS } from '../../types/tender.types';
 import type { TenderStatus } from '../../types/tender.types';
