@@ -59,6 +59,7 @@ const PostAwardFollowUpsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
   const [creating, setCreating] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [outcome, setOutcome] = useState('');
+  const [isDirtyCreate, setIsDirtyCreate] = useState(false);
   const [form] = Form.useForm();
 
   const followUps = data?.getPostAwardFollowUps ?? [];
@@ -97,6 +98,7 @@ const PostAwardFollowUpsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
       message.success('Follow-up created');
       setCreateModalOpen(false);
       form.resetFields();
+      setIsDirtyCreate(false);
       refetch();
     } catch {
       message.error('Failed to create follow-up');
@@ -167,7 +169,9 @@ const PostAwardFollowUpsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
       width: 140,
       render: (_, r) => {
         if (!r.nextFollowUpDate) return <Text type="secondary" style={{ fontSize: 12 }}>—</Text>;
-        const next = dayjs(r.nextFollowUpDate);
+        // Strict parsing with multiple format options from backend
+        const parsed = dayjs(r.nextFollowUpDate, ['YYYY-MM-DDTHH:mm:ss.SSSZ', 'YYYY-MM-DDTHH:mm:ssZ', 'YYYY-MM-DD'], true);
+        const next = parsed.isValid() ? parsed : dayjs(r.nextFollowUpDate);
         const isOverdue = !r.isCompleted && next.isBefore(dayjs());
         return (
           <Tooltip title={next.format('DD MMM YYYY HH:mm')}>
@@ -284,11 +288,11 @@ const PostAwardFollowUpsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
       <Modal
         title="Add Follow-Up"
         open={createModalOpen}
-        onCancel={() => { setCreateModalOpen(false); form.resetFields(); }}
+        onCancel={() => { setCreateModalOpen(false); form.resetFields(); setIsDirtyCreate(false); }}
         footer={null}
         destroyOnClose
       >
-        <Form form={form} layout="vertical" onFinish={handleCreate}>
+        <Form form={form} layout="vertical" onFinish={handleCreate} onValuesChange={() => setIsDirtyCreate(true)}>
           <Form.Item
             label="Priority"
             name="priority"
@@ -318,7 +322,7 @@ const PostAwardFollowUpsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
             <TextArea rows={3} placeholder="Notes about this follow-up…" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={creating} block>
+            <Button type="primary" htmlType="submit" loading={creating} block disabled={!isDirtyCreate}>
               Create Follow-Up
             </Button>
           </Form.Item>

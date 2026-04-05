@@ -13,6 +13,7 @@ import type { ColumnsType } from 'antd/es/table';
 import type { Vendor, VendorMdRequest, UserRole } from '../../types';
 import Button from '../../../../components/button';
 import AppTable from '../../../../components/app-table';
+import VendorExcelImport from '../../components/VendorExcelImport';
 import styles from './styles.module.css';
 
 export type ActiveView = 'all' | 'pending' | 'resolved';
@@ -44,6 +45,7 @@ export default function VendorList({
   onRoleChange,
   activeView,
   onViewChange,
+  onRefresh,
 }: VendorListProps) {
   const activeVendors = useMemo(() => vendors.filter((v) => !v.isDeleted), [vendors]);
 
@@ -80,7 +82,7 @@ export default function VendorList({
       title: 'Company Name',
       dataIndex: 'companyName',
       key: 'companyName',
-      width: '28%',
+      width: '24%',
       render: (name: string, record: Vendor) => (
         <div>
           <span className={styles.vendorName}>{name}</span>
@@ -94,7 +96,7 @@ export default function VendorList({
       title: 'Tags',
       dataIndex: 'tagNames',
       key: 'tagNames',
-      width: '16%',
+      width: '14%',
       render: (tagNames: string[]) => {
         if (!tagNames?.length) return <span className={styles.tagsCount}>—</span>;
         const visible = tagNames.slice(0, 2);
@@ -117,7 +119,7 @@ export default function VendorList({
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      width: '14%',
+      width: '11%',
       render: (status: string) => {
         const cfg = getStatusConfig(status);
         return <Tag color={cfg.color}>{cfg.label}</Tag>;
@@ -127,8 +129,20 @@ export default function VendorList({
       title: 'Created Date',
       dataIndex: 'createdDate',
       key: 'createdDate',
-      width: '12%',
+      width: '10%',
       render: (date: string) => <span className={styles.secondaryText}>{formatDate(date)}</span>,
+      sorter: (a: Vendor, b: Vendor) => {
+        const dateA = a.createdDate ? new Date(a.createdDate).getTime() : 0;
+        const dateB = b.createdDate ? new Date(b.createdDate).getTime() : 0;
+        return dateB - dateA;
+      },
+    },
+    {
+      title: 'Updated Date',
+      dataIndex: 'updatedDate',
+      key: 'updatedDate',
+      width: '10%',
+      render: (date?: string) => <span className={styles.secondaryText}>{date ? formatDate(date) : '—'}</span>,
       sorter: (a: Vendor, b: Vendor) => {
         const dateA = a.updatedDate ? new Date(a.updatedDate).getTime() : 0;
         const dateB = b.updatedDate ? new Date(b.updatedDate).getTime() : 0;
@@ -140,7 +154,7 @@ export default function VendorList({
       title: 'Created By',
       dataIndex: 'createdBy',
       key: 'createdBy',
-      width: '12%',
+      width: '10%',
       render: (email?: string) => {
         if (!email) return <span className={styles.secondaryText}>—</span>;
         const display = email.includes('@') ? email.split('@')[0] : email;
@@ -155,7 +169,7 @@ export default function VendorList({
       title: 'Updated By',
       dataIndex: 'updatedBy',
       key: 'updatedBy',
-      width: '12%',
+      width: '10%',
       render: (email?: string) => {
         if (!email) return <span className={styles.secondaryText}>—</span>;
         const display = email.includes('@') ? email.split('@')[0] : email;
@@ -169,7 +183,7 @@ export default function VendorList({
     {
       title: 'Actions',
       key: 'actions',
-      width: '8%',
+      width: '11%',
       align: 'center' as const,
       render: (_: unknown, record: Vendor) => (
         <Space size="small">
@@ -191,7 +205,7 @@ export default function VendorList({
     {
       title: 'Company Name',
       key: 'companyName',
-      width: '22%',
+      width: '20%',
       render: (_: unknown, req: VendorMdRequest) => {
         const v = vendorMap.get(req.vendorId);
         return (
@@ -207,7 +221,7 @@ export default function VendorList({
     {
       title: 'Status',
       key: 'status',
-      width: '12%',
+      width: '11%',
       render: (_: unknown, req: VendorMdRequest) => {
         const v = vendorMap.get(req.vendorId);
         if (!v) return '—';
@@ -218,7 +232,7 @@ export default function VendorList({
     {
       title: 'Employee Remark',
       key: 'empRemark',
-      width: '30%',
+      width: '27%',
       render: (_: unknown, req: VendorMdRequest) => (
         <span className={styles.remarkText}>{req.empRemark || '—'}</span>
       ),
@@ -226,10 +240,16 @@ export default function VendorList({
     {
       title: 'Requested On',
       key: 'requestedOn',
-      width: '14%',
+      width: '12%',
       render: (_: unknown, req: VendorMdRequest) => (
         <span className={styles.secondaryText}>{formatDate(req.createdDate)}</span>
       ),
+      sorter: (a: VendorMdRequest, b: VendorMdRequest) => {
+        const dateA = new Date(a.createdDate).getTime();
+        const dateB = new Date(b.createdDate).getTime();
+        return dateB - dateA;
+      },
+      defaultSortOrder: 'descend' as const,
     },
     {
       title: 'Actions',
@@ -255,7 +275,7 @@ export default function VendorList({
     {
       title: 'Company Name',
       key: 'companyName',
-      width: '18%',
+      width: '16%',
       render: (_: unknown, req: VendorMdRequest) => {
         const v = vendorMap.get(req.vendorId);
         return <span className={styles.vendorName}>{v?.companyName ?? req.vendorId}</span>;
@@ -264,7 +284,7 @@ export default function VendorList({
     {
       title: 'Status',
       key: 'status',
-      width: '11%',
+      width: '10%',
       render: (_: unknown, req: VendorMdRequest) => {
         const v = vendorMap.get(req.vendorId);
         if (!v) return '—';
@@ -275,7 +295,7 @@ export default function VendorList({
     {
       title: 'Employee Remark',
       key: 'empRemark',
-      width: '24%',
+      width: '22%',
       render: (_: unknown, req: VendorMdRequest) => (
         <span className={styles.remarkText}>{req.empRemark || '—'}</span>
       ),
@@ -283,7 +303,7 @@ export default function VendorList({
     {
       title: 'MD Remark',
       key: 'mdRemark',
-      width: '24%',
+      width: '22%',
       render: (_: unknown, req: VendorMdRequest) => (
         <span className={styles.remarkText}>{req.mdRemark || '—'}</span>
       ),
@@ -291,12 +311,18 @@ export default function VendorList({
     {
       title: 'Resolved On',
       key: 'resolvedOn',
-      width: '13%',
+      width: '12%',
       render: (_: unknown, req: VendorMdRequest) => (
         <span className={styles.secondaryText}>
           {req.resolvedDate ? formatDate(req.resolvedDate) : '—'}
         </span>
       ),
+      sorter: (a: VendorMdRequest, b: VendorMdRequest) => {
+        const dateA = a.resolvedDate ? new Date(a.resolvedDate).getTime() : 0;
+        const dateB = b.resolvedDate ? new Date(b.resolvedDate).getTime() : 0;
+        return dateB - dateA;
+      },
+      defaultSortOrder: 'descend' as const,
     },
     {
       title: 'Actions',
@@ -406,6 +432,11 @@ export default function VendorList({
             <strong>{resolvedRequests.length}</strong> resolved request{resolvedRequests.length !== 1 ? 's' : ''}.
           </span>
         </div>
+      )}
+
+      {/*  Excel Import — Employee "All Vendors" only  */}
+      {role === 'EMPLOYEE' && activeView === 'all' && (
+        <VendorExcelImport onImportComplete={onRefresh} />
       )}
 
       {/*  Table  */}

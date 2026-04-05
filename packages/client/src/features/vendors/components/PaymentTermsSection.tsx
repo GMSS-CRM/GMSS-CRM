@@ -43,6 +43,7 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   // Hooks for API calls
   const { paymentTerms, loading: termsLoading } = useGetPaymentTermsByVendor(vendorId);
@@ -56,6 +57,7 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
   const handleAddPaymentTerm = useCallback(() => {
     setEditingId(null);
     form.resetFields();
+    setIsDirty(false);
     setModalOpen(true);
   }, [form]);
 
@@ -69,6 +71,7 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
       agreementDate: term.agreementDate ? dayjs(term.agreementDate) : undefined,
       fillAmount: term.fillAmount,
     });
+    setIsDirty(false);
     setModalOpen(true);
   }, [form]);
 
@@ -123,7 +126,8 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
       setModalOpen(false);
       form.resetFields();
       onDataChange?.();
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.errorFields) return; // Inline validation messages shown by Form
       message.error(editingId ? 'Failed to update payment term' : 'Failed to add payment term');
     } finally {
       setLoading(false);
@@ -157,7 +161,16 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
       title: 'Agreement Date',
       dataIndex: 'agreementDate',
       key: 'agreementDate',
-      render: (date?: string) => (date ? dayjs(date).format('DD MMM YYYY') : '—'),
+      render: (date?: string) => {
+        if (!date) return '—';
+        // Strict parsing with multiple format options from backend
+        const parsed = dayjs(date, ['YYYY-MM-DDTHH:mm:ss.SSSZ', 'YYYY-MM-DDTHH:mm:ssZ', 'YYYY-MM-DD'], true);
+        if (parsed.isValid()) {
+          return parsed.format('DD MMM YYYY');
+        }
+        // Fallback for invalid format
+        return dayjs(date).format('DD MMM YYYY');
+      },
     },
     {
       title: 'Status',
@@ -245,8 +258,9 @@ export default function PaymentTermsSection({ vendorId, companyType, onDataChang
         centered
         width={700}
         confirmLoading={loading}
+        okButtonProps={{ disabled: editingId ? !isDirty : false }}
       >
-        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }} onValuesChange={() => setIsDirty(true)}>
           <Form.Item
             label="Payment Term Type"
             name="paymentTermType"

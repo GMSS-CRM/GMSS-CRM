@@ -39,18 +39,24 @@ const validateColumns = (row: any): boolean => {
 };
 
 /**
- * Parse Excel file containing tender data
+ * Parse Excel file containing tender data with progress callback
  * @param file - Excel file to parse
+ * @param onProgress - Optional callback for progress updates (0-1)
  * @returns Array of TenderWorkflowItem objects
  * @throws Error if file parsing fails or required columns are missing
  */
-export const parseTenderExcel = async (file: File): Promise<TenderWorkflowItem[]> => {
+export const parseTenderExcel = async (
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<TenderWorkflowItem[]> => {
   try {
     // Read file as array buffer
     const buffer = await file.arrayBuffer();
+    onProgress?.(0.1);
     
     // Parse workbook
     const workbook = XLSX.read(buffer, { type: "array" });
+    onProgress?.(0.2);
     
     // Get first sheet
     const firstSheetName = workbook.SheetNames[0];
@@ -62,21 +68,29 @@ export const parseTenderExcel = async (file: File): Promise<TenderWorkflowItem[]
     
     // Convert sheet to JSON with empty string default for missing values
     const rawData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    onProgress?.(0.3);
 
     if (!rawData || rawData.length === 0) {
       throw new Error("Excel file contains no data");
     }
 
-    // Process each row
-    const tenderItems: TenderWorkflowItem[] = rawData.map((rawRow: any) => {
+    // Process rows with periodic yielding to keep UI responsive
+    const tenderItems: TenderWorkflowItem[] = [];
+    const totalRows = rawData.length;
+    // Yield every 100 rows — frequent enough for progress, rare enough for speed
+    const yieldInterval = Math.max(50, Math.min(100, Math.ceil(totalRows / 10)));
+
+    for (let i = 0; i < rawData.length; i++) {
+      const rawRow = rawData[i] as Record<string, unknown>;
+      
       // Clean all keys by removing non-breaking spaces and trimming
       const cleanedRow: Record<string, any> = {};
       Object.keys(rawRow).forEach((key) => {
         cleanedRow[cleanKey(key)] = rawRow[key];
       });
 
-      // Validate that required columns exist
-      if (!validateColumns(cleanedRow)) {
+      // Validate that required columns exist (only check first row)
+      if (i === 0 && !validateColumns(cleanedRow)) {
         const missingCols = Object.values(EXPECTED_COLUMNS)
           .filter(col => col !== EXPECTED_COLUMNS.ACTIONS && !(col in cleanedRow))
           .join(", ");
@@ -97,8 +111,8 @@ export const parseTenderExcel = async (file: File): Promise<TenderWorkflowItem[]
       // Generate unique ID using crypto.randomUUID()
       const id = crypto.randomUUID();
 
-      // Return mapped tender workflow item
-      return {
+      // Add mapped tender workflow item
+      tenderItems.push({
         id,
         department,
         tenderNo,
@@ -108,9 +122,17 @@ export const parseTenderExcel = async (file: File): Promise<TenderWorkflowItem[]
         dueDateTime,
         dueDays,
         workflowStatus: "DRAFT" as const,
-      };
-    });
+      });
 
+      // Yield periodically to keep UI responsive
+      if (i % yieldInterval === 0) {
+        const progress = 0.2 + ((i + 1) / totalRows) * 0.79;
+        onProgress?.(Math.min(0.99, progress));
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    }
+
+    onProgress?.(1);
     return tenderItems;
   } catch (error) {
     if (error instanceof Error) {

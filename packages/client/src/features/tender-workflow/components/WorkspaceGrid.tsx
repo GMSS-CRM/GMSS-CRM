@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Button, Space, Tooltip, Tag, Dropdown, message } from "antd";
+import { Button, Space, Tooltip, Tag, Dropdown, message, Modal } from "antd";
 import type { MenuProps } from "antd";
 import {
   SendOutlined,
@@ -34,6 +34,7 @@ interface Props {
   onVerifyNit?: (id: string) => void;
   onApprove?: (id: string) => void;
   onBulkApprove?: (ids: string[]) => void;
+  onOpenTaggingDrawer?: (tender: Tender) => void;
 }
 
 const fmtDate = (d?: Date | string) => {
@@ -68,8 +69,10 @@ export const WorkspaceGrid: React.FC<Props> = ({
   onSendMail,
   onApprove,
   onBulkApprove,
+  onOpenTaggingDrawer,
 }) => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+  const [nitPreviewUrl, setNitPreviewUrl] = useState<string | null>(null);
 
   const primaryAction = useCallback(
     (t: Tender): React.ReactNode => {
@@ -128,12 +131,28 @@ export const WorkspaceGrid: React.FC<Props> = ({
                 Approve
               </Button>
             ) : null;
-          if (t.status === "NIT_UPLOADED")
-            return (
-              <Button size="small" type="link" icon={<EyeOutlined />} onClick={() => onView(t)}>
+          if (t.status === "NIT_UPLOADED") {
+            return onOpenTaggingDrawer ? (
+              <Button
+                size="small"
+                type="default"
+                icon={<EyeOutlined />}
+                onClick={(e) => {
+                  e.nativeEvent.stopImmediatePropagation();
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onOpenTaggingDrawer(t);
+                  return false;
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
                 Tag & Verify
               </Button>
-            );
+            ) : null;
+          }
       }
       return null;
     },
@@ -248,15 +267,24 @@ export const WorkspaceGrid: React.FC<Props> = ({
     {
       title: "NIT",
       key: "nit",
-      width: 60,
+      width: 100,
       render: (_: unknown, record: Tender) => {
-        const nitDoc = record.documents.find((d) => d.type === "NIT" || d.name?.toLowerCase().includes("nit"));
-        if (!nitDoc?.url) return <span className={s.noTags}>—</span>;
+        const nitDoc = record.documents.find((d) => d.documentName?.toLowerCase().includes("nit"));
+        if (!nitDoc?.documentUrl) return <span className={s.noTags}>—</span>;
         return (
-          <Tooltip title="View NIT Document">
-            <a href={nitDoc.url} target="_blank" rel="noopener noreferrer">
-              <FileTextOutlined style={{ color: "var(--primary-color, #1677ff)", fontSize: 14 }} />
-            </a>
+          <Tooltip title="Click to preview, or use menu to download">
+            <Button
+              type="link"
+              size="small"
+              icon={<FileTextOutlined style={{ color: "var(--primary-color, #1677ff)", fontSize: 14 }} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setNitPreviewUrl(nitDoc.documentUrl!);
+              }}
+              style={{ padding: "4px 8px", height: "auto" }}
+            >
+              {nitDoc.documentName || "NIT"}
+            </Button>
           </Tooltip>
         );
       },
@@ -267,7 +295,7 @@ export const WorkspaceGrid: React.FC<Props> = ({
       width: 100,
       ellipsis: true,
       render: (_: unknown, record: Tender) => {
-        const email = (record as any).createdBy ?? "—";
+        const email = record.createdBy ?? "—";
         const short = email.includes("@") ? email.split("@")[0] : email;
         return (
           <Tooltip title={email}>
@@ -383,6 +411,29 @@ export const WorkspaceGrid: React.FC<Props> = ({
           }}
         />
       </div>
+
+      {/* NIT Preview Modal */}
+      <Modal
+        title="NIT Document Preview"
+        open={!!nitPreviewUrl}
+        onCancel={() => setNitPreviewUrl(null)}
+        footer={[
+          <Button key="close" onClick={() => setNitPreviewUrl(null)}>Close</Button>,
+          <Button key="open" type="primary" href={nitPreviewUrl ?? undefined} target="_blank" rel="noopener noreferrer">
+            Open in New Tab
+          </Button>,
+        ]}
+        width={800}
+        styles={{ body: { height: 600, padding: 0 } }}
+      >
+        {nitPreviewUrl && (
+          <iframe
+            src={nitPreviewUrl}
+            style={{ width: "100%", height: "100%", border: "none" }}
+            title="NIT Preview"
+          />
+        )}
+      </Modal>
     </div>
   );
 };

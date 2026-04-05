@@ -54,7 +54,7 @@ export async function startApolloServer() {
   const server = new ApolloServer<GraphQLContext>({
     typeDefs: mergedTypeDefs,
     resolvers,
-    introspection: true,
+    introspection: process.env.NODE_ENV !== 'production',
   });
 
   await server.start();

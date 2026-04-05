@@ -5,10 +5,12 @@ import { TenderStatus } from '../../entities/enums/TenderStatus';
 import { VALID_TENDER_TRANSITIONS } from './constants';
 import ErrorInfo from '../common/error-info';
 import { getCurrentEmail } from '../common/utils';
-import { DataSource } from 'typeorm';
+import { DataSource, LessThan, MoreThan, Between } from 'typeorm';
 import { TenderTag } from '../../entities/TenderTag';
 import { VendorTag } from '../../entities/VendorTag';
 import { VendorTender } from '../../entities/VendorTender';
+import { Notification } from '../../entities/Notification';
+import { Tender } from '../../entities/Tender';
 
 @injectable()
 export class TenderService implements ITenderService {
@@ -72,6 +74,15 @@ export class TenderService implements ITenderService {
       updateData.submissionDeadline = input.submissionDeadline
         ? new Date(input.submissionDeadline)
         : null;
+    }
+    if (input.drawingRequired !== undefined) {
+      updateData.drawingRequired = input.drawingRequired;
+    }
+    if (input.strRequired !== undefined) {
+      updateData.strRequired = input.strRequired;
+    }
+    if (input.specificationsRequired !== undefined) {
+      updateData.specificationsRequired = input.specificationsRequired;
     }
 
     return this.tenderRepository.updateTender(id, updateData);
@@ -254,6 +265,14 @@ export class TenderService implements ITenderService {
 
     const createdBy = getCurrentEmail();
 
+    // Build composite dedup keys: date + referenceNumber + name
+    const buildKey = (name?: string, ref?: string, deadline?: string): string => {
+      const n = (name ?? '').trim().toLowerCase();
+      const r = (ref ?? '').trim().toLowerCase();
+      const d = deadline ? new Date(deadline).toISOString().slice(0, 10) : '';
+      return `${d}|${r}|${n}`;
+    };
+
     // Separate inputs into those with a referenceNumber and those without
     const withRef = inputs
       .map((i) => i.referenceNumber?.trim())
@@ -266,6 +285,13 @@ export class TenderService implements ITenderService {
     // Single round-trip to find all existing tenders
     const existing = await this.tenderRepository.findExisting(withRef, withoutRefNames);
 
+    // Build composite key set from existing tenders for dedup
+    const existingKeySet = new Set(
+      existing.map((t) =>
+        buildKey(t.name, t.referenceNumber, t.submissionDeadline?.toISOString()),
+      ),
+    );
+    // Keep legacy ref/name sets for fallback matching
     const existingRefSet = new Set(
       existing.map((t) => t.referenceNumber?.trim()).filter(Boolean),
     );
@@ -283,14 +309,19 @@ export class TenderService implements ITenderService {
         continue;
       }
 
-      // Dedup key: referenceNumber first (when non-empty), else fall back to name
-      const isDuplicate = ref ? existingRefSet.has(ref) : existingNameSet.has(name);
+      // Composite dedup: date + number + name
+      const compositeKey = buildKey(name, ref, input.submissionDeadline);
+      const isDuplicateComposite = existingKeySet.has(compositeKey);
+      // Fallback: referenceNumber first (when non-empty), else name
+      const isDuplicateLegacy = ref ? existingRefSet.has(ref) : existingNameSet.has(name);
+      const isDuplicate = isDuplicateComposite || isDuplicateLegacy;
 
       if (isDuplicate) {
-        skipped.push({ name, referenceNumber: ref, reason: 'Already exists in the system' });
+        skipped.push({ name, referenceNumber: ref, reason: 'Already exists in the system (matched by date + number + name)' });
       } else {
         toCreate.push(input);
         // Add to sets so sibling duplicates (within same batch) are also caught
+        existingKeySet.add(compositeKey);
         if (ref) existingRefSet.add(ref);
         else existingNameSet.add(name);
       }
@@ -354,5 +385,68 @@ export class TenderService implements ITenderService {
       throw new Error(ErrorInfo.TENDER_NOT_FOUND);
     }
     return updated;
+  }
+
+  /**
+   * Check all active tenders for approaching deadlines (within 3 days)
+   * and create TENDER_DEADLINE notifications. Returns count of notifications created.
+   */
+  async checkDeadlineReminders(): Promise<number> {
+    const now = new Date();
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    // Find tenders with deadlines between now and 3 days from now
+    const approachingTenders = await this.db.manager
+      .createQueryBuilder(Tender, 'tender')
+      .where('tender.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('tender.submissionDeadline IS NOT NULL')
+      .andWhere('tender.submissionDeadline > :now', { now })
+      .andWhere('tender.submissionDeadline <= :threeDays', { threeDays: threeDaysFromNow })
+      .andWhere('tender.status NOT IN (:...excludedStatuses)', {
+        excludedStatuses: [
+          TenderStatus.COMPLETED,
+          TenderStatus.REJECTED,
+          TenderStatus.FILLED,
+          TenderStatus.NOT_INTERESTED_TENDER,
+        ],
+      })
+      .getMany();
+
+    let created = 0;
+
+    for (const tender of approachingTenders) {
+      const daysLeft = Math.ceil(
+        (tender.submissionDeadline!.getTime() - now.getTime()) / (24 * 60 * 60 * 1000),
+      );
+
+      // Check if a notification was already created for this tender today
+      const existingNotification = await this.db.manager.findOne(Notification, {
+        where: {
+          referenceId: tender.id,
+          type: 'TENDER_DEADLINE' as any,
+        },
+        order: { createdDate: 'DESC' },
+      });
+
+      // Skip if notification was created in the last 24 hours
+      if (existingNotification) {
+        const lastCreated = new Date(existingNotification.createdDate).getTime();
+        if (now.getTime() - lastCreated < 24 * 60 * 60 * 1000) continue;
+      }
+
+      await this.db.manager.save(Notification, {
+        type: 'TENDER_DEADLINE',
+        title: `Tender deadline approaching: ${tender.name}`,
+        body: `Tender "${tender.name}" (${tender.referenceNumber ?? 'No Ref'}) has ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left until submission deadline.`,
+        referenceId: tender.id,
+        referenceType: 'TENDER',
+        isRead: false,
+        isDismissed: false,
+      } as any);
+
+      created++;
+    }
+
+    return created;
   }
 }

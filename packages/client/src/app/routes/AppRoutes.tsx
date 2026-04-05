@@ -34,14 +34,7 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route
-          path="/tags"
-          element={
-            <ProtectedRoute>
-              <TagsListPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/tags" element={<TagsListPage />} />
         <Route path="/security" element={<SecurityPage />} />
         <Route path="/vendors" element={<VendorsPage />} />
         <Route path="/vendors/create" element={<VendorDetailsForm />} />

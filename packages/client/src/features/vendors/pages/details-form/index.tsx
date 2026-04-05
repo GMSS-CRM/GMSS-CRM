@@ -28,6 +28,7 @@ import {
   DeleteOutlined,
   ShopOutlined,
   SafetyCertificateOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useRef } from 'react';
@@ -58,6 +59,7 @@ import {
   useResolveMdRequest,
   useUploadVendorDocument,
   useDeleteVendorDocument,
+  useGetSharedTenders,
 } from '../../services/vendors.service';
 import { useSearchTags } from '../../../tags/services/tags.service';
 import { useCreateTag } from '../../../tags/services/tags.service';
@@ -112,6 +114,8 @@ export default function VendorDetailsForm() {
   const [sendToMdLoading, setSendToMdLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedSubMenu, setSelectedSubMenu] = useState<VendorSubMenuItem>('basic');
+  const [isDirty, setIsDirty] = useState(false);
+  const formPopulatedRef = useRef(false);
 
   // Remark modals
   const [sendToMdRemarkOpen, setSendToMdRemarkOpen] = useState(false);
@@ -136,9 +140,12 @@ export default function VendorDetailsForm() {
 
   const loading = vendorLoading;
 
-  // Populate form when vendor loads
+  // Populate form when vendor loads for the first time.
+  // Skip subsequent Apollo re-emissions (cache-and-network) to avoid
+  // overwriting the user's in-progress edits.
   useEffect(() => {
-    if (vendor) {
+    if (vendor && !formPopulatedRef.current) {
+      formPopulatedRef.current = true;
       // Normalize vendor payload to match form expectations. The API may return
       // fields with different names (e.g. `name`, `type`, `isRailwayLinked`,
       // `msmeUdyamNumber`) and contact persons may be a flat shape.
@@ -165,6 +172,7 @@ export default function VendorDetailsForm() {
         companyName: vendor.companyName ?? v.name,
         isLinkedWithRailways: vendor.isLinkedWithRailways ?? v.isRailwayLinked ?? false,
         companyType: vendor.companyType ?? v.type,
+        agreementWith: vendor.agreementWith ?? v.agreementWith,
         status: vendor.status,
         address: vendor.address,
         contactPersons: normalizedContactPersons,
@@ -214,6 +222,7 @@ export default function VendorDetailsForm() {
         companyName: values.companyName,
         companyType: values.companyType as CompanyType,
         isLinkedWithRailways: values.isLinkedWithRailways ?? false,
+        agreementWith: values.agreementWith,
         status: values.status as CompanyStatus,
         address: values.address,
         contactPersons: values.contactPersons ?? [],
@@ -226,14 +235,22 @@ export default function VendorDetailsForm() {
 
       if (isEditMode && vendor) {
         await updateVendor(vendor.id, payload, rawStatus ?? 'NEW');
+        // Allow the useEffect to re-sync the form from the updated server data
+        formPopulatedRef.current = false;
+        setIsDirty(false);
         message.success('Vendor saved successfully');
       } else {
         await createVendor(payload);
         message.success('Vendor created successfully');
+        navigate(`/vendors?role=${role}`);
       }
-      navigate(`/vendors?role=${role}`);
-    } catch {
-      message.warning('Please fill in all required fields');
+    } catch (err: any) {
+      // Ant Design form.validateFields() rejects with { errorFields } — not an Error
+      if (err?.errorFields?.length) {
+        // Inline validation messages are already shown next to each field
+        return;
+      }
+      message.error('An error occurred while saving');
     } finally {
       setSaving(false);
     }
@@ -481,6 +498,7 @@ export default function VendorDetailsForm() {
                 isReadOnly={isFormReadOnly}
                 role={role}
                 isPendingView={isPendingView}
+                onFormDirtyChange={setIsDirty}
               />
             )}
             {selectedSubMenu === 'documents' && (
@@ -515,6 +533,7 @@ export default function VendorDetailsForm() {
               onOk={handleSaveClick}
               okLabel={isEditMode ? 'Save Changes' : 'Save Vendor'}
               okLoading={saving}
+              okDisabled={isEditMode && !isDirty}
             />
           )}
         </div>
@@ -565,9 +584,10 @@ interface BasicInfoSectionProps {
   isReadOnly: boolean;
   role: UserRole;
   isPendingView: boolean;
+  onFormDirtyChange: (isDirty: boolean) => void;
 }
 
-function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPendingView }: BasicInfoSectionProps) {
+function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPendingView, onFormDirtyChange }: BasicInfoSectionProps) {
   const [tagSearch, setTagSearch] = useState('');
 
   // Build options: real tags + synthetic "create" option when search has no exact match
@@ -632,7 +652,13 @@ function BasicInfoSection({ form, tags, pendingRequest, isReadOnly, role, isPend
       </div>
 
       <Card className={styles.card}>
-        <Form form={form} layout="vertical" className={styles.form} disabled={isReadOnly}>
+        <Form 
+          form={form} 
+          layout="vertical" 
+          className={styles.form} 
+          disabled={isReadOnly}
+          onValuesChange={() => onFormDirtyChange(true)}
+        >
           <Row gutter={24}>
             {/* Row 1: Company Name + Company Status */}
             <Col span={12}>
@@ -855,6 +881,7 @@ interface DocumentsSectionProps {
 function DocumentsSection({ vendorId, documents, documentColumns, onUploadSuccess, isReadOnly, vendorStatus }: DocumentsSectionProps) {
   const { uploadVendorDocument } = useUploadVendorDocument();
   const { uploadFile } = useFirebaseUpload();
+  const { sharedTenders } = useGetSharedTenders(vendorId);
   const isNewCompany = vendorStatus === 'New';
   const uploadDisabled = isReadOnly || isNewCompany;
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
@@ -864,6 +891,7 @@ function DocumentsSection({ vendorId, documents, documentColumns, onUploadSucces
   const [expiryDate, setExpiryDate] = useState<string | null>(null);
   const [remarks, setRemarks] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [docSearch, setDocSearch] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCloseModal = () => {
@@ -931,24 +959,122 @@ function DocumentsSection({ vendorId, documents, documentColumns, onUploadSucces
           )}
         </div>
         {!uploadDisabled && (
-          <AntButton
-            type="primary"
-            icon={<UploadOutlined />}
-            onClick={() => setUploadModalVisible(true)}
-          >
-            Upload Document
-          </AntButton>
+          <Space>
+            <Input
+              placeholder="Search documents…"
+              prefix={<SearchOutlined />}
+              value={docSearch}
+              onChange={(e) => setDocSearch(e.target.value)}
+              allowClear
+              style={{ width: 220 }}
+            />
+            <AntButton
+              type="primary"
+              icon={<UploadOutlined />}
+              onClick={() => setUploadModalVisible(true)}
+            >
+              Upload Document
+            </AntButton>
+          </Space>
+        )}
+        {uploadDisabled && (
+          <Input
+            placeholder="Search documents…"
+            prefix={<SearchOutlined />}
+            value={docSearch}
+            onChange={(e) => setDocSearch(e.target.value)}
+            allowClear
+            style={{ width: 220 }}
+          />
         )}
       </div>
       <Card className={styles.card}>
         <Table
           columns={documentColumns}
-          dataSource={documents}
+          dataSource={documents.filter((d) => {
+            if (!docSearch.trim()) return true;
+            const q = docSearch.toLowerCase();
+            return (
+              d.documentType?.toLowerCase().includes(q) ||
+              d.fileName?.toLowerCase().includes(q)
+            );
+          })}
           rowKey="id"
           pagination={false}
           size="middle"
         />
       </Card>
+
+      {/* Tender Documents — documents from shared tenders */}
+      {(() => {
+        const tenderDocs = sharedTenders.flatMap((vt: any) => {
+          const tender = vt.tender;
+          if (!tender?.documents?.length) return [];
+          return tender.documents.map((doc: any) => ({
+            id: doc.id,
+            documentName: doc.documentName,
+            documentUrl: doc.documentUrl,
+            tenderName: tender.name,
+            tenderRef: tender.referenceNumber,
+            createdBy: doc.createdBy,
+            createdDate: doc.createdDate,
+          }));
+        });
+        if (tenderDocs.length === 0) return null;
+        return (
+          <div style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
+              Tender Documents ({tenderDocs.length})
+            </h3>
+            <Card className={styles.card}>
+              <Table
+                columns={[
+                  {
+                    title: 'Document',
+                    dataIndex: 'documentName',
+                    key: 'documentName',
+                    render: (name: string) => <span style={{ fontWeight: 500 }}>{name}</span>,
+                  },
+                  {
+                    title: 'Tender',
+                    key: 'tender',
+                    render: (_: unknown, rec: any) => (
+                      <span style={{ fontSize: 12 }}>
+                        {rec.tenderName}
+                        {rec.tenderRef && <span style={{ color: '#8c8c8c', marginLeft: 4 }}>({rec.tenderRef})</span>}
+                      </span>
+                    ),
+                  },
+                  {
+                    title: 'Uploaded',
+                    dataIndex: 'createdDate',
+                    key: 'createdDate',
+                    width: 120,
+                    render: (date: string) => date
+                      ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                      : '—',
+                  },
+                  {
+                    title: 'Action',
+                    key: 'action',
+                    width: 80,
+                    render: (_: unknown, rec: any) =>
+                      rec.documentUrl ? (
+                        <AntButton type="link" size="small" href={rec.documentUrl} target="_blank" rel="noopener noreferrer">
+                          View
+                        </AntButton>
+                      ) : '—',
+                  },
+                ]}
+                dataSource={tenderDocs}
+                rowKey="id"
+                pagination={false}
+                size="small"
+              />
+            </Card>
+          </div>
+        );
+      })()}
       <Modal
         open={uploadModalVisible}
         title={
@@ -1012,10 +1138,20 @@ interface ContactPersonsSectionProps {
 
 function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
   const [contactPersons, setContactPersons] = useState<any[]>([]);
+  const isLocalUpdate = useRef(false);
+  const formContactPersons = Form.useWatch('contactPersons', form);
 
+  // Sync local state from form store whenever it changes externally
+  // (e.g. parent useEffect sets vendor data after API load)
   useEffect(() => {
-    const existing = form.getFieldValue('contactPersons') || [];
-    if (existing.length === 0) {
+    if (isLocalUpdate.current) {
+      isLocalUpdate.current = false;
+      return;
+    }
+    const data = formContactPersons || [];
+    if (data.length > 0) {
+      setContactPersons(data);
+    } else if (contactPersons.length === 0) {
       const defaultContact = {
         id: `cp_${Date.now()}`,
         name: '',
@@ -1023,12 +1159,11 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
         phone: '',
         email: { mailto: [], cc: [], bcc: [] },
       };
-      form.setFieldsValue({ contactPersons: [defaultContact] });
       setContactPersons([defaultContact]);
-    } else {
-      setContactPersons(existing);
+      form.setFieldsValue({ contactPersons: [defaultContact] });
     }
-  }, [form]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formContactPersons, form]);
 
   const addContactPerson = () => {
     const newContact = {
@@ -1040,6 +1175,7 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
     };
     const updated = [...contactPersons, newContact];
     setContactPersons(updated);
+    isLocalUpdate.current = true;
     form.setFieldsValue({ contactPersons: updated });
   };
 
@@ -1047,17 +1183,19 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
     if (contactPersons.length <= 1) return;
     const updated = contactPersons.filter((_, i) => i !== index);
     setContactPersons(updated);
+    isLocalUpdate.current = true;
     form.setFieldsValue({ contactPersons: updated });
   };
 
   const updateContactPerson = (index: number, field: string, value: any) => {
     const updated = [...contactPersons];
     if (field.startsWith('email.')) {
-      updated[index].email[field.split('.')[1]] = value;
+      updated[index] = { ...updated[index], email: { ...updated[index].email, [field.split('.')[1]]: value } };
     } else {
-      updated[index][field] = value;
+      updated[index] = { ...updated[index], [field]: value };
     }
     setContactPersons(updated);
+    isLocalUpdate.current = true;
     form.setFieldsValue({ contactPersons: updated });
   };
 
@@ -1160,14 +1298,14 @@ function ContactPersonsSection({ form, disabled }: ContactPersonsSectionProps) {
             validator: (_, value) => {
               if (!value?.length) return Promise.reject('At least one contact person is required');
               const valid = value.some((c: any) => c.name && c.email?.mailto?.length > 0);
-              if (!valid) return Promise.reject('At least one contact with name and email is required');
+              if (!valid) return Promise.reject('At least one contact must have a name and email address');
               return Promise.resolve();
             },
           },
         ]}
-        style={{ display: 'none' }}
+        style={{ marginBottom: 0 }}
       >
-        <Input />
+        <Input type="hidden" style={{ display: 'none' }} />
       </Form.Item>
     </div>
   );

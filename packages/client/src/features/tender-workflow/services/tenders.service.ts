@@ -29,6 +29,9 @@ const TENDER_FIELDS = gql`
     updatedBy
     createdDate
     updatedDate
+    drawingRequired
+    strRequired
+    specificationsRequired
     documents {
       id
       documentName
@@ -195,6 +198,17 @@ export const useCreateTenderDocument = () =>
   >(CREATE_TENDER_DOCUMENT, {
     refetchQueries: [{ query: SEARCH_TENDERS }],
   });
+
+// ─── Deadline Reminders ───────────────────────────────────────────────────────
+
+const CHECK_DEADLINE_REMINDERS = gql`
+  mutation CheckTenderDeadlineReminders {
+    checkTenderDeadlineReminders
+  }
+`;
+
+export const useCheckDeadlineReminders = () =>
+  useMutation<{ checkTenderDeadlineReminders: number }>(CHECK_DEADLINE_REMINDERS);
 
 // ─── Vendor Follow-Up ─────────────────────────────────────────────────────────
 

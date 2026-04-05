@@ -48,6 +48,7 @@ export class VendorService implements IVendorService {
       name: input.name.trim(),
       type: input.type,
       isRailwayLinked: input.isRailwayLinked ?? false,
+      agreementWith: input.agreementWith,
       gstNumber: input.gstNumber,
       panNumber: input.panNumber,
       cinNumber: input.cinNumber,

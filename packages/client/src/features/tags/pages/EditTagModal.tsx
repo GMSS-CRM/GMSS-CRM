@@ -1,5 +1,5 @@
 // packages/client/src/features/tags/pages/EditTagModal.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 import type { TagWithVendorCount } from '../types/tagTypes';
@@ -21,10 +21,12 @@ export default function EditTagModal({
   loading,
 }: EditTagModalProps) {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (open && tag) {
       form.setFieldsValue({ name: tag.name });
+      setIsDirty(false);
     }
   }, [open, tag, form]);
 
@@ -66,6 +68,7 @@ export default function EditTagModal({
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          onValuesChange={() => setIsDirty(true)}
         >
           <Form.Item
             name="name"
@@ -92,6 +95,7 @@ export default function EditTagModal({
                 type="primary"
                 htmlType="submit"
                 loading={loading}
+                disabled={!isDirty}
               >
                 Save Changes
               </Button>

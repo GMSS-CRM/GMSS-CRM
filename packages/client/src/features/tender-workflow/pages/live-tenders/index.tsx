@@ -115,6 +115,12 @@ const LiveTendersPage: React.FC = () => {
         ) : (
           <Text type="secondary">—</Text>
         ),
+      sorter: (a: Tender, b: Tender) => {
+        const dateA = a.mailSentAt ? new Date(a.mailSentAt).getTime() : 0;
+        const dateB = b.mailSentAt ? new Date(b.mailSentAt).getTime() : 0;
+        return dateB - dateA;
+      },
+      defaultSortOrder: 'descend' as const,
     },
     {
       title: 'Submission Deadline',

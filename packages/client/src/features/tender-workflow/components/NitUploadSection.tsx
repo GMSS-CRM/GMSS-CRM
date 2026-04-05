@@ -66,7 +66,7 @@ export const NitUploadSection: React.FC<Props> = ({ tender, open, onClose, onUpl
 
     setProgress(100);
     // 3. Trigger status transition regardless of upload outcome
-    onUpload(tender.id, { name: file?.name ?? "nit", type: "NIT", uploadedAt: new Date(), url: publicUrl, size: file?.size });
+    onUpload(tender.id, { documentName: file?.name ?? "nit", documentUrl: publicUrl ?? '' });
     message.success(file ? "NIT submitted" : "Status advanced");
     reset();
     onClose();

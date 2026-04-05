@@ -89,6 +89,17 @@ export class Tender {
   @Column({ type: 'text', nullable: true })
   countdownSilenceReason?: string;
 
+  /* ── Document requirement flags ──────────────────────── */
+
+  @Column({ default: false })
+  drawingRequired!: boolean;
+
+  @Column({ default: false })
+  strRequired!: boolean;
+
+  @Column({ default: false })
+  specificationsRequired!: boolean;
+
   @Column({ default: 'SYSTEM' })
   createdBy!: string;
 

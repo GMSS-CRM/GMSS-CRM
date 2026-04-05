@@ -136,7 +136,11 @@ export const TenderPreviewTable: React.FC<Props> = ({
           dataSource={data}
           rowKey="id"
           size="small"
-          pagination={false}
+          pagination={
+            data.length > 50
+              ? { pageSize: 50, showSizeChanger: true, pageSizeOptions: ['50', '100', '200'], size: 'small', showTotal: (total) => `${total} tenders` }
+              : false
+          }
           scroll={{ x: 960 }}
         />
       </div>

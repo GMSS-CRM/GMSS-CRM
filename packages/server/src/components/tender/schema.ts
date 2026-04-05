@@ -22,6 +22,9 @@ export const tenderTypeDefs = gql`
     updatedSubmissionDeadline: String
     mailCheckProofUrl: String
     countdownSilenceReason: String
+    drawingRequired: Boolean
+    strRequired: Boolean
+    specificationsRequired: Boolean
     isDeleted: Boolean
     deletedBy: String
     deletedDate: String
@@ -76,6 +79,9 @@ export const tenderTypeDefs = gql`
     closingDateProofUrl: String
     updatedSubmissionDeadline: String
     mailCheckProofUrl: String
+    drawingRequired: Boolean
+    strRequired: Boolean
+    specificationsRequired: Boolean
   }
 
   input SearchTenderInput {
@@ -117,5 +123,6 @@ export const tenderTypeDefs = gql`
     changeTenderStatus(input: ChangeTenderStatusInput!): Tender!
     seedTenderVendors(tenderId: ID!): Boolean!
     silenceTenderCountdown(tenderId: ID!, reason: TenderStatus!, newDeadline: String, remarks: String): Tender!
+    checkTenderDeadlineReminders: Int!
   }
 `;

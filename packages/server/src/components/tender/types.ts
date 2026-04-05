@@ -35,4 +35,5 @@ export interface ITenderService {
   searchTender(params: any): Promise<Tender[]>;
   seedTenderVendors(tenderId: string): Promise<boolean>;
   silenceTenderCountdown(tenderId: string, reason: string, newDeadline?: string, remarks?: string): Promise<Tender>;
+  checkDeadlineReminders(): Promise<number>;
 }

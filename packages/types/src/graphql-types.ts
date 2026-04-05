@@ -391,6 +391,7 @@ export type Mutation = {
   assignPermissions: RolePermissionResult;
   changeTenderStatus: Tender;
   changeVendorStatus: Vendor;
+  checkTenderDeadlineReminders: Scalars['Int']['output'];
   completePostAwardFollowUp: PostAwardFollowUp;
   createCourierRecord: CourierRecord;
   createDeliverySchedule: TenderDeliverySchedule;
@@ -1597,6 +1598,7 @@ export type Tender = {
   deletedDate?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   documents?: Maybe<Array<TenderDocument>>;
+  drawingRequired?: Maybe<Scalars['Boolean']['output']>;
   feasibilityRemarks?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   isDeleted?: Maybe<Scalars['Boolean']['output']>;
@@ -1609,7 +1611,9 @@ export type Tender = {
   referenceNumber?: Maybe<Scalars['String']['output']>;
   rejectionReason?: Maybe<Scalars['String']['output']>;
   sourcePortal?: Maybe<SourcePortal>;
+  specificationsRequired?: Maybe<Scalars['Boolean']['output']>;
   status: TenderStatus;
+  strRequired?: Maybe<Scalars['Boolean']['output']>;
   submissionDeadline?: Maybe<Scalars['String']['output']>;
   tags?: Maybe<Array<TenderTag>>;
   tenderType?: Maybe<TenderTypeEnum>;
@@ -2125,6 +2129,7 @@ export type UpdateTenderInput = {
   closingDateChanged?: InputMaybe<Scalars['Boolean']['input']>;
   closingDateProofUrl?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  drawingRequired?: InputMaybe<Scalars['Boolean']['input']>;
   feasibilityRemarks?: InputMaybe<Scalars['String']['input']>;
   isFeasible?: InputMaybe<Scalars['Boolean']['input']>;
   isLoadedOnPortal?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2133,6 +2138,8 @@ export type UpdateTenderInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   referenceNumber?: InputMaybe<Scalars['String']['input']>;
   sourcePortal?: InputMaybe<SourcePortal>;
+  specificationsRequired?: InputMaybe<Scalars['Boolean']['input']>;
+  strRequired?: InputMaybe<Scalars['Boolean']['input']>;
   submissionDeadline?: InputMaybe<Scalars['String']['input']>;
   tenderType?: InputMaybe<TenderTypeEnum>;
   updatedSubmissionDeadline?: InputMaybe<Scalars['String']['input']>;
@@ -2895,6 +2902,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   assignPermissions?: Resolver<ResolversTypes['RolePermissionResult'], ParentType, ContextType, RequireFields<MutationAssignPermissionsArgs, 'input'>>;
   changeTenderStatus?: Resolver<ResolversTypes['Tender'], ParentType, ContextType, RequireFields<MutationChangeTenderStatusArgs, 'input'>>;
   changeVendorStatus?: Resolver<ResolversTypes['Vendor'], ParentType, ContextType, RequireFields<MutationChangeVendorStatusArgs, 'input'>>;
+  checkTenderDeadlineReminders?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   completePostAwardFollowUp?: Resolver<ResolversTypes['PostAwardFollowUp'], ParentType, ContextType, RequireFields<MutationCompletePostAwardFollowUpArgs, 'id' | 'outcome'>>;
   createCourierRecord?: Resolver<ResolversTypes['CourierRecord'], ParentType, ContextType, RequireFields<MutationCreateCourierRecordArgs, 'input'>>;
   createDeliverySchedule?: Resolver<ResolversTypes['TenderDeliverySchedule'], ParentType, ContextType, RequireFields<MutationCreateDeliveryScheduleArgs, 'input'>>;
@@ -3183,6 +3191,7 @@ export type TenderResolvers<ContextType = any, ParentType extends ResolversParen
   deletedDate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   documents?: Resolver<Maybe<Array<ResolversTypes['TenderDocument']>>, ParentType, ContextType>;
+  drawingRequired?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   feasibilityRemarks?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isDeleted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -3195,7 +3204,9 @@ export type TenderResolvers<ContextType = any, ParentType extends ResolversParen
   referenceNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   rejectionReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sourcePortal?: Resolver<Maybe<ResolversTypes['SourcePortal']>, ParentType, ContextType>;
+  specificationsRequired?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['TenderStatus'], ParentType, ContextType>;
+  strRequired?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   submissionDeadline?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<ResolversTypes['TenderTag']>>, ParentType, ContextType>;
   tenderType?: Resolver<Maybe<ResolversTypes['TenderTypeEnum']>, ParentType, ContextType>;

@@ -48,6 +48,9 @@ const ICONS: Record<TenderStatus, React.ReactNode> = {
   PAYMENT: <CreditCardOutlined />,
   SD_RELEASE: <LockOutlined />,
   COMPLETED: <CheckCircleOutlined />,
+  DEADLINE_EXTENDED: <ClockCircleOutlined />,
+  FILLED: <CheckCircleOutlined />,
+  NOT_INTERESTED_TENDER: <CloseCircleOutlined />,
 };
 
 interface Props {

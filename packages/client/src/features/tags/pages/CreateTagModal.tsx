@@ -1,5 +1,5 @@
 // packages/client/src/features/tags/pages/CreateTagModal.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Form, Input } from 'antd';
 import { TagOutlined } from '@ant-design/icons';
 import styles from '../styles/tags.module.css';
@@ -22,6 +22,7 @@ export default function CreateTagModal({
   isEdit = false,
 }: CreateTagModalProps) {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   const handleOk = async () => {
     try {
@@ -41,8 +42,10 @@ export default function CreateTagModal({
   React.useEffect(() => {
     if (open && initialValue) {
       form.setFieldsValue({ name: initialValue });
+      setIsDirty(false);
     } else if (open) {
       form.resetFields();
+      setIsDirty(false);
     }
   }, [open, initialValue, form]);
 
@@ -60,9 +63,10 @@ export default function CreateTagModal({
       okText={isEdit ? 'Save Changes' : 'Create Tag'}
       confirmLoading={loading}
       destroyOnClose
+      okButtonProps={{ disabled: !isDirty }}
     >
       <div className={styles.formContainer}>
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" onValuesChange={() => setIsDirty(true)}>
           <Form.Item
             name="name"
             label="Tag Name"

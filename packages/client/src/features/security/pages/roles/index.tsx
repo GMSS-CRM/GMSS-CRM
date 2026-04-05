@@ -37,6 +37,7 @@ export default function RolesPage({
 }: RolesPageProps) {
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   // All roles from the backend (no isDeleted/isActive filter needed)
   const activeRoles = roles;
@@ -87,6 +88,7 @@ export default function RolesPage({
       }
 
       form.resetFields();
+      setIsDirty(false);
     } catch (error) {
       console.error('Form validation failed:', error);
     } finally {
@@ -96,6 +98,7 @@ export default function RolesPage({
 
   const handleCancel = useCallback(() => {
     form.resetFields();
+    setIsDirty(false);
     onCancel();
   }, [form, onCancel]);
 
@@ -118,7 +121,7 @@ export default function RolesPage({
       title: 'Role Name',
       dataIndex: 'name',
       key: 'name',
-      width: '25%',
+      width: '20%',
       render: (name: string) => (
         <span className={styles.roleName}>{name}</span>
       ),
@@ -127,7 +130,7 @@ export default function RolesPage({
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      width: '40%',
+      width: '35%',
       ellipsis: {
         showTitle: false,
       },
@@ -145,7 +148,7 @@ export default function RolesPage({
       title: 'Created By',
       dataIndex: 'createdBy',
       key: 'createdBy',
-      width: '12%',
+      width: '11%',
       render: (createdBy?: string) => (
         <span className={styles.secondaryText}>
           {createdBy || '—'}
@@ -156,7 +159,7 @@ export default function RolesPage({
       title: 'Created Date',
       dataIndex: 'createdDate',
       key: 'createdDate',
-      width: '12%',
+      width: '11%',
       render: (createdDate: string) => (
         <span className={styles.dateText}>
           {formatDate(createdDate)}
@@ -164,9 +167,26 @@ export default function RolesPage({
       ),
     },
     {
+      title: 'Updated Date',
+      dataIndex: 'updatedDate',
+      key: 'updatedDate',
+      width: '11%',
+      render: (updatedDate: string) => (
+        <span className={styles.dateText}>
+          {formatDate(updatedDate)}
+        </span>
+      ),
+      sorter: (a: Role, b: Role) => {
+        const dateA = a.updatedDate ? new Date(a.updatedDate).getTime() : 0;
+        const dateB = b.updatedDate ? new Date(b.updatedDate).getTime() : 0;
+        return dateB - dateA;
+      },
+      defaultSortOrder: 'descend' as const,
+    },
+    {
       title: 'Actions',
       key: 'actions',
-      width: '10%',
+      width: '12%',
       align: 'center',
       render: (_, role) => {
         return (
@@ -251,6 +271,7 @@ export default function RolesPage({
           form={form}
           layout="vertical"
           onFinish={handleSubmit}
+          onValuesChange={() => setIsDirty(true)}
           className={styles.form}
           autoComplete="off"
         >
@@ -314,6 +335,7 @@ export default function RolesPage({
                 variant="primary"
                 htmlType="submit"
                 loading={isSubmitting}
+                disabled={!isDirty}
               >
                 {isEditMode ? 'Save Changes' : 'Create Role'}
               </Button>

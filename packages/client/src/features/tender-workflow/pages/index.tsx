@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, Button, Badge, message } from "antd";
+import { Tabs, Button, Badge, message, Alert } from "antd";
 import {
   FileTextOutlined,
   UserOutlined,
   TeamOutlined,
   ReloadOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import { useTenderWorkflow } from "../hooks/useTenderWorkflow";
 import { TenderPreviewTable } from "../components/TenderPreviewTable";
@@ -15,6 +16,7 @@ import { MdTaggingDrawer } from "../components/MdTaggingDrawer";
 import { NitUploadSection } from "../components/NitUploadSection";
 import { DocumentUploadSection } from "../components/DocumentUploadSection";
 import { ExcelUploadSection } from "../components/ExcelUploadSelection";
+import { useCheckDeadlineReminders } from "../services/tenders.service";
 import type { Tender } from "../types/tender.types";
 import s from "../styles/tender-workflow.module.css";
 
@@ -52,6 +54,29 @@ export const TenderWorkflowPage: React.FC = () => {
   const [nitTender, setNitTender] = useState<Tender | null>(null);
   const [docTender, setDocTender] = useState<Tender | null>(null);
   const navigate = useNavigate();
+  const [reminderDismissed, setReminderDismissed] = useState(false);
+
+  // Fire deadline reminders check on mount (creates server-side notifications)
+  const [checkReminders] = useCheckDeadlineReminders();
+  useEffect(() => {
+    checkReminders().catch(() => {/* silent - mutation identity is stable */});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Capture current time once to avoid impure Date.now() in render
+  const [mountTime] = useState(() => Date.now());
+
+  // Tenders with deadlines approaching within 3 days
+  const approachingDeadlineTenders = useMemo(() => {
+    const now = mountTime;
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    return state.tenders.filter((t) => {
+      if (!t.submissionDeadline) return false;
+      const deadline = new Date(t.submissionDeadline).getTime();
+      const daysLeft = deadline - now;
+      return daysLeft > 0 && daysLeft <= threeDaysMs;
+    });
+  }, [state.tenders, mountTime]);
 
   const counts = getTabCounts();
   const tabs = getCurrentTabs();
@@ -71,15 +96,13 @@ export const TenderWorkflowPage: React.FC = () => {
 
   const onView = useCallback(
     (t: Tender) => {
-      // Navigate to post-award detail page once the mail has been sent
-      if (t.status === 'MAIL_SENT') {
-        navigate(`/tender-workflow/${t.id}`);
-        return;
-      }
-      // Open tagging drawer for both approval step and post-NIT tagging step
+      // Open tagging drawer for MD users in approval or tagging steps
       if (role === "MD" && (t.status === "PENDING_MD_TAGGING" || t.status === "NIT_UPLOADED")) {
         openTaggingDrawer(t);
+        return;
       }
+      // Navigate to tender detail page for other workflows
+      navigate(`/tender-workflow/${t.id}`);
     },
     [role, openTaggingDrawer, navigate]
   );
@@ -104,6 +127,7 @@ export const TenderWorkflowPage: React.FC = () => {
         role={role}
         tabKey={tab.key}
         onView={onView}
+        onOpenTaggingDrawer={openTaggingDrawer}
         onDelete={(id) => {
           deleteTender(id);
           message.success("Deleted");
@@ -165,6 +189,33 @@ export const TenderWorkflowPage: React.FC = () => {
           <Button icon={<ReloadOutlined />} type="text" size="small" />
         </div>
       </header>
+
+      {/* Approaching Deadline Reminder */}
+      {!reminderDismissed && approachingDeadlineTenders.length > 0 && (
+        <Alert
+          type="warning"
+          banner
+          closable
+          onClose={() => setReminderDismissed(true)}
+          icon={<WarningOutlined />}
+          message={
+            <span style={{ fontSize: 13 }}>
+              <strong>{approachingDeadlineTenders.length} tender{approachingDeadlineTenders.length !== 1 ? 's' : ''}</strong> with deadline approaching within 3 days:{' '}
+              {approachingDeadlineTenders.slice(0, 3).map((t, i) => {
+                const days = Math.ceil((new Date(t.submissionDeadline!).getTime() - mountTime) / 864e5);
+                return (
+                  <span key={t.id}>
+                    {i > 0 && ', '}
+                    <strong>{t.name}</strong> ({days}d left)
+                  </span>
+                );
+              })}
+              {approachingDeadlineTenders.length > 3 && ` and ${approachingDeadlineTenders.length - 3} more`}
+            </span>
+          }
+          style={{ marginBottom: 0 }}
+        />
+      )}
 
       <div className={s.body}>
         {(isUserRole || isMailTab) && (

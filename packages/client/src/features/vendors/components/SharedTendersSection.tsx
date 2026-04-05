@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { Card, Empty, Tag, Space, Button, Tooltip } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { useCallback, useState } from 'react';
+import { Card, Empty, Tag, Space, Button, Tooltip, Input } from 'antd';
+import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { useGetSharedTenders } from '../services/vendors.service';
@@ -13,6 +13,7 @@ interface SharedTendersSectionProps {
 export default function SharedTendersSection({ vendorId }: SharedTendersSectionProps) {
   const navigate = useNavigate();
   const { sharedTenders, loading } = useGetSharedTenders(vendorId);
+  const [search, setSearch] = useState('');
 
   const statusColors: Record<string, string> = {
     ACTIVE: 'blue',
@@ -72,6 +73,18 @@ export default function SharedTendersSection({ vendorId }: SharedTendersSectionP
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className={styles.searchBar}>
+        <Input
+          placeholder="Search by name, reference no. or department…"
+          prefix={<SearchOutlined />}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          allowClear
+          style={{ maxWidth: 380 }}
+        />
+      </div>
+
       {/* Stats Cards */}
       {/* <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={8}>
@@ -105,7 +118,20 @@ export default function SharedTendersSection({ vendorId }: SharedTendersSectionP
 
       {/* Tenders Grid */}
       <div className={styles.gridContainer}>
-        {sharedTenders.map((vendorTender) => {
+        {sharedTenders
+          .filter((vt) => {
+            if (!search.trim()) return true;
+            const q = search.toLowerCase();
+            const tender = vt.tender;
+            if (!tender) return false;
+            return (
+              tender.name?.toLowerCase().includes(q) ||
+              tender.referenceNumber?.toLowerCase().includes(q) ||
+              tender.issuingDepartment?.toLowerCase().includes(q) ||
+              tender.status?.toLowerCase().includes(q)
+            );
+          })
+          .map((vendorTender) => {
           const tender = vendorTender.tender;
           if (!tender) return null;
 

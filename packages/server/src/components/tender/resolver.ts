@@ -35,6 +35,9 @@ export const tenderResolvers = {
 
     silenceTenderCountdown: (_: unknown, { tenderId, reason, newDeadline, remarks }: any) =>
       getService().silenceTenderCountdown(tenderId, reason, newDeadline, remarks),
+
+    checkTenderDeadlineReminders: () =>
+      getService().checkDeadlineReminders(),
   },
 
   Tender: {

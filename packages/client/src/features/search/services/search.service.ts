@@ -24,7 +24,7 @@ export const SEARCH_TENDERS = gql`
       }
       documents {
         id
-        name
+        documentName
       }
     }
   }
@@ -103,7 +103,7 @@ interface SearchTendersResult {
   submissionDeadline?: string;
   createdDate: string;
   tags: Array<{ id: string; tag: { id: string; name: string } }>;
-  documents?: Array<{ id: string; name: string }>;
+  documents?: Array<{ id: string; documentName: string }>;
 }
 
 interface SearchVendorsResult {

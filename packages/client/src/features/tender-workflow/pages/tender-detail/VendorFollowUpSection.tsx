@@ -15,8 +15,9 @@ import {
   Col,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { EditOutlined, SyncOutlined } from '@ant-design/icons';
+import { EditOutlined, SyncOutlined, EyeOutlined } from '@ant-design/icons';
 import type { VendorTender, TenderPostAward } from '@gmss/types';
+import { useNavigate } from 'react-router-dom';
 import {
   useGetTenderFollowUps,
   useSeedTenderVendors,
@@ -28,6 +29,7 @@ const { Text } = Typography;
 
 interface Props {
   tenderId: string;
+  tenderStatus?: string;
   onVendorSelected?: (vendor: VendorTender) => void;
   selectedVendor?: VendorTender | null;
   postAwardData?: TenderPostAward | null;
@@ -45,10 +47,11 @@ const ROW_BG: Record<string, string> = {
   PENDING:        '#ffffff',
 };
 
-const VendorFollowUpSection: React.FC<Props> = ({ tenderId, onVendorSelected, selectedVendor, postAwardData }) => {
+const VendorFollowUpSection: React.FC<Props> = ({ tenderId, tenderStatus, onVendorSelected, selectedVendor, postAwardData }) => {
   const { data, loading, refetch } = useGetTenderFollowUps(tenderId);
   const [seedVendors, { loading: seeding }] = useSeedTenderVendors();
   const [drawerRecord, setDrawerRecord] = useState<VendorTender | null>(null);
+  const navigate = useNavigate();
 
   const records = data?.getTenderFollowUps ?? [];
 
@@ -228,15 +231,40 @@ const VendorFollowUpSection: React.FC<Props> = ({ tenderId, onVendorSelected, se
     {
       title: '',
       key: 'action',
-      width: 52,
-      render: (_, r) => (
-        <Button
-          type="text"
-          icon={<EditOutlined />}
-          onClick={(e) => { e.stopPropagation(); handleEditVendor(r); }}
-          size="small"
-        />
-      ),
+      width: 120,
+      render: (_, r) => {
+        const vendorStatus = (r.vendor?.status ?? '').toUpperCase();
+        const isFinal = vendorStatus === 'FINAL';
+        const isMailSent = tenderStatus === 'MAIL_SENT';
+        
+        return (
+          <Space size={4}>
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/vendors/${r.vendorId}`);
+              }}
+              size="small"
+              title="View vendor details"
+            >
+              View
+            </Button>
+            {isFinal && isMailSent && (
+              <Button
+                type="text"
+                icon={<EditOutlined />}
+                onClick={(e) => { e.stopPropagation(); handleEditVendor(r); }}
+                size="small"
+                title="Edit final company details"
+              >
+                Edit
+              </Button>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 

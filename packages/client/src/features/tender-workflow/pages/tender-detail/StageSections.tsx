@@ -33,6 +33,7 @@ function boolField(val?: boolean | null): boolean {
 
 export const OrderFollowUpSection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     tenderOfficerName: data.tenderOfficerName ?? '',
@@ -49,7 +50,7 @@ export const OrderFollowUpSection: React.FC<Props> = ({ data, saving, onSave }) 
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Title level={5}>Tender Officer Details</Title>
       <Row gutter={16}>
         <Col span={8}><Form.Item label="Officer Name" name="tenderOfficerName"><Input /></Form.Item></Col>
@@ -80,7 +81,7 @@ export const OrderFollowUpSection: React.FC<Props> = ({ data, saving, onSave }) 
       </Row>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save Order Follow-Up</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save Order Follow-Up</Button>
       </Form.Item>
     </Form>
   );
@@ -93,6 +94,7 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
   const [sdRequired, setSdRequired] = useState(boolField(data.securityDepositRequired));
   const [extRequested, setExtRequested] = useState(boolField(data.extensionRequested));
   const [ldcApplicable, setLdcApplicable] = useState(boolField(data.ldcApplicable));
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     poUploaded: boolField(data.poUploaded),
@@ -130,7 +132,7 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Title level={5}>PO Details</Title>
       <Row gutter={16}>
         <Col span={4}><Form.Item label="PO Uploaded" name="poUploaded" valuePropName="checked"><Switch /></Form.Item></Col>
@@ -216,7 +218,7 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
       </Row>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save Order Processing</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save Order Processing</Button>
       </Form.Item>
     </Form>
   );
@@ -227,6 +229,7 @@ export const OrderProcessingSection: React.FC<Props> = ({ data, saving, onSave }
 export const InspectionSection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
   const [required, setRequired] = useState(boolField(data.inspectionRequired));
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     inspectionRequired: required,
@@ -239,7 +242,7 @@ export const InspectionSection: React.FC<Props> = ({ data, saving, onSave }) => 
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Form.Item label="TPI Inspection Required" name="inspectionRequired" valuePropName="checked">
         <Switch onChange={setRequired} />
       </Form.Item>
@@ -260,7 +263,7 @@ export const InspectionSection: React.FC<Props> = ({ data, saving, onSave }) => 
       )}
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save Inspection</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save Inspection</Button>
       </Form.Item>
     </Form>
   );
@@ -270,6 +273,7 @@ export const InspectionSection: React.FC<Props> = ({ data, saving, onSave }) => 
 
 export const DispatchDeliverySection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   const ldcTotal =
     (data.ldcRailwayPoValue ?? 0) * ((data.ldcGivenPercentage ?? 0) / 100);
@@ -291,7 +295,7 @@ export const DispatchDeliverySection: React.FC<Props> = ({ data, saving, onSave 
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Title level={5}>Courier / Delivery</Title>
       <Row gutter={16}>
         <Col span={4}><Form.Item label="Purchase Invoice Received" name="purchaseInvoiceReceived" valuePropName="checked"><Switch /></Form.Item></Col>
@@ -327,7 +331,7 @@ export const DispatchDeliverySection: React.FC<Props> = ({ data, saving, onSave 
       </Row>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save Dispatch & Delivery</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save Dispatch & Delivery</Button>
       </Form.Item>
     </Form>
   );
@@ -339,6 +343,7 @@ export const WarrantySection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
   const [applicable, setApplicable] = useState(boolField(data.warrantyRejectionApplicable));
   const [engineerVisit, setEngineerVisit] = useState(boolField(data.warrantyEngineerVisit));
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     warrantyRejectionApplicable: applicable,
@@ -362,7 +367,7 @@ export const WarrantySection: React.FC<Props> = ({ data, saving, onSave }) => {
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Form.Item label="Warranty Rejection Applicable" name="warrantyRejectionApplicable" valuePropName="checked">
         <Switch onChange={setApplicable} />
       </Form.Item>
@@ -413,7 +418,7 @@ export const WarrantySection: React.FC<Props> = ({ data, saving, onSave }) => {
       )}
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save Warranty</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save Warranty</Button>
       </Form.Item>
     </Form>
   );
@@ -423,6 +428,7 @@ export const WarrantySection: React.FC<Props> = ({ data, saving, onSave }) => {
 
 export const BillPaymentSection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     billUploaded: boolField(data.billUploaded),
@@ -439,7 +445,7 @@ export const BillPaymentSection: React.FC<Props> = ({ data, saving, onSave }) =>
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Title level={5}>Bill Upload</Title>
       <Form.Item label="Bill Uploaded to Portal" name="billUploaded" valuePropName="checked">
         <Switch />
@@ -479,7 +485,7 @@ export const BillPaymentSection: React.FC<Props> = ({ data, saving, onSave }) =>
       </Row>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save Bill & Payment</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save Bill & Payment</Button>
       </Form.Item>
     </Form>
   );
@@ -489,6 +495,7 @@ export const BillPaymentSection: React.FC<Props> = ({ data, saving, onSave }) =>
 
 export const LoaProcessingSection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     loaNumber: data.loaNumber ?? '',
@@ -506,7 +513,7 @@ export const LoaProcessingSection: React.FC<Props> = ({ data, saving, onSave }) 
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Title level={5}>LOA Details</Title>
       <Row gutter={16}>
         <Col span={8}><Form.Item label="LOA Number" name="loaNumber"><Input /></Form.Item></Col>
@@ -548,7 +555,7 @@ export const LoaProcessingSection: React.FC<Props> = ({ data, saving, onSave }) 
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save LOA Processing</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save LOA Processing</Button>
       </Form.Item>
     </Form>
   );
@@ -558,6 +565,7 @@ export const LoaProcessingSection: React.FC<Props> = ({ data, saving, onSave }) 
 
 export const SdReturnSection: React.FC<Props> = ({ data, saving, onSave }) => {
   const [form] = Form.useForm();
+  const [isDirty, setIsDirty] = useState(false);
 
   const initial = {
     sdOfficerName: data.sdOfficerName ?? '',
@@ -569,7 +577,7 @@ export const SdReturnSection: React.FC<Props> = ({ data, saving, onSave }) => {
   };
 
   return (
-    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} style={{ padding: 24 }}>
+    <Form form={form} layout="vertical" initialValues={initial} onFinish={onSave} onValuesChange={() => setIsDirty(true)} style={{ padding: 24 }}>
       <Title level={5}>SD Officer Details</Title>
       <Row gutter={16}>
         <Col span={8}><Form.Item label="Officer Name" name="sdOfficerName"><Input /></Form.Item></Col>
@@ -588,7 +596,7 @@ export const SdReturnSection: React.FC<Props> = ({ data, saving, onSave }) => {
       </Form.Item>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" loading={saving}>Save SD Return</Button>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={!isDirty}>Save SD Return</Button>
       </Form.Item>
     </Form>
   );

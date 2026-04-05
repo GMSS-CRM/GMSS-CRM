@@ -23,7 +23,6 @@ import {
   useSearchTenders,
   useCreateTendersBatch,
   useDeleteTender,
-  useDeleteTenders,
   useChangeTenderStatus,
 } from "../services/tenders.service";
 
@@ -44,10 +43,10 @@ const toLocalTender = (t: GqlTender): import("../types/tender.types").Tender => 
   })),
   documents: (t.documents ?? []).map((d) => ({
     id: d.id,
-    name: d.documentName,
-    type: "OTHER" as const,
-    uploadedAt: new Date(d.createdDate),
-    url: d.documentUrl,
+    documentName: d.documentName,
+    documentUrl: d.documentUrl,
+    createdBy: d.createdBy,
+    createdDate: d.createdDate,
   })),
   createdAt: new Date(t.createdDate),
   updatedAt: new Date(t.updatedDate),
@@ -56,7 +55,15 @@ const toLocalTender = (t: GqlTender): import("../types/tender.types").Tender => 
   mailSentAt: t.mailSentAt ? new Date(t.mailSentAt) : undefined,
   createdBy: t.createdBy ?? undefined,
   updatedBy: t.updatedBy ?? undefined,
-} as any);
+  drawingRequired: t.drawingRequired ?? undefined,
+  strRequired: t.strRequired ?? undefined,
+  specificationsRequired: t.specificationsRequired ?? undefined,
+  sourcePortal: (t.sourcePortal as string) ?? undefined,
+  tenderType: (t.tenderType as string) ?? undefined,
+  countdownSilenceReason: t.countdownSilenceReason ?? undefined,
+  updatedSubmissionDeadline: t.updatedSubmissionDeadline ?? undefined,
+  closingDateChanged: t.closingDateChanged ?? undefined,
+});
 
 const generateRefNumber = (): string => {
   const prefix = "TND";
@@ -161,13 +168,13 @@ export interface UseTenderWorkflowReturn {
 
 export function useTenderWorkflow(): UseTenderWorkflowReturn {
   const [role, setRoleState] = useState<UserRole>("USER");
-  // Default active tab: users see Rejected (draft removed), MDs see Pending Approval
-  const [activeTab, setActiveTab] = useState<string>("rejected");
+  // Default active tab: users see NIT Pending, MDs see Pending Approval
+  const [activeTab, setActiveTab] = useState<string>("nitPending");
 
   const setRole = (r: UserRole) => {
     setRoleState(r);
     if (r === "MD") setActiveTab("pendingApproval");
-    else setActiveTab("rejected");
+    else setActiveTab("nitPending");
   };
 
   const [ui, setUi] = useState<LocalUIState>({
@@ -183,28 +190,11 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
   const { data, loading, refetch } = useSearchTenders();
   const [createTendersBatchMut] = useCreateTendersBatch();
   const [deleteTenderMut] = useDeleteTender();
-  const [_deleteTendersMut] = useDeleteTenders();
   const [changeStatusMut] = useChangeTenderStatus();
 
-  // Map GQL tenders → local shape, filter out overdue tenders
+  // Map GQL tenders → local shape (includes all tenders, even overdue)
   const tenders = useMemo(
-    () => {
-      const allTenders = (data?.searchTendersAdvanced ?? []).map(toLocalTender);
-      // Post-award and completed statuses are always visible regardless of deadline
-      const POST_AWARD_STATUSES = new Set([
-        "MAIL_SENT", "VENDOR_FOLLOWUP", "QUOTE_COLLECTION", "TENDER_PREPARATION",
-        "PARTICIPATED", "ORDER_FOLLOWUP", "ORDER_PROCESSING", "INSPECTION",
-        "DISPATCH", "DELIVERY", "WARRANTY", "BILL_SUBMISSION", "PAYMENT",
-        "SD_RELEASE", "COMPLETED",
-      ]);
-      return allTenders.filter((t) => {
-        if (POST_AWARD_STATUSES.has(t.status)) return true;
-        if (!t.submissionDeadline) return true; // Show if no deadline
-        const now = Date.now();
-        const deadline = new Date(t.submissionDeadline).getTime();
-        return deadline >= now; // Filter out if deadline has passed
-      });
-    },
+    () => (data?.searchTendersAdvanced ?? []).map(toLocalTender),
     [data],
   );
 
@@ -221,6 +211,11 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
   const canPerformAction = useCallback(
     (action: string, tender: import("../types/tender.types").Tender): boolean => {
+      // Block upload actions on expired tenders (past submission deadline)
+      const isExpired = tender.submissionDeadline && new Date(tender.submissionDeadline).getTime() < Date.now();
+      if (isExpired && (action === "uploadNit" || action === "uploadDocuments")) {
+        return false;
+      }
       switch (action) {
         case "delete":
           return role === "USER";
@@ -312,10 +307,13 @@ export function useTenderWorkflow(): UseTenderWorkflowReturn {
 
       if (created.length > 0) {
         // Send created tenders directly to MD (skip draft)
+        // Process in batches of 10 to avoid overwhelming the server
         const createdIds = created.map((c: any) => c.id).filter(Boolean) as string[];
-        if (createdIds.length > 0) {
+        const BATCH_SIZE = 10;
+        for (let i = 0; i < createdIds.length; i += BATCH_SIZE) {
+          const batch = createdIds.slice(i, i + BATCH_SIZE);
           await Promise.all(
-            createdIds.map((id) =>
+            batch.map((id) =>
               changeStatusMut({
                 variables: {
                   input: { tenderId: id, status: 'PENDING_MD_TAGGING' as unknown as GqlTenderStatus },

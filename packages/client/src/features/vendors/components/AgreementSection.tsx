@@ -103,6 +103,8 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
   const [uploadProgress, setUploadProgress] = useState(0);
   const [paymentAmount, setPaymentAmount] = useState<number | null>(null);
   const [hasOtherBenefits, setHasOtherBenefits] = useState(false);
+  const [isDirtyAgreement, setIsDirtyAgreement] = useState(false);
+  const [isDirtySignature, setIsDirtySignature] = useState(false);
 
   const gstAmount = paymentAmount ? Math.round(paymentAmount * GST_RATE) : null;
   const totalWithGst = paymentAmount && gstAmount ? paymentAmount + gstAmount : null;
@@ -120,6 +122,7 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
     setUploadProgress(0);
     setPaymentAmount(null);
     setHasOtherBenefits(false);
+    setIsDirtyAgreement(false);
     setModalOpen(true);
   }, [form]);
 
@@ -130,6 +133,7 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
     setUploadProgress(0);
     setPaymentAmount(null);
     setHasOtherBenefits(false);
+    setIsDirtyAgreement(false);
   }, [form]);
 
   const handleCreateAgreement = useCallback(async () => {
@@ -156,9 +160,10 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
       message.success('Agreement created successfully');
       closeModal();
       refetch();
-    } catch (err) {
-      const msg = (err as Error)?.message;
-      if (msg && !msg.includes('validation')) message.error(msg);
+    } catch (err: any) {
+      if (err?.errorFields) return; // Inline validation messages shown by Form
+      const msg = err instanceof Error ? err.message : 'Failed to create agreement';
+      message.error(msg);
     }
   }, [form, vendorId, createAgreement, refetch, uploadedFile, closeModal]);
 
@@ -197,9 +202,10 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
       signatureForm.resetFields();
       setSelectedAgreement(null);
       refetch();
-    } catch (err) {
-      const msg = (err as Error)?.message;
-      if (msg && !msg.includes('validation')) message.error(msg);
+    } catch (err: any) {
+      if (err?.errorFields) return;
+      const msg = err instanceof Error ? err.message : 'Failed to update signature';
+      message.error(msg);
     }
   }, [selectedAgreement, signatureForm, updateSignature, refetch]);
 
@@ -209,6 +215,7 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
       signatureStatus: agreement.signatureStatus,
       signedDate: agreement.signedDate ? dayjs(agreement.signedDate) : undefined,
     });
+    setIsDirtySignature(false);
     setSignatureModalOpen(true);
   }, [signatureForm]);
 
@@ -234,14 +241,30 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
       dataIndex: 'agreementStartDate',
       key: 'agreementStartDate',
       width: 110,
-      render: (d: string) => dayjs(d).format('DD MMM YYYY'),
+      render: (d: string) => {
+        // Strict parsing with multiple format options from backend
+        const parsed = dayjs(d, ['YYYY-MM-DDTHH:mm:ss.SSSZ', 'YYYY-MM-DDTHH:mm:ssZ', 'YYYY-MM-DD'], true);
+        if (parsed.isValid()) {
+          return parsed.format('DD MMM YYYY');
+        }
+        // Fallback for invalid format
+        return dayjs(d).format('DD MMM YYYY');
+      },
     },
     {
       title: 'End Date',
       dataIndex: 'agreementEndDate',
       key: 'agreementEndDate',
       width: 110,
-      render: (d: string) => dayjs(d).format('DD MMM YYYY'),
+      render: (d: string) => {
+        // Strict parsing with multiple format options from backend
+        const parsed = dayjs(d, ['YYYY-MM-DDTHH:mm:ss.SSSZ', 'YYYY-MM-DDTHH:mm:ssZ', 'YYYY-MM-DD'], true);
+        if (parsed.isValid()) {
+          return parsed.format('DD MMM YYYY');
+        }
+        // Fallback for invalid format
+        return dayjs(d).format('DD MMM YYYY');
+      },
     },
     ...(isVendor ? [{
       title: 'Payment Term',
@@ -429,6 +452,7 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
         width={720}
         centered
         destroyOnHidden
+        okButtonProps={{ disabled: !isDirtyAgreement }}
       >
         <Alert
           type="info"
@@ -443,6 +467,7 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
           onValuesChange={(changed) => {
             if ('paymentAmount' in changed) setPaymentAmount(changed.paymentAmount ?? null);
             if ('hasOtherBenefits' in changed) setHasOtherBenefits(changed.hasOtherBenefits ?? false);
+            setIsDirtyAgreement(true);
           }}
         >
           <Divider>Agreement Dates</Divider>
@@ -669,8 +694,9 @@ export default function AgreementSection({ vendorId, companyType }: AgreementSec
         confirmLoading={updatingSignature}
         centered
         destroyOnHidden
+        okButtonProps={{ disabled: !isDirtySignature }}
       >
-        <Form form={signatureForm} layout="vertical" style={{ marginTop: 16 }}>
+        <Form form={signatureForm} layout="vertical" style={{ marginTop: 16 }} onValuesChange={() => setIsDirtySignature(true)}>
           <Form.Item
             label="Signature Status"
             name="signatureStatus"

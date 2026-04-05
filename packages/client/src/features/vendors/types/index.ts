@@ -30,6 +30,7 @@ export interface Vendor {
   companyName: string;
   companyType: CompanyType;
   isLinkedWithRailways: boolean;
+  agreementWith?: string;
   address?: string;
   contactPersons: ContactPerson[];
   // Business Identity Fields

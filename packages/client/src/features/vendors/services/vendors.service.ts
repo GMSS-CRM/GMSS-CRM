@@ -44,6 +44,7 @@ function mapGqlVendor(v: any): Vendor {
     companyName: v.name ?? '',
     companyType: (v.type as CompanyType) ?? 'Vendor',
     isLinkedWithRailways: v.isRailwayLinked ?? false,
+    agreementWith: v.agreementWith ?? undefined,
     address: v.address,
     gstNumber: v.gstNumber,
     panNumber: v.panNumber,
@@ -109,6 +110,7 @@ const VENDOR_FIELDS = gql`
     type
     status
     isRailwayLinked
+    agreementWith
     gstNumber
     panNumber
     cinNumber
@@ -389,6 +391,7 @@ export const useCreateVendor = () => {
     companyName: string;
     companyType: CompanyType;
     isLinkedWithRailways: boolean;
+    agreementWith?: string;
     status: CompanyStatus;
     address?: string;
     contactPersons: ContactPerson[];
@@ -404,6 +407,7 @@ export const useCreateVendor = () => {
           name: values.companyName,
           type: values.companyType,
           isRailwayLinked: values.isLinkedWithRailways,
+          agreementWith: values.agreementWith,
           address: values.address,
           gstNumber: values.gstNumber,
           panNumber: values.panNumber,
@@ -434,6 +438,7 @@ export const useUpdateVendor = () => {
       companyName: string;
       companyType: CompanyType;
       isLinkedWithRailways: boolean;
+      agreementWith?: string;
       status: CompanyStatus;
       address?: string;
       contactPersons: ContactPerson[];
@@ -453,6 +458,7 @@ export const useUpdateVendor = () => {
           name: values.companyName,
           type: values.companyType,
           isRailwayLinked: values.isLinkedWithRailways,
+          agreementWith: values.agreementWith,
           address: values.address,
           gstNumber: values.gstNumber,
           panNumber: values.panNumber,
@@ -478,8 +484,9 @@ export const useUpdateVendor = () => {
             input: { vendorId: id, newStatus: desiredGql, remarks: 'Status updated from form' },
           },
         });
-      } catch {
+      } catch (err) {
         // Transition may not be valid from current status — other fields still saved
+        console.warn('Vendor status transition failed:', err);
       }
     }
 
@@ -618,6 +625,13 @@ const GET_SHARED_TENDERS = gql`
         mailSentAt
         createdBy
         createdDate
+        documents {
+          id
+          documentName
+          documentUrl
+          createdBy
+          createdDate
+        }
         tags {
           id
           tenderId

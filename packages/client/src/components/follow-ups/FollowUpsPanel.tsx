@@ -29,7 +29,6 @@ import {
   EditOutlined,
   DeleteOutlined,
   CalendarOutlined,
-  FileTextOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { RcFile } from 'antd/es/upload';
@@ -127,12 +126,22 @@ const STATUS_CONFIG: Record<FollowUpStatus, { color: string; label: string; icon
 
 function fmtDate(d?: string) {
   if (!d) return '—';
-  return dayjs(d).format('DD MMM YYYY');
+  // Strict parsing: handle ISO 8601 format from backend
+  const parsed = dayjs(d, ['YYYY-MM-DDTHH:mm:ss.SSSZ', 'YYYY-MM-DDTHH:mm:ssZ', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'], true);
+  if (!parsed.isValid()) {
+    // Fallback: try flexible parsing as last resort
+    return dayjs(d).format('DD MMM YYYY');
+  }
+  return parsed.format('DD MMM YYYY');
 }
 
 function isOverdue(d?: string) {
   if (!d) return false;
-  return dayjs(d).isBefore(dayjs(), 'day');
+  const parsed = dayjs(d, ['YYYY-MM-DDTHH:mm:ss.SSSZ', 'YYYY-MM-DDTHH:mm:ssZ', 'YYYY-MM-DD HH:mm:ss', 'YYYY-MM-DD'], true);
+  if (!parsed.isValid()) {
+    return dayjs(d).isBefore(dayjs(), 'day');
+  }
+  return parsed.isBefore(dayjs(), 'day');
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -207,9 +216,10 @@ export default function FollowUpsPanel({
       setModalOpen(false);
       setSelectedFollowUp(null);
       refetch?.();
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-      if (errorMsg) message.error(errorMsg);
+    } catch (err: any) {
+      if (err?.errorFields) return; // Inline validation messages are already shown
+      const errorMsg = err instanceof Error ? err.message : 'Something went wrong';
+      message.error(errorMsg);
     } finally {
       setIsCreating(false);
       setIsUpdating(false);
@@ -267,9 +277,10 @@ export default function FollowUpsPanel({
       setReceivedOpen(false);
       setSelectedFollowUp(null);
       refetch?.();
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-      if (errorMsg) message.error(errorMsg);
+    } catch (err: any) {
+      if (err?.errorFields) return;
+      const errorMsg = err instanceof Error ? err.message : 'Something went wrong';
+      message.error(errorMsg);
     } finally {
       setIsUploading(false);
       setIsUpdating(false);
@@ -294,9 +305,10 @@ export default function FollowUpsPanel({
       setCourierOpen(false);
       setSelectedFollowUp(null);
       refetch?.();
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-      if (errorMsg) message.error(errorMsg);
+    } catch (err: any) {
+      if (err?.errorFields) return;
+      const errorMsg = err instanceof Error ? err.message : 'Something went wrong';
+      message.error(errorMsg);
     } finally {
       setIsUpdating(false);
     }
@@ -317,9 +329,10 @@ export default function FollowUpsPanel({
       setReminderOpen(false);
       setSelectedFollowUp(null);
       refetch?.();
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-      if (errorMsg) message.error(errorMsg);
+    } catch (err: any) {
+      if (err?.errorFields) return;
+      const errorMsg = err instanceof Error ? err.message : 'Something went wrong';
+      message.error(errorMsg);
     } finally {
       setIsUpdating(false);
     }
@@ -433,30 +446,30 @@ export default function FollowUpsPanel({
         );
       },
     },
-    {
-      title: 'Document',
-      dataIndex: 'documentName',
-      key: 'documentName',
-      width: 120,
-      render: (name?: string, record?: FollowUp) => {
-        if (!name)
-          return (
-            <Text style={{ color: 'var(--text-muted, #9ca3af)' }}>—</Text>
-          );
-        return (
-          <Tooltip title={record?.documentUrl}>
-            <Button
-              type="link"
-              size="small"
-              icon={<FileTextOutlined />}
-              style={{ padding: 0, fontSize: 12 }}
-            >
-              {name.length > 12 ? `${name.slice(0, 12)}…` : name}
-            </Button>
-          </Tooltip>
-        );
-      },
-    },
+    // {
+    //   title: 'Document',
+    //   dataIndex: 'documentName',
+    //   key: 'documentName',
+    //   width: 120,
+    //   render: (name?: string, record?: FollowUp) => {
+    //     if (!name)
+    //       return (
+    //         <Text style={{ color: 'var(--text-muted, #9ca3af)' }}>—</Text>
+    //       );
+    //     return (
+    //       <Tooltip title={record?.documentUrl}>
+    //         <Button
+    //           type="link"
+    //           size="small"
+    //           icon={<FileTextOutlined />}
+    //           style={{ padding: 0, fontSize: 12 }}
+    //         >
+    //           {name.length > 12 ? `${name.slice(0, 12)}…` : name}
+    //         </Button>
+    //       </Tooltip>
+    //     );
+    //   },
+    // },
     {
       title: 'Courier Tracking',
       dataIndex: 'courierTrackingNumber',

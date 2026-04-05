@@ -11,8 +11,9 @@ const authLink = new SetContextLink(async (prevContext) => {
   let token: string | null = null;
   try {
     token = (await auth.currentUser?.getIdToken()) ?? null;
-  } catch {
+  } catch (err) {
     // not logged in yet — server falls back to demo token in dev
+    console.debug('Firebase token unavailable:', err);
   }
   return {
     ...prevContext,

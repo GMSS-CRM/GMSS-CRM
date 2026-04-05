@@ -24,7 +24,10 @@ export type TenderStatus =
   | "BILL_SUBMISSION"
   | "PAYMENT"
   | "SD_RELEASE"
-  | "COMPLETED";
+  | "COMPLETED"
+  | "FILLED"
+  | "NOT_INTERESTED_TENDER"
+  | "DEADLINE_EXTENDED";
 
 export type UserRole = "USER" | "MD";
 
@@ -36,11 +39,12 @@ export interface TenderTag {
 
 export interface TenderDocument {
   id: string;
-  name: string;
-  type: "NIT" | "TECHNICAL" | "FINANCIAL" | "OTHER";
-  uploadedAt: Date;
-  url?: string;
-  size?: number;
+  documentName: string;
+  documentUrl: string;
+  createdBy?: string;
+  createdDate?: string;
+  expiresOn?: string;
+  tenderId?: string;
 }
 
 export interface Tender {
@@ -58,6 +62,16 @@ export interface Tender {
   submissionDeadline?: Date;
   rejectionReason?: string;
   mailSentAt?: Date;
+  createdBy?: string;
+  updatedBy?: string;
+  drawingRequired?: boolean;
+  strRequired?: boolean;
+  specificationsRequired?: boolean;
+  sourcePortal?: string;
+  tenderType?: string;
+  countdownSilenceReason?: string;
+  updatedSubmissionDeadline?: string;
+  closingDateChanged?: boolean;
 }
 
 /** Input type for creating / updating a Tender (excludes auto-generated fields) */
@@ -121,6 +135,9 @@ export const STATUS_TRANSITIONS: Record<TenderStatus, TenderStatus[]> = {
   PAYMENT: ["SD_RELEASE", "COMPLETED"],
   SD_RELEASE: ["COMPLETED"],
   COMPLETED: [],
+  FILLED: [],
+  NOT_INTERESTED_TENDER: [],
+  DEADLINE_EXTENDED: ["DRAFT", "PENDING_MD_TAGGING"],
 };
 
 // Role-based allowed status targets
@@ -159,6 +176,9 @@ export const STATUS_COLORS: Record<TenderStatus, string> = {
   PAYMENT: "processing",
   SD_RELEASE: "gold",
   COMPLETED: "success",
+  FILLED: "purple",
+  NOT_INTERESTED_TENDER: "orange",
+  DEADLINE_EXTENDED: "gold",
 };
 
 export const STATUS_LABELS: Record<TenderStatus, string> = {
@@ -186,6 +206,9 @@ export const STATUS_LABELS: Record<TenderStatus, string> = {
   PAYMENT: "Payment",
   SD_RELEASE: "SD Release",
   COMPLETED: "Completed",
+  FILLED: "Filled",
+  NOT_INTERESTED_TENDER: "Not Interested",
+  DEADLINE_EXTENDED: "Deadline Extended",
 };
 
 // Tab configuration for each role

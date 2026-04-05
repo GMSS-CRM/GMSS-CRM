@@ -58,13 +58,15 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
   const { uploadFile } = useFirebaseUpload();
   const [modalOpen, setModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isDirtyUpload, setIsDirtyUpload] = useState(false);
   const [form] = Form.useForm();
 
   const documents = data?.getPostAwardDocuments ?? [];
   const docTypes = STAGE_DOCUMENT_TYPES[currentStage] ?? STAGE_DOCUMENT_TYPES['ORDER_FOLLOWUP'];
 
   const handleUpload = async (values: { documentType: string; remarks?: string; file: any }) => {
-    const file: File = values.file?.file?.originFileObj ?? values.file?.originFileObj;
+    const fileList = values.file || [];
+    const file: File | undefined = fileList[0]?.originFileObj;
     if (!file) {
       message.error('Please select a file');
       return;
@@ -89,6 +91,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
       message.success('Document uploaded');
       setModalOpen(false);
       form.resetFields();
+      setIsDirtyUpload(false);
       refetch();
     } catch {
       message.error('Failed to upload document');
@@ -212,7 +215,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
       <Modal
         title="Upload Post-Award Document"
         open={modalOpen}
-        onCancel={() => { setModalOpen(false); form.resetFields(); }}
+        onCancel={() => { setModalOpen(false); form.resetFields(); setIsDirtyUpload(false); }}
         footer={null}
         destroyOnClose
       >
@@ -220,6 +223,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
           form={form}
           layout="vertical"
           onFinish={handleUpload}
+          onValuesChange={() => setIsDirtyUpload(true)}
         >
           <Form.Item
             label="Document Type"
@@ -231,7 +235,17 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
           <Form.Item
             label="File"
             name="file"
-            rules={[{ required: true, message: 'Select a file' }]}
+            valuePropName="fileList"
+            getValueFromEvent={(e: any) => {
+              if (Array.isArray(e)) return e;
+              return e?.fileList;
+            }}
+            rules={[{
+              validator: (_: any, value: any) =>
+                value && value.length > 0
+                  ? Promise.resolve()
+                  : Promise.reject('Please select a file'),
+            }]}
           >
             <Upload beforeUpload={() => false} maxCount={1}>
               <Button icon={<UploadOutlined />}>Select File</Button>
@@ -241,7 +255,7 @@ const PostAwardDocumentsPanel: React.FC<Props> = ({ postAwardId, tenderId, curre
             <Input.TextArea rows={2} placeholder="Optional remarks…" />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={uploading} block>
+            <Button type="primary" htmlType="submit" loading={uploading} block disabled={!isDirtyUpload}>
               Upload
             </Button>
           </Form.Item>

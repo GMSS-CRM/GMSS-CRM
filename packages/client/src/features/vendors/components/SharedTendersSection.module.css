@@ -3,15 +3,8 @@
 }
 
 .sectionHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  gap: 16px;
-}
-
-.sectionHeader > div {
-  flex: 1;
+  display: block;
+  margin-bottom: 12px;
 }
 
 .sectionTitle {
@@ -25,6 +18,12 @@
   font-size: 13px;
   color: var(--text-muted, #9ca3af);
   margin: 0;
+}
+
+.searchBar {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .card {

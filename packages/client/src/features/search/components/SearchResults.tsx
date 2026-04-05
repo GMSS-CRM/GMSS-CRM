@@ -100,10 +100,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchTerm, onTenderSelec
                         </Text>
                       </Col>
                     )}
-                    {(tender as any).documents?.length > 0 && (
+                    {(tender.documents?.length ?? 0) > 0 && (
                       <Col>
                         <Tag icon={<PaperClipOutlined />} style={{ fontSize: 10 }}>
-                          {(tender as any).documents.length} doc{(tender as any).documents.length > 1 ? 's' : ''}
+                          {tender.documents!.length} doc{tender.documents!.length > 1 ? 's' : ''}
                         </Tag>
                       </Col>
                     )}

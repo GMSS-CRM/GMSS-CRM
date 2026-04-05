@@ -24,6 +24,7 @@ export const ExcelUploadSection: React.FC<Props> = ({
 }) => {
   const [showDrop, setShowDrop] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [parseProgress, setParseProgress] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
 
   const handleFile = useCallback(
@@ -32,16 +33,19 @@ export const ExcelUploadSection: React.FC<Props> = ({
         message.error("Excel files (.xlsx, .xls) only");
         return false;
       }
-      if (file.size / 1024 / 1024 > 10) {
-        message.error("File must be under 10 MB");
+      if (file.size / 1024 / 1024 > 100) {
+        message.error("File must be under 100 MB");
         return false;
       }
 
       setUploading(true);
       setFileName(file.name);
+      setParseProgress(0);
 
       try {
-        const data = await parseTenderExcel(file);
+        const data = await parseTenderExcel(file, (progress) => {
+          setParseProgress(Math.round(progress * 100));
+        });
         if (!data.length) {
           message.warning("No tender data found");
           setFileName(null);
@@ -55,6 +59,7 @@ export const ExcelUploadSection: React.FC<Props> = ({
         setFileName(null);
       } finally {
         setUploading(false);
+        setParseProgress(0);
       }
       return false;
     },
@@ -90,7 +95,7 @@ export const ExcelUploadSection: React.FC<Props> = ({
       <div className={s.uploadIntro}>
         <div className={s.uploadIntroText}>
           <span className={s.uploadIntroTitle}>Import tender list</span>
-          <span className={s.uploadIntroHint}>.xlsx / .xls — max 10 MB</span>
+          <span className={s.uploadIntroHint}>.xlsx / .xls — max 100 MB</span>
         </div>
         <Button
           className={s.uploadBtn}
@@ -129,11 +134,38 @@ export const ExcelUploadSection: React.FC<Props> = ({
         >
           <InboxOutlined className={s.draggerIcon} />
           <p className={s.draggerText}>
-            {uploading ? "Parsing…" : <>Drop here or <span>browse</span></>}
+            {uploading ? `Parsing… ${parseProgress}%` : <>Drop here or <span>browse</span></>}
           </p>
-          <p className={s.draggerHint}>.xlsx, .xls — max 10 MB</p>
+          <p className={s.draggerHint}>.xlsx, .xls — max 100 MB</p>
         </Upload.Dragger>
       </div>
+      {uploading && parseProgress > 0 && (
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-color, #f0f0f0)' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 6,
+          }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary, #666)' }}>Parsing Excel file…</span>
+            <span style={{ fontSize: 12, color: 'var(--accent, #1677ff)', fontWeight: 600 }}>{parseProgress}%</span>
+          </div>
+          <div style={{
+            width: '100%',
+            height: 6,
+            background: 'var(--border-color, #f0f0f0)',
+            borderRadius: 3,
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${parseProgress}%`,
+              background: 'var(--accent, #1677ff)',
+              transition: 'width 0.2s',
+            }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
